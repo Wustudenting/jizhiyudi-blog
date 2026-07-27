@@ -4,7 +4,6 @@ const TIMEOUT = 3000
 
 async function withFallback(apiFn, localStorageKey, transform) {
   try {
-    const controller = new AbortController?.()
     const result = await Promise.race([
       apiFn(),
       new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), TIMEOUT))
