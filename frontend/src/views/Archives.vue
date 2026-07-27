@@ -46,6 +46,7 @@
 <script setup>
 import SideBar from '../components/SideBar.vue'
 import { ref, computed, onMounted } from 'vue'
+import { syncFromServer } from '../service/syncService'
 
 const getDateStr = (daysAgo) => {
   const date = new Date()
@@ -100,7 +101,8 @@ const loadArticles = () => {
   articles.value = localArticles.concat(defaultArticles)
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   loadArticles()
 })
 </script>

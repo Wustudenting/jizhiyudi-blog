@@ -66,6 +66,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { syncFromServer } from '../service/syncService'
 
 const mockLinks = [
   { id: 1, linkName: 'GitHub', linkUrl: 'https://github.com', linkDescription: '代码托管平台' },
@@ -119,7 +120,8 @@ const submitLink = () => {
   alert('申请提交成功！')
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   friendLinks.value = loadLinks()
 })
 </script>

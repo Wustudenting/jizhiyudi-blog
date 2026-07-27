@@ -40,6 +40,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const defaultCategories = [
   { id: 1, categoryName: '前端开发', categoryDescription: '前端技术相关文章' },
@@ -153,7 +154,8 @@ const categoriesWithCount = computed(() => {
   })
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   categories.value = loadCategories()
 })
 </script>

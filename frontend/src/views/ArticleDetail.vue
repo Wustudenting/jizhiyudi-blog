@@ -170,15 +170,22 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
 import AIChat from '../components/AIChat.vue'
+import { syncArticleDetail, syncComments } from '../service/syncService'
 
 const route = useRoute()
 const router = useRouter()
 const article = ref(null)
 const comments = ref([])
 
-watch(() => route.params.id, () => {
+watch(() => route.params.id, async () => {
   if (route.params.id) {
+    await syncArticleDetail(route.params.id)
     loadArticle()
+    await syncComments(route.params.id)
+    const syncedComments = loadComments(route.params.id)
+    if (syncedComments) {
+      comments.value = syncedComments
+    }
   }
 })
 
@@ -521,7 +528,15 @@ const loadArticle = () => {
   }
 }
 
-onMounted(() => {
-  loadArticle()
+onMounted(async () => {
+  if (route.params.id) {
+    await syncArticleDetail(route.params.id)
+    loadArticle()
+    await syncComments(route.params.id)
+    const syncedComments = loadComments(route.params.id)
+    if (syncedComments) {
+      comments.value = syncedComments
+    }
+  }
 })
 </script>

@@ -78,6 +78,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const route = useRoute()
 
@@ -183,7 +184,8 @@ const loadArticlesByCategory = () => {
   total.value = filtered.length
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   loadArticlesByCategory()
 })
 </script>

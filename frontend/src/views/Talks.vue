@@ -163,6 +163,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const getDateTimeStr = (daysAgo, time) => {
   const date = new Date()
@@ -341,7 +342,8 @@ const submitComment = (talkId) => {
   newComment.value = { nickname: '', content: '' }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   talks.value = loadTalks()
 })
 </script>

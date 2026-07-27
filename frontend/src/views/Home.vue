@@ -179,6 +179,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { syncFromServer } from '../service/syncService'
 
 const getDateStr = (daysAgo) => {
   const date = new Date()
@@ -424,7 +425,8 @@ const initMockComments = () => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   initMockComments()
   
   const savedTalks = loadLocalTalks()

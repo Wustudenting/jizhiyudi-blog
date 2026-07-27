@@ -66,6 +66,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const route = useRoute()
 
@@ -179,6 +180,7 @@ const formatDate = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
 })
 </script>

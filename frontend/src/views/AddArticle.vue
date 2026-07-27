@@ -157,6 +157,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { syncFromServer } from '../service/syncService'
+import { blogApi } from '../service/api'
 
 const router = useRouter()
 
@@ -409,6 +411,21 @@ const submitArticle = async () => {
       viewCount: 0,
       commentCount: 0,
     }
+
+    try {
+      await blogApi.saveArticle({
+        title: newArticle.articleTitle,
+        summary: newArticle.articleSummary,
+        content: newArticle.articleContent,
+        cover: newArticle.articleCover,
+        category_id: newArticle.categoryId,
+        tags: selectedTagNames,
+        is_top: newArticle.isTop,
+        is_featured: newArticle.isFeatured,
+      })
+    } catch (apiErr) {
+      console.warn('API save failed, using localStorage:', apiErr.message)
+    }
     
     const allArticles = loadArticles()
     allArticles.unshift(newArticle)
@@ -438,7 +455,8 @@ const submitArticle = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   categories.value = loadCategories()
   tags.value = loadTags()
 })

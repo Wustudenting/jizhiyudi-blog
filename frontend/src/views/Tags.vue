@@ -33,6 +33,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const defaultTags = [
   { id: 1, tagName: 'Vue3' },
@@ -111,7 +112,8 @@ const tagsWithCount = computed(() => {
   })
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   tags.value = loadTags()
 })
 </script>

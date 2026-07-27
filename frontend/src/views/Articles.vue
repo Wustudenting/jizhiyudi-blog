@@ -181,6 +181,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const route = useRoute()
 
@@ -405,7 +406,8 @@ const nextPage = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await syncFromServer()
   if (route.query.keyword) {
     searchKeyword.value = route.query.keyword
   }
