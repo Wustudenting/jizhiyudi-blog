@@ -8,7 +8,11 @@
     "deploy": "node deploy.js"
   },
   "engines": {
+<<<<<<< HEAD
     "node": "18.x"
+=======
+    "node": "24.x"
+>>>>>>> a4fec62a64cc84e073cb105f42c243f42be41086
   },
   "dependencies": {
     "@agoose77/markdown-it-mermaid": "^1.1.0",
