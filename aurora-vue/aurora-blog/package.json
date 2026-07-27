@@ -8,7 +8,7 @@
     "deploy": "node deploy.js"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "dependencies": {
     "@agoose77/markdown-it-mermaid": "^1.1.0",
