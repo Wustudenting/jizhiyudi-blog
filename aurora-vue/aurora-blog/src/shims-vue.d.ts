@@ -6,3 +6,4 @@ declare module '*.vue' {
 }
 declare module 'vue-avatar-cropper'
 declare module 'js-cookie'
+declare module 'tocbot'
