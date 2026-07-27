@@ -215,10 +215,16 @@ body {
 }
 
 #app {
-  @apply relative min-w-full min-h-screen h-full;
-  font-family: Rubik, Avenir, Helvetica, Arial, sans-serif;
+    position: relative;
+    min-width: 100%;
+    min-height: 100vh;
+    height: 100%;
+    font-family: Rubik, Avenir, Helvetica, Arial, sans-serif;
   .app-wrapper {
-    @apply bg-ob-deep-900 min-w-full h-full pb-12;
+    background-color: var(--background-primary);
+    min-width: 100%;
+    height: 100%;
+    padding-bottom: 3rem;
     transition-property: transform, border-radius;
     transition-duration: 350ms;
     transition-timing-function: ease;
@@ -237,10 +243,20 @@ body {
   }
 
   .App-Mobile-sidebar {
-    @apply fixed top-0 bottom-0 left-0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
   }
   .App-Mobile-wrapper {
-    @apply relative overflow-y-auto h-full -mr-4 pr-6 pl-4 pt-8 opacity-0;
+    position: relative;
+    overflow-y: auto;
+    height: 100%;
+    margin-right: -1rem;
+    padding-right: 1.5rem;
+    padding-left: 1rem;
+    padding-top: 2rem;
+    opacity: 0;
     transition: all 0.85s cubic-bezier(0, 1.8, 1, 1.2);
     transform: translateY(-20%);
     width: 280px;
