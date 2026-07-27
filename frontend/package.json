@@ -8,6 +8,9 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "autoprefixer": "^10.5.4",
     "axios": "^1.18.1",
