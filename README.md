@@ -1,77 +1,89 @@
-[![Powered by DartNode]( https://dartnode.com/branding/DN-Open-Source-sm.png)]( https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
-# Aurora---前后端分离博客
+# 机智的鱼 - 个人博客系统
 
-### 轻量版后端: https://github.com/zhouyqxy/aurora_Lite
+一个基于 Vue3 + Node.js Express 的前后端分离个人博客系统。
 
-## 前言
+## ✨ 功能特性
 
-- 开源不易，希望大家star支持一下
-- 由于本人还在上学，主语言并不是Java，所以项目更新频率较慢，但是本项目会长期维护，有问题可以提issue，
-  同时也欢迎大家来共建此项目，包括但不限于：bug 修复、代码优化、功能开发等等
+- 📝 **文章管理** - 支持文章创建、编辑、删除，Markdown 格式
+- 🏷️ **标签系统** - 灵活的标签分类，支持多标签筛选
+- 📂 **分类管理** - 多级分类组织文章
+- 💬 **评论功能** - 文章评论与回复
+- 🔍 **搜索功能** - 文章全文搜索
+- 📱 **响应式设计** - 适配各种屏幕尺寸
+- 🌙 **暗色模式** - 支持主题切换
+- 🤖 **AI 助手** - 文章AI智能问答
 
-## 在线地址
+## 🛠️ 技术栈
 
-- 前台链接：[www.linhaojun.top](https://www.linhaojun.top)
-- 后台链接：[admin.linhaojun.top](https://admin.linhaojun.top)
-- 演示账号：test@163.com，密码：123456
+### 前端
+- Vue 3 + Vite
+- Vue Router 4
+- Tailwind CSS
+- Axios
 
-## 效果图
+### 后端
+- Node.js + Express
+- SQLite (sql.js)
+- JWT 认证
 
-### 图片1：
-![图片1](https://s3.bmp.ovh/imgs/2023/06/25/8a6ad38dfb27bb3a.png)
+## 📁 项目结构
 
-### 图片2：
-![图片2](https://s3.bmp.ovh/imgs/2023/06/25/7036a13dc0a0488a.png)
-
-## 相关技术
-
-### 前端：
-
-- 样式来自于：[hexo的aurora主题](https://github.com/auroral-ui/hexo-theme-aurora)
-- 基础框架：vue3(前台) vue2(后台)
-- 状态管理：pinia(前台) vuex(后台)
-- 路由组件：vue-router
-- 网络请求：axios
-- 其他技术：详见前端项目的package.json
-
-### 后端：
-
-- 基础框架：springboot
-- ORM框架：mybatisplus
-- 权限框架：springsecurity
-- 缓存中间件：redis
-- 消息中间件：rabbitmq
-- 搜索引擎：elasticsearch
-- 对象存储：minio
-- 定时任务：quartz
-- 其他技术：详见后端项目的pom.xml
-
-## 后续计划
-
-- [ ] 前台代码优化
-- [ ] 后台vue3重构
-- [ ] 后端提供轻量化选择
-
-## 快速开始
-
-一键安装
-
-执行如下命令一键安装 Aurora 博客：
-
-```shell
-curl -sSL https://kangxianghui.top/api/Util/OnlineView/aurora_shell/aurora_install.sh -o aurora_install.sh && sh aurora_install.sh
+```
+aurora-master/
+├── frontend/          # 前端项目
+│   ├── src/
+│   │   ├── components/    # 组件
+│   │   ├── views/         # 页面视图
+│   │   ├── router/        # 路由配置
+│   │   └── service/       # 服务层
+│   └── package.json
+├── server/            # 后端项目
+│   ├── src/
+│   │   ├── routes/        # API路由
+│   │   ├── db.js          # 数据库配置
+│   │   └── index.js       # 入口文件
+│   └── package.json
+└── vercel.json        # Vercel部署配置
 ```
 
-此命令适用于：CentOS 操作系统
+## 🚀 快速开始
 
-## 部署
+### 后端服务
 
-- 详见项目部署文档
+```bash
+cd server
+npm install
+npm start
+```
 
-## 交流群
+后端服务将运行在 `http://localhost:8080`
 
-- QQ群：338371628
+### 前端开发
 
-## 鸣谢
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- 感谢[jetbrains](https://www.jetbrains.com/)提供的开源开发许可证
+前端应用将运行在 `http://localhost:5173`
+
+### 生产构建
+
+```bash
+cd frontend
+npm run build
+```
+
+构建产物将输出到 `frontend/dist`
+
+## 🌐 Vercel 部署
+
+1. 将项目推送到 GitHub
+2. 访问 [vercel.com](https://vercel.com)
+3. 导入仓库，Vercel 会自动检测配置
+4. 点击部署即可
+
+## 📝 License
+
+MIT
