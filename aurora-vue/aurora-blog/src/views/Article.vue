@@ -262,7 +262,7 @@ export default defineComponent({
         headingSelector: 'h1, h2, h3',
         collapseDepth: 3,
         disableTocScrollSync: true,
-        onClick: function (e) {
+        onClick: function (e: Event) {
           e.preventDefault()
         }
       })
