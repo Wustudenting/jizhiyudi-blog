@@ -92,7 +92,13 @@ const skillCategories = [
       { name: 'JavaScript', icon: '📜', level: 90 },
       { name: 'Vue3', icon: '💚', level: 88 },
       { name: 'ES6+', icon: '✨', level: 85 },
-      { name: 'Ajax', icon: '🔄', level: 88 }
+      { name: 'Ajax', icon: '🔄', level: 88 },
+      { name: 'Element Plus', icon: '📦', level: 85 },
+      { name: 'Vue Router', icon: '🧭', level: 86 },
+      { name: 'Pinia', icon: '🏪', level: 84 },
+      { name: 'Axios', icon: '📡', level: 87 },
+      { name: 'SCSS', icon: '💅', level: 82 },
+      { name: 'ECharts', icon: '📊', level: 80 }
     ]
   },
   {
@@ -102,6 +108,8 @@ const skillCategories = [
     skills: [
       { name: 'Node.js', icon: '🟢', level: 82 },
       { name: 'Java', icon: '☕', level: 80 },
+      { name: 'SSM', icon: '🏛️', level: 78 },
+      { name: 'Spring Boot', icon: '🍃', level: 82 },
       { name: 'MySQL', icon: '🗄️', level: 85 },
       { name: 'C++', icon: '🔵', level: 75 }
     ]
@@ -113,14 +121,14 @@ const skillCategories = [
     skills: [
       { name: 'Git', icon: '🌱', level: 88 },
       { name: 'Webpack', icon: '📦', level: 80 },
-      { name: 'Vite', icon: '⚡', level: 85 }
+      { name: 'Vite', icon: '⚡', level: 85 },
+      { name: 'Navicat11', icon: '🗃️', level: 82 }
     ]
   }
 ]
 
 const tools = [
-  'VS Code', 'Figma', 'Postman', 'Chrome DevTools', 'Docker', 'Nginx', 
-  'Linux', 'Windows Server', 'TypeScript', 'Tailwind CSS', 'Element Plus',
-  'Vant', 'Pinia', 'Vue Router', 'RESTful API', 'WebSocket'
+  'VS Code', 'Postman', 'Chrome DevTools', 'Docker', 'Nginx', 
+  'Linux', 'TypeScript', 'Tailwind CSS', 'Vant', 'RESTful API', 'WebSocket'
 ]
 </script>

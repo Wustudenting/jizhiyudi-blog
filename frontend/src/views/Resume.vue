@@ -50,11 +50,11 @@
                 <div class="absolute -left-[7px] top-1 w-3 h-3 bg-indigo-500 rounded-full"></div>
                 <div class="flex flex-wrap justify-between items-start mb-1">
                   <h3 class="font-medium text-slate-800">计算机科学与技术</h3>
-                  <span class="text-sm text-slate-500">2022 - 2026</span>
+                  <span class="text-sm text-slate-500">2023 - 2027</span>
                 </div>
-                <p class="text-slate-500 text-sm mb-2">本科 | 华中科技大学</p>
+                <p class="text-slate-500 text-sm mb-2">本科 | 广东理工学院</p>
                 <p class="text-slate-600 text-sm">
-                  主修课程：数据结构、算法设计、操作系统、计算机网络、数据库系统、软件工程、人工智能
+                  主修课程：数据结构、算法设计、操作系统、计算机网络、数据库系统、软件工程、编译原理
                 </p>
               </div>
             </div>

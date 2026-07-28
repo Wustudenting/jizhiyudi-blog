@@ -55,10 +55,10 @@ const projects = [
     title: '基于YOLOv10和卷积神经网络的智能补货系统',
     emoji: '📦',
     gradient: 'from-blue-500 to-cyan-500',
-    status: '科研项目',
+    status: '大创项目',
     statusClass: 'bg-blue-500',
     description: '基于 YOLOv10 目标检测算法和卷积神经网络，开发的智能零售补货系统。通过摄像头实时识别商品货架状态，自动检测缺货商品并生成补货订单，有效提升零售门店的运营效率。',
-    techStack: ['Python', 'YOLOv10', 'PyTorch', 'OpenCV', 'TensorFlow'],
+    techStack: ['Python', 'YOLOv10', 'PyTorch', 'OpenCV', 'Vue3', 'Spring Boot', 'MySQL'],
     highlights: [
       '使用 YOLOv10 实现商品检测，准确率达到 95% 以上',
       '设计了改进的 CNN 模型进行货架状态分类',
@@ -74,7 +74,7 @@ const projects = [
     status: '文旅项目',
     statusClass: 'bg-purple-500',
     description: '融合潮汕文化与智慧旅游的创新项目，通过数字化技术展现潮汕地区的历史文化魅力。为游客提供个性化的旅游路线推荐、文化景点讲解和互动体验。',
-    techStack: ['Vue3', 'Node.js', 'MongoDB', 'Redis', '微信小程序'],
+    techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'MySQL', 'Redis', 'Vue Router', 'Pinia', 'Axios', 'ECharts'],
     highlights: [
       '整理并数字化潮汕三市的文化景点和历史资料',
       '开发智能路线推荐算法，根据用户偏好定制行程',
@@ -90,7 +90,7 @@ const projects = [
     status: '电商项目',
     statusClass: 'bg-orange-500',
     description: '面向年轻用户的生鲜电商平台，提供新鲜、优质、便捷的购物体验。支持线上下单、线下自提和快速配送，打造社区新零售模式。',
-    techStack: ['Vue3', 'Vant', 'Spring Boot', 'MySQL', 'Redis', 'Docker'],
+    techStack: ['Java', 'SSM', 'Spring Boot', 'MySQL', 'Navicat11', 'Vue3', 'HTML', 'CSS', 'JavaScript'],
     highlights: [
       '设计了高并发的商品秒杀系统',
       '实现了基于位置的智能配送调度',
@@ -106,7 +106,7 @@ const projects = [
     status: 'AI应用',
     statusClass: 'bg-green-500',
     description: '基于大语言模型的心理健康 AI 助手，为用户提供情绪疏导、心理建议和正念冥想引导。致力于降低心理健康服务门槛，让每个人都能随时获得心理支持。',
-    techStack: ['Vue3', 'Node.js', 'Python', 'FastAPI', 'LangChain', 'PostgreSQL'],
+    techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'Vue Router', 'SCSS', 'Pinia', 'Axios', 'ECharts', 'Python', 'FastAPI'],
     highlights: [
       '集成大语言模型，实现自然流畅的心理咨询对话',
       '设计了情绪识别算法，实时感知用户情绪变化',
