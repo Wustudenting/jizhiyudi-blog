@@ -6,7 +6,7 @@ export const blogApi = {
   getArticles: () => request.get('/articles/all'),
   getArticleById: (id) => request.get(`/articles/${id}`),
   getArticlesByCategory: (id) => request.get(`/articles/categoryId?categoryId=${id}`),
-  getArticlesByTag: (id) => request.get(`/articles/tagId?tagId=${id}`),
+  getArticlesByTag: (id) => request.get(`/articles/all?tagId=${id}`),
   getTopAndFeatured: () => request.get('/articles/topAndFeatured'),
   searchArticles: (keyword) => request.get(`/articles/search?keyword=${keyword}`),
   saveArticle: (data) => request.post('/articles/save', data),

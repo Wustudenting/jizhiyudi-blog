@@ -78,7 +78,7 @@
               <span class="font-medium text-slate-800">{{ talk.nickname || '作者' }}</span>
               <span class="text-sm text-slate-500">{{ formatDate(talk.createTime) }}</span>
             </div>
-            <p class="text-slate-600 leading-relaxed">{{ talk.talkContent }}</p>
+            <p class="text-slate-600 leading-relaxed cursor-pointer hover:text-blue-500 hover:underline" @click="goToDetail(talk.id)">{{ talk.talkContent }}</p>
             <div v-if="talk.talkImages?.length > 0" class="flex flex-wrap gap-2 mt-4">
               <img 
                 v-for="(img, index) in talk.talkImages" 
@@ -162,8 +162,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
 import { syncFromServer } from '../service/syncService'
+
+const router = useRouter()
 
 const getDateTimeStr = (daysAgo, time) => {
   const date = new Date()
@@ -220,10 +223,30 @@ const saveTalks = (talksData) => {
   localStorage.setItem('blog_talks', JSON.stringify(talksData))
 }
 
+const safeParse = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : fallback
+  } catch (e) {
+    return fallback
+  }
+}
+
 const loadTalks = () => {
-  const saved = localStorage.getItem('blog_talks')
-  if (saved) {
-    return JSON.parse(saved)
+  const saved = safeParse('blog_talks', null)
+  if (saved && Array.isArray(saved) && saved.length > 0) {
+    return saved.map(t => ({
+      ...t,
+      talkContent: t.talkContent || t.content || '',
+      createTime: t.createTime || t.created_at || '',
+      talkImages: t.talkImages || (t.images ? (Array.isArray(t.images) ? t.images : (typeof t.images === 'string' ? t.images.split(',').filter(Boolean) : [])) : []),
+      likeCount: t.likeCount || t.like_count || 0,
+      comments: t.comments || [],
+      liked: t.liked || false,
+      nickname: t.nickname || '匿名',
+    }))
   }
   return defaultTalks
 }
@@ -314,6 +337,10 @@ const toggleComments = (talkId) => {
   activeTalkId.value = activeTalkId.value === talkId ? null : talkId
 }
 
+const goToDetail = (talkId) => {
+  router.push(`/talks/${talkId}`)
+}
+
 const submitComment = (talkId) => {
   if (!newComment.value.nickname || !newComment.value.content) {
     alert('请填写昵称和评论内容')
@@ -343,7 +370,12 @@ const submitComment = (talkId) => {
 }
 
 onMounted(async () => {
-  await syncFromServer()
   talks.value = loadTalks()
+  try {
+    await syncFromServer()
+    talks.value = loadTalks()
+  } catch (e) {
+    console.warn('Sync failed, using local data:', e.message)
+  }
 })
 </script>

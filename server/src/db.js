@@ -110,6 +110,47 @@ async function initDB() {
   `)
 
   seedData()
+
+  let schemaVer = null
+  try {
+    const metaTable = query("SELECT name FROM sqlite_master WHERE type='table' AND name='meta'")
+    if (metaTable.length === 0) {
+      try { run("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)") } catch (e) {}
+    } else {
+      const row = query("SELECT value FROM meta WHERE key = 'schema_version'")
+      schemaVer = row.length > 0 ? row[0].value : null
+    }
+  } catch (e) {}
+
+  const tagArtCount = query('SELECT COUNT(*) as count FROM article_tags')[0].count
+  if (schemaVer !== 'v4' || tagArtCount < 20) {
+    try { run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', 'v4')") } catch (e) {}
+    run('DELETE FROM article_tags WHERE article_id <= 11')
+    const getTagIdByName = (name) => {
+      const row = get('SELECT id FROM tags WHERE name = ?', [name])
+      return row ? row.id : null
+    }
+    const articleTagMap = [
+      [1, 'Vue3'], [1, 'JavaScript'], [1, '前端'],
+      [2, 'Tailwind'], [2, 'CSS'], [2, '前端'],
+      [3, 'Node.js'], [3, 'Express'],
+      [4, '前端'], [4, '学习'],
+      [5, '生活'], [5, '随笔'],
+      [6, 'Vite'], [6, 'Vue3'],
+      [7, 'React'], [7, 'JavaScript'],
+      [8, 'Node.js'], [8, 'Redis'],
+      [9, 'Docker'], [9, 'Nginx'],
+      [10, 'MySQL'],
+      [11, 'Kubernetes'], [11, 'Docker'],
+    ]
+    articleTagMap.forEach(([articleId, tagName]) => {
+      const tagId = getTagIdByName(tagName)
+      if (tagId) {
+        try { run('INSERT OR IGNORE INTO article_tags (article_id, tag_id) VALUES (?, ?)', [articleId, tagId]) } catch (e) {}
+      }
+    })
+  }
+
   saveDB()
 
   setInterval(saveDB, 5000)
@@ -165,7 +206,7 @@ function seedData() {
 
   const tagCount = query('SELECT COUNT(*) as count FROM tags')[0].count
   if (tagCount === 0) {
-    const tags = ['Vue3', 'JavaScript', 'CSS', 'Node.js', 'Express', 'Tailwind', 'Vite', 'SQLite', '生活', '随笔']
+    const tags = ['Vue3', 'JavaScript', 'CSS', 'Node.js', 'Express', 'Tailwind', 'Vite', 'SQLite', '生活', '随笔', '前端', '学习', 'Docker', 'React', 'TypeScript', 'MySQL', 'Redis', 'Spring Boot', 'Kubernetes', 'Git', 'Linux', 'Nginx', 'Java', 'Python', 'HTML5']
     tags.forEach(t => run('INSERT INTO tags (name) VALUES (?)', [t]))
   }
 
@@ -177,25 +218,42 @@ function seedData() {
       ['Node.js Express 入门', '从零开始学习 Node.js Express 框架', '# Express 入门\n\nExpress 是最流行的 Node.js Web 框架...', 2, 89, 0],
       ['我的前端学习之路', '记录我的前端学习历程与心得体会', '# 学习之路\n\n从零基础到能够独立开发项目...', 4, 456, 1],
       ['生活中的小确幸', '记录生活中的美好瞬间', '# 生活随笔\n\n生活中总有一些让人感到幸福的瞬间...', 3, 67, 0],
-      ['Vite 构建优化', 'Vite 项目的构建优化实践', '# Vite 优化\n\nVite 是新一代前端构建工具...', 1, 192, 0]
+      ['Vite 构建优化', 'Vite 项目的构建优化实践', '# Vite 优化\n\nVite 是新一代前端构建工具...', 1, 192, 0],
+      ['React Hooks 实战指南', '深入理解 React Hooks 使用方法', '# React Hooks\n\nReact Hooks 让函数组件拥有状态管理能力...', 1, 780, 0],
+      ['Node.js 性能优化实践', '分享 Node.js 性能优化的实用技巧', '# Node.js 性能优化\n\nNode.js 应用性能优化涉及多个方面...', 2, 654, 0],
+      ['Docker 容器化部署指南', '从入门到精通 Docker 容器化部署', '# Docker\n\nDocker 容器化部署指南...', 4, 1567, 1],
+      ['MySQL 索引优化', 'MySQL 索引优化最佳实践', '# MySQL 索引\n\n合理使用索引可以大幅提升查询效率...', 2, 610, 0],
+      ['Kubernetes 入门到精通', 'Kubernetes 容器编排系统学习', '# Kubernetes\n\nKubernetes 是容器编排系统...', 4, 430, 0],
     ]
     articles.forEach(a => run('INSERT INTO articles (title, summary, content, category_id, view_count, is_featured, status) VALUES (?, ?, ?, ?, ?, ?, ?)', [...a, 'published']))
   }
 
-  const tagArtCount = query('SELECT COUNT(*) as count FROM article_tags')[0].count
-  if (tagArtCount === 0) {
-    const tags = query('SELECT id FROM tags')
-    const articles = query('SELECT id FROM articles')
-    articles.forEach(a => {
-      const count = 2 + Math.floor(Math.random() * 3)
-      const shuffled = [...tags].sort(() => 0.5 - Math.random())
-      for (let i = 0; i < count; i++) {
-        try {
-          run('INSERT OR IGNORE INTO article_tags (article_id, tag_id) VALUES (?, ?)', [a.id, shuffled[i].id])
-        } catch (e) {}
-      }
-    })
+  run('DELETE FROM article_tags WHERE article_id <= 11')
+  const getTagIdByName = (name) => {
+    const row = get('SELECT id FROM tags WHERE name = ?', [name])
+    return row ? row.id : null
   }
+  const articleTagMap = [
+    [1, 'Vue3'], [1, 'JavaScript'], [1, '前端'],
+    [2, 'Tailwind'], [2, 'CSS'], [2, '前端'],
+    [3, 'Node.js'], [3, 'Express'],
+    [4, '前端'], [4, '学习'],
+    [5, '生活'], [5, '随笔'],
+    [6, 'Vite'], [6, 'Vue3'],
+    [7, 'React'], [7, 'JavaScript'],
+    [8, 'Node.js'], [8, 'Redis'],
+    [9, 'Docker'], [9, 'Nginx'],
+    [10, 'MySQL'],
+    [11, 'Kubernetes'], [11, 'Docker'],
+  ]
+  articleTagMap.forEach(([articleId, tagName]) => {
+    const tagId = getTagIdByName(tagName)
+    if (tagId) {
+      try {
+        run('INSERT OR IGNORE INTO article_tags (article_id, tag_id) VALUES (?, ?)', [articleId, tagId])
+      } catch (e) {}
+    }
+  })
 
   const talkCount = query('SELECT COUNT(*) as count FROM talks')[0].count
   if (talkCount === 0) {
@@ -206,10 +264,18 @@ function seedData() {
 
   const linkCount = query('SELECT COUNT(*) as count FROM links')[0].count
   if (linkCount === 0) {
-    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['GitHub', 'https://github.com', '', '全球最大的代码托管平台'])
-    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Vue 官网', 'https://vuejs.org', '', '渐进式 JavaScript 框架'])
-    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Tailwind CSS', 'https://tailwindcss.com', '', '实用优先的 CSS 框架'])
-    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Node.js', 'https://nodejs.org', '', 'JavaScript 运行时'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['GitHub', 'https://github.com', '', '全球最大的代码托管平台，开源项目聚集地'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Vue 官网', 'https://vuejs.org', '', '渐进式 JavaScript 框架，用于构建用户界面'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Tailwind CSS', 'https://tailwindcss.com', '', '实用优先的 CSS 框架，快速构建现代界面'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Node.js', 'https://nodejs.org', '', 'JavaScript 运行时，服务端 JavaScript 开发'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['MDN', 'https://developer.mozilla.org', '', 'Web 技术文档与开发者资源'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Vite', 'https://vitejs.dev', '', '下一代前端构建工具，极速开发体验'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Stack Overflow', 'https://stackoverflow.com', '', '全球最大的技术问答社区'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['React', 'https://react.dev', '', '用于构建用户界面的 JavaScript 库'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['百度', 'https://www.baidu.com', '', '全球最大的中文搜索引擎'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['掘金', 'https://juejin.cn', '', '面向开发者的中文技术社区'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['CSDN', 'https://www.csdn.net', '', '中文 IT 技术知识社区'])
+    run('INSERT INTO links (name, url, logo, description) VALUES (?, ?, ?, ?)', ['Bing', 'https://www.bing.com', '', '微软旗下搜索引擎'])
   }
 
   const aboutCount = query('SELECT COUNT(*) as count FROM about')[0].count

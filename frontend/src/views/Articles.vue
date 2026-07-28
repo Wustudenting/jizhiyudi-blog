@@ -101,11 +101,14 @@
           <div 
             v-for="article in articles" 
             :key="article.id"
-            class="glass-card glass-card-hover p-6 cursor-pointer transition-all"
+            class="glass-card glass-card-hover p-6 cursor-pointer transition-all h-full flex flex-col"
             @click="$router.push(`/articles/${article.id}`)"
           >
             <div v-if="article.articleCover" class="mb-4">
               <img :src="article.articleCover" :alt="article.articleTitle" class="w-full h-40 object-cover rounded-lg" />
+            </div>
+            <div v-else class="mb-4 h-40 bg-slate-100 rounded-lg flex items-center justify-center">
+              <span class="text-slate-300 text-sm">无封面</span>
             </div>
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded">{{ article.categoryName }}</span>
@@ -114,7 +117,7 @@
         <h3 class="text-xl font-semibold text-slate-800 mb-2 hover:text-blue-500 transition-colors">
           {{ article.articleTitle }}
         </h3>
-        <p class="text-slate-400 text-sm line-clamp-3 mb-4">{{ article.articleSummary }}</p>
+        <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1">{{ article.articleSummary }}</p>
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4 text-slate-500 text-sm">
             <span class="flex items-center">
@@ -192,63 +195,110 @@ const getDateStr = (daysAgo) => {
 }
 
 const defaultArticles = [
-  { id: 1, articleTitle: 'Vue3 组合式API详解', articleSummary: '深入探讨Vue3的组合式API，包括setup、ref、reactive等核心概念...', categoryName: '前端开发', createTime: getDateStr(0), viewCount: 1234, commentCount: 45, tags: [{ id: 1, tagName: 'Vue3' }, { id: 2, tagName: 'JavaScript' }, { id: 7, tagName: 'CSS' }], articleCover: '' },
-  { id: 2, articleTitle: 'JavaScript 高级技巧', articleSummary: '掌握JavaScript的高级特性，提升代码质量和开发效率...', categoryName: '前端开发', createTime: getDateStr(1), viewCount: 892, commentCount: 32, tags: [{ id: 2, tagName: 'JavaScript' }, { id: 6, tagName: 'TypeScript' }], articleCover: '' },
-  { id: 3, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享Node.js应用性能优化的实用技巧和最佳实践...', categoryName: '后端开发', createTime: getDateStr(2), viewCount: 654, commentCount: 28, tags: [{ id: 3, tagName: 'Node.js' }, { id: 12, tagName: 'Redis' }], articleCover: '' },
-  { id: 4, articleTitle: 'Docker容器化部署指南', articleSummary: '从入门到精通Docker容器化部署，轻松管理你的应用...', categoryName: 'DevOps', createTime: getDateStr(3), viewCount: 1567, commentCount: 56, tags: [{ id: 4, tagName: 'Docker' }, { id: 15, tagName: 'Nginx' }], articleCover: '' },
-  { id: 5, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解React Hooks，掌握useState、useEffect等常用Hook...', categoryName: '前端开发', createTime: getDateStr(4), viewCount: 2134, commentCount: 89, tags: [{ id: 5, tagName: 'React' }, { id: 2, tagName: 'JavaScript' }], articleCover: '' },
-  { id: 6, articleTitle: 'Spring Boot 企业级开发', articleSummary: '使用Spring Boot快速构建企业级后端服务...', categoryName: '后端开发', createTime: getDateStr(5), viewCount: 789, commentCount: 34, tags: [{ id: 10, tagName: 'Spring Boot' }, { id: 11, tagName: 'MySQL' }, { id: 18, tagName: 'Java' }], articleCover: '' },
-  { id: 7, articleTitle: 'Vue2与Vue3迁移实战', articleSummary: '从Vue2迁移到Vue3的完整指南和最佳实践...', categoryName: '前端开发', createTime: getDateStr(6), viewCount: 567, commentCount: 23, tags: [{ id: 9, tagName: 'Vue2' }, { id: 1, tagName: 'Vue3' }], articleCover: '' },
-  { id: 8, articleTitle: 'Python数据分析入门', articleSummary: '使用Python进行数据分析的基础知识和常用库...', categoryName: '后端开发', createTime: getDateStr(7), viewCount: 445, commentCount: 19, tags: [{ id: 17, tagName: 'Python' }, { id: 12, tagName: 'Redis' }], articleCover: '' },
-  { id: 9, articleTitle: 'Linux服务器运维', articleSummary: 'Linux服务器运维常用命令和技巧...', categoryName: 'DevOps', createTime: getDateStr(8), viewCount: 398, commentCount: 15, tags: [{ id: 14, tagName: 'Linux' }, { id: 13, tagName: 'Git' }], articleCover: '' },
-  { id: 10, articleTitle: 'Kubernetes容器编排', articleSummary: '使用Kubernetes进行容器编排和管理...', categoryName: 'DevOps', createTime: getDateStr(9), viewCount: 512, commentCount: 21, tags: [{ id: 16, tagName: 'Kubernetes' }, { id: 4, tagName: 'Docker' }], articleCover: '' },
+  { id: 1, articleTitle: 'Vue 3 组合式 API 详解', articleSummary: '深入理解 Vue 3 的组合式 API 使用方法', categoryName: '前端', createTime: getDateStr(0), viewCount: 1234, commentCount: 45, tags: [{ id: 1, tagName: 'Vue3' }, { id: 2, tagName: 'JavaScript' }, { id: 11, tagName: '前端' }], articleCover: '' },
+  { id: 2, articleTitle: 'Tailwind CSS 实战技巧', articleSummary: '分享 Tailwind CSS 在项目中的实用技巧', categoryName: '前端', createTime: getDateStr(1), viewCount: 256, commentCount: 20, tags: [{ id: 6, tagName: 'Tailwind' }, { id: 3, tagName: 'CSS' }, { id: 11, tagName: '前端' }], articleCover: '' },
+  { id: 3, articleTitle: 'Node.js Express 入门', articleSummary: '从零开始学习 Node.js Express 框架...', categoryName: '后端', createTime: getDateStr(2), viewCount: 654, commentCount: 28, tags: [{ id: 4, tagName: 'Node.js' }, { id: 5, tagName: 'Express' }], articleCover: '' },
+  { id: 4, articleTitle: '我的前端学习之路', articleSummary: '记录我的前端学习历程与心得体会', categoryName: '学习', createTime: getDateStr(3), viewCount: 456, commentCount: 19, tags: [{ id: 11, tagName: '前端' }, { id: 12, tagName: '学习' }], articleCover: '' },
+  { id: 5, articleTitle: '生活中的小确幸', articleSummary: '记录生活中的美好瞬间', categoryName: '生活', createTime: getDateStr(4), viewCount: 68, commentCount: 2, tags: [{ id: 9, tagName: '生活' }, { id: 10, tagName: '随笔' }], articleCover: '' },
+  { id: 6, articleTitle: 'Vite 构建优化', articleSummary: 'Vite 项目的构建优化实践', categoryName: '前端', createTime: getDateStr(5), viewCount: 192, commentCount: 18, tags: [{ id: 7, tagName: 'Vite' }, { id: 1, tagName: 'Vue3' }], articleCover: '' },
+  { id: 7, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解 React Hooks 使用方法...', categoryName: '前端', createTime: getDateStr(6), viewCount: 780, commentCount: 25, tags: [{ id: 14, tagName: 'React' }, { id: 2, tagName: 'JavaScript' }], articleCover: '' },
+  { id: 8, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享 Node.js 性能优化的实用技巧...', categoryName: '后端', createTime: getDateStr(7), viewCount: 654, commentCount: 28, tags: [{ id: 4, tagName: 'Node.js' }, { id: 17, tagName: 'Redis' }], articleCover: '' },
+  { id: 9, articleTitle: 'Docker 容器化部署指南', articleSummary: '从入门到精通 Docker 容器化部署...', categoryName: '学习', createTime: getDateStr(8), viewCount: 1567, commentCount: 56, tags: [{ id: 13, tagName: 'Docker' }, { id: 22, tagName: 'Nginx' }], articleCover: '' },
+  { id: 10, articleTitle: 'MySQL 索引优化', articleSummary: 'MySQL 索引优化最佳实践', categoryName: '后端', createTime: getDateStr(9), viewCount: 610, commentCount: 22, tags: [{ id: 16, tagName: 'MySQL' }], articleCover: '' },
+  { id: 11, articleTitle: 'Kubernetes 入门到精通', articleSummary: 'Kubernetes 容器编排系统学习', categoryName: '学习', createTime: getDateStr(10), viewCount: 430, commentCount: 15, tags: [{ id: 19, tagName: 'Kubernetes' }, { id: 13, tagName: 'Docker' }], articleCover: '' },
 ]
 
-const initDefaultArticles = () => {
-  const saved = localStorage.getItem('blog_articles')
-  if (!saved) {
-    localStorage.setItem('blog_articles', JSON.stringify([]))
+const safeParse = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : fallback
+  } catch (e) {
+    console.warn(`Failed to parse ${key}:`, e.message)
+    return fallback
   }
 }
 
 const getCommentCount = (articleId) => {
   const saved = localStorage.getItem(`blog_comments_${articleId}`)
   if (saved) {
-    const comments = JSON.parse(saved)
-    let count = comments.length
-    for (const c of comments) {
-      if (c.replies && Array.isArray(c.replies)) {
-        count += c.replies.length
+    try {
+      const comments = JSON.parse(saved)
+      let count = comments.length
+      for (const c of comments) {
+        if (c.replies && Array.isArray(c.replies)) {
+          count += c.replies.length
+        }
       }
+      return count
+    } catch (e) {
+      return 0
     }
-    return count
   }
   return 0
 }
 
 const loadLocalArticles = () => {
-  initDefaultArticles()
-  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
-  return saved.map(a => {
+  const saved = safeParse('blog_articles', [])
+  const seenTitles = new Map()
+  const seenIds = new Set()
+  const deduped = saved.filter(a => {
+    if (!a) return false
+    const id = a.id
+    const title = (a.articleTitle || a.title || '').trim().toLowerCase()
+    if (!title) return true
+    if (id != null && seenIds.has(id)) return false
+    if (seenTitles.has(title)) {
+      const existing = seenTitles.get(title)
+      if (existing._backendId || (existing.id && existing.id > 1000)) {
+        return false
+      }
+      if (id != null) seenIds.add(id)
+      return false
+    }
+    seenTitles.set(title, a)
+    if (id != null) seenIds.add(id)
+    return true
+  })
+  return deduped.map(a => {
     const actualCommentCount = getCommentCount(a.id)
+    let tags = []
+    if (Array.isArray(a.tags) && a.tags.length > 0) {
+      tags = a.tags.map((t, idx) => ({
+        id: t.id || idx + 100,
+        tagName: t.tagName || t.name || ''
+      })).filter(t => t.tagName)
+    } else if (Array.isArray(a.tagNames) && a.tagNames.length > 0) {
+      tags = a.tagNames.map((name, idx) => ({ id: idx + 100, tagName: name }))
+    }
     return {
       id: a.id,
-      articleTitle: a.articleTitle,
-      articleSummary: a.articleSummary,
-      articleCover: a.articleCover || '',
-      categoryName: a.categoryName,
-      createTime: a.createTime,
-      viewCount: a.viewCount || 0,
+      articleTitle: a.articleTitle || a.title,
+      articleSummary: a.articleSummary || a.summary || '',
+      articleCover: a.articleCover || a.cover || '',
+      categoryName: a.categoryName || (a.category ? a.category.name : '') || '未分类',
+      createTime: a.createTime || a.created_at,
+      viewCount: a.viewCount ?? a.view_count ?? 0,
       commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
-      tags: (a.tagNames || []).map((name, idx) => ({ id: idx + 100, tagName: name })),
+      tags,
+      _synced: a._synced || false,
     }
   })
 }
 
 const getAllArticles = () => {
   const localArticles = loadLocalArticles()
-  const merged = localArticles.concat(defaultArticles)
-  return merged.map(a => {
+  if (localArticles.length > 0) {
+    return localArticles.map(a => {
+      const actualCommentCount = getCommentCount(a.id)
+      return {
+        ...a,
+        commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
+      }
+    })
+  }
+  return defaultArticles.map(a => {
     const actualCommentCount = getCommentCount(a.id)
     return {
       ...a,
@@ -407,10 +457,17 @@ const nextPage = () => {
 }
 
 onMounted(async () => {
-  await syncFromServer()
+  loadArticles()
+  
   if (route.query.keyword) {
     searchKeyword.value = route.query.keyword
   }
-  loadArticles()
+  
+  try {
+    await syncFromServer()
+    loadArticles()
+  } catch (e) {
+    console.warn('Sync failed, using local data:', e.message)
+  }
 })
 </script>

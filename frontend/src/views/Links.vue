@@ -69,20 +69,29 @@ import { ref, onMounted } from 'vue'
 import { syncFromServer } from '../service/syncService'
 
 const mockLinks = [
-  { id: 1, linkName: 'GitHub', linkUrl: 'https://github.com', linkDescription: '代码托管平台' },
-  { id: 2, linkName: '机智的鱼', linkUrl: 'https://github.com', linkDescription: '个人主页' },
-  { id: 3, linkName: 'Stack Overflow', linkUrl: 'https://stackoverflow.com', linkDescription: '技术问答平台' },
-  { id: 4, linkName: 'Vue.js', linkUrl: 'https://vuejs.org', linkDescription: 'Vue.js 官方网站' },
-  { id: 5, linkName: 'MDN', linkUrl: 'https://developer.mozilla.org', linkDescription: 'Web 技术文档' },
-  { id: 6, linkName: 'Vite', linkUrl: 'https://vitejs.dev', linkDescription: '下一代前端构建工具' },
-  { id: 7, linkName: '百度', linkUrl: 'https://www.baidu.com', linkDescription: '搜索引擎' },
-  { id: 8, linkName: 'Bing', linkUrl: 'https://www.bing.com', linkDescription: '微软搜索引擎' },
+  { id: 1, linkName: 'GitHub', linkUrl: 'https://github.com', linkDescription: '全球最大的代码托管平台，开源项目聚集地' },
+  { id: 2, linkName: 'Vue 官网', linkUrl: 'https://vuejs.org', linkDescription: '渐进式 JavaScript 框架，用于构建用户界面' },
+  { id: 3, linkName: 'Tailwind CSS', linkUrl: 'https://tailwindcss.com', linkDescription: '实用优先的 CSS 框架，快速构建现代界面' },
+  { id: 4, linkName: 'Node.js', linkUrl: 'https://nodejs.org', linkDescription: 'JavaScript 运行时，服务端 JavaScript 开发' },
+  { id: 5, linkName: 'MDN', linkUrl: 'https://developer.mozilla.org', linkDescription: 'Web 技术文档与开发者资源' },
+  { id: 6, linkName: 'Vite', linkUrl: 'https://vitejs.dev', linkDescription: '下一代前端构建工具，极速开发体验' },
+  { id: 7, linkName: 'Stack Overflow', linkUrl: 'https://stackoverflow.com', linkDescription: '全球最大的技术问答社区' },
+  { id: 8, linkName: 'React', linkUrl: 'https://react.dev', linkDescription: '用于构建用户界面的 JavaScript 库' },
+  { id: 9, linkName: '百度', linkUrl: 'https://www.baidu.com', linkDescription: '全球最大的中文搜索引擎' },
+  { id: 10, linkName: '掘金', linkUrl: 'https://juejin.cn', linkDescription: '面向开发者的中文技术社区' },
+  { id: 11, linkName: 'CSDN', linkUrl: 'https://www.csdn.net', linkDescription: '中文 IT 技术知识社区' },
+  { id: 12, linkName: 'Bing', linkUrl: 'https://www.bing.com', linkDescription: '微软旗下搜索引擎' },
 ]
 
 const loadLinks = () => {
   const saved = localStorage.getItem('blog_links')
   if (saved) {
-    return JSON.parse(saved)
+    try {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.filter(l => l && l.linkName && l.linkName.trim())
+      }
+    } catch (e) {}
   }
   localStorage.setItem('blog_links', JSON.stringify(mockLinks))
   return [...mockLinks]

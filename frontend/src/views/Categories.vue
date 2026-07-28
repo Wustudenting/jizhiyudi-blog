@@ -4,7 +4,7 @@
       <div class="lg:col-span-2">
         <h1 class="text-3xl font-bold text-slate-800 mb-8">文章分类</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="categoriesWithCount.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <router-link 
             v-for="category in categoriesWithCount" 
             :key="category.id"
@@ -24,7 +24,7 @@
           </router-link>
         </div>
 
-        <div v-if="categories.length === 0" class="text-center py-16">
+        <div v-else class="text-center py-16">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
@@ -43,15 +43,11 @@ import SideBar from '../components/SideBar.vue'
 import { syncFromServer } from '../service/syncService'
 
 const defaultCategories = [
-  { id: 1, categoryName: '前端开发', categoryDescription: '前端技术相关文章' },
-  { id: 2, categoryName: '后端开发', categoryDescription: '后端技术相关文章' },
-  { id: 3, categoryName: 'DevOps', categoryDescription: '运维与部署相关文章' },
-  { id: 4, categoryName: '生活感悟', categoryDescription: '生活随笔与感悟' },
-  { id: 5, categoryName: '感悟', categoryDescription: '人生感悟与思考' },
-  { id: 6, categoryName: '生活', categoryDescription: '日常生活点滴记录' },
-  { id: 7, categoryName: '读书笔记', categoryDescription: '读书笔记与好书推荐' },
-  { id: 8, categoryName: '项目实战', categoryDescription: '项目开发实战经验分享' },
-  { id: 9, categoryName: '工具推荐', categoryDescription: '开发工具与效率工具推荐' },
+  { id: 1, categoryName: '前端', categoryDescription: '前端开发技术分享' },
+  { id: 2, categoryName: '后端', categoryDescription: '后端开发技术分享' },
+  { id: 3, categoryName: '生活', categoryDescription: '生活随笔与感悟' },
+  { id: 4, categoryName: '学习', categoryDescription: '学习笔记与知识总结' },
+  { id: 5, categoryName: '项目', categoryDescription: '项目实战经验' },
 ]
 
 const categoryDescriptions = {
@@ -90,24 +86,30 @@ const generateDescription = (name) => {
 }
 
 const defaultArticles = [
-  { id: 1, categoryName: '前端开发' },
-  { id: 2, categoryName: '前端开发' },
-  { id: 3, categoryName: '后端开发' },
-  { id: 4, categoryName: 'DevOps' },
-  { id: 5, categoryName: '前端开发' },
-  { id: 6, categoryName: '后端开发' },
-  { id: 7, categoryName: '前端开发' },
-  { id: 8, categoryName: '后端开发' },
-  { id: 9, categoryName: 'DevOps' },
-  { id: 10, categoryName: 'DevOps' },
+  { id: 1, categoryName: '前端' },
+  { id: 2, categoryName: '前端' },
+  { id: 3, categoryName: '后端' },
+  { id: 4, categoryName: '学习' },
+  { id: 5, categoryName: '生活' },
+  { id: 6, categoryName: '前端' },
 ]
 
+const safeParse = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : fallback
+  } catch (e) {
+    console.warn(`Failed to parse ${key}:`, e.message)
+    return fallback
+  }
+}
+
 const loadCategories = () => {
-  const saved = localStorage.getItem('blog_categories')
-  if (saved) {
-    const savedCategories = JSON.parse(saved)
-    const defaultNames = new Set(defaultCategories.map(c => c.categoryName))
-    const merged = [...savedCategories]
+  const saved = safeParse('blog_categories', null)
+  if (saved && saved.length > 0) {
+    const merged = [...saved]
     
     defaultCategories.forEach(dc => {
       if (!merged.find(c => c.categoryName === dc.categoryName)) {
@@ -117,7 +119,10 @@ const loadCategories = () => {
     
     merged.forEach(cat => {
       if (!cat.categoryDescription || cat.categoryDescription === '暂无描述') {
-        cat.categoryDescription = generateDescription(cat.categoryName)
+        cat.categoryDescription = generateDescription(cat.categoryName || '')
+      }
+      if (cat.categoryName && !cat.id) {
+        cat.id = Date.now() + Math.random()
       }
     })
     
@@ -129,9 +134,12 @@ const loadCategories = () => {
 }
 
 const loadArticles = () => {
-  const saved = localStorage.getItem('blog_articles')
-  const localArticles = saved ? JSON.parse(saved) : []
-  return localArticles.concat(defaultArticles)
+  const localArticles = safeParse('blog_articles', [])
+  if (!localArticles || localArticles.length === 0) return defaultArticles
+  return localArticles.map(a => ({
+    ...a,
+    categoryName: a.categoryName || (a.category ? a.category.name : '') || '未分类',
+  }))
 }
 
 const categories = ref([])
@@ -155,7 +163,13 @@ const categoriesWithCount = computed(() => {
 })
 
 onMounted(async () => {
-  await syncFromServer()
   categories.value = loadCategories()
+  
+  try {
+    await syncFromServer()
+    categories.value = loadCategories()
+  } catch (e) {
+    console.warn('Sync failed, using local data:', e.message)
+  }
 })
 </script>

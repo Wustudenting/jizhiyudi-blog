@@ -188,51 +188,53 @@ const getDateStr = (daysAgo) => {
 }
 
 const defaultArticles = [
-  { id: 1, articleTitle: 'Vue3 组合式API详解', articleSummary: '深入探讨Vue3的组合式API，包括setup、ref、reactive等核心概念...', categoryName: '前端开发', createTime: getDateStr(0), viewCount: 1234, commentCount: 45, articleCover: '', tagNames: ['Vue3', 'JavaScript', 'CSS'] },
-  { id: 2, articleTitle: 'JavaScript 高级技巧', articleSummary: '掌握JavaScript的高级特性，提升代码质量和开发效率...', categoryName: '前端开发', createTime: getDateStr(1), viewCount: 892, commentCount: 32, articleCover: '', tagNames: ['JavaScript', 'TypeScript'] },
-  { id: 3, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享Node.js应用性能优化的实用技巧和最佳实践...', categoryName: '后端开发', createTime: getDateStr(2), viewCount: 654, commentCount: 28, articleCover: '', tagNames: ['Node.js', 'Redis'] },
-  { id: 4, articleTitle: 'Docker容器化部署指南', articleSummary: '从入门到精通Docker容器化部署，轻松管理你的应用...', categoryName: 'DevOps', createTime: getDateStr(3), viewCount: 1567, commentCount: 56, articleCover: '', tagNames: ['Docker', 'Nginx'] },
-  { id: 5, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解React Hooks，掌握useState、useEffect等常用Hook...', categoryName: '前端开发', createTime: getDateStr(4), viewCount: 2134, commentCount: 89, articleCover: '', tagNames: ['React', 'JavaScript'] },
-  { id: 6, articleTitle: 'Spring Boot 企业级开发', articleSummary: '使用Spring Boot快速构建企业级后端服务...', categoryName: '后端开发', createTime: getDateStr(5), viewCount: 789, commentCount: 34, articleCover: '', tagNames: ['Spring Boot', 'MySQL', 'Java'] },
-  { id: 7, articleTitle: 'Vue2与Vue3迁移实战', articleSummary: '从Vue2迁移到Vue3的完整指南和最佳实践...', categoryName: '前端开发', createTime: getDateStr(6), viewCount: 567, commentCount: 23, articleCover: '', tagNames: ['Vue2', 'Vue3'] },
-  { id: 8, articleTitle: 'Python数据分析入门', articleSummary: '使用Python进行数据分析的基础知识和常用库...', categoryName: '后端开发', createTime: getDateStr(7), viewCount: 445, commentCount: 19, articleCover: '', tagNames: ['Python', 'Redis'] },
-  { id: 9, articleTitle: 'Linux服务器运维', articleSummary: 'Linux服务器运维常用命令和技巧...', categoryName: 'DevOps', createTime: getDateStr(8), viewCount: 398, commentCount: 15, articleCover: '', tagNames: ['Linux', 'Git'] },
-  { id: 10, articleTitle: 'Kubernetes容器编排', articleSummary: '使用Kubernetes进行容器编排和管理...', categoryName: 'DevOps', createTime: getDateStr(9), viewCount: 512, commentCount: 21, articleCover: '', tagNames: ['Kubernetes', 'Docker'] },
+  { id: 1, articleTitle: 'Vue3 组合式API详解', articleSummary: '深入探讨Vue3的组合式API，包括setup、ref、reactive等核心概念...', categoryName: '前端', createTime: getDateStr(0), viewCount: 1234, articleCover: '', tagNames: ['Vue3', 'JavaScript'] },
+  { id: 2, articleTitle: 'Tailwind CSS 实战技巧', articleSummary: '分享 Tailwind CSS 在项目中的实用技巧...', categoryName: '前端', createTime: getDateStr(1), viewCount: 256, articleCover: '', tagNames: ['Tailwind', 'JavaScript'] },
+  { id: 3, articleTitle: 'Node.js Express 入门', articleSummary: '从零开始学习 Node.js Express 框架...', categoryName: '后端', createTime: getDateStr(2), viewCount: 654, articleCover: '', tagNames: ['Node.js', 'Express'] },
+  { id: 4, articleTitle: '我的前端学习之路', articleSummary: '记录我的前端学习历程与心得体会', categoryName: '学习', createTime: getDateStr(3), viewCount: 456, articleCover: '', tagNames: ['前端', '学习'] },
+  { id: 5, articleTitle: '生活中的小确幸', articleSummary: '记录生活中的美好瞬间', categoryName: '生活', createTime: getDateStr(4), viewCount: 68, articleCover: '', tagNames: ['生活', '随笔'] },
+  { id: 6, articleTitle: 'Vite 构建优化', articleSummary: 'Vite 项目的构建优化实践', categoryName: '前端', createTime: getDateStr(5), viewCount: 192, articleCover: '', tagNames: ['Vite', 'Vue3'] },
+  { id: 7, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解 React Hooks 使用方法...', categoryName: '前端', createTime: getDateStr(6), viewCount: 780, articleCover: '', tagNames: ['React', 'JavaScript'] },
+  { id: 8, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享 Node.js 性能优化的实用技巧...', categoryName: '后端', createTime: getDateStr(7), viewCount: 654, articleCover: '', tagNames: ['Node.js', 'Redis'] },
+  { id: 9, articleTitle: 'Docker 容器化部署指南', articleSummary: '从入门到精通 Docker 容器化部署...', categoryName: '学习', createTime: getDateStr(8), viewCount: 1567, articleCover: '', tagNames: ['Docker', 'Nginx'] },
+  { id: 10, articleTitle: 'MySQL 索引优化', articleSummary: 'MySQL 索引优化最佳实践', categoryName: '后端', createTime: getDateStr(9), viewCount: 610, articleCover: '', tagNames: ['MySQL'] },
+  { id: 11, articleTitle: 'Kubernetes 入门到精通', articleSummary: 'Kubernetes 容器编排系统学习', categoryName: '学习', createTime: getDateStr(10), viewCount: 430, articleCover: '', tagNames: ['Kubernetes', 'Docker'] },
 ]
 
 const defaultTags = [
   { id: 1, tagName: 'Vue3' },
   { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'Node.js' },
-  { id: 4, tagName: 'Docker' },
-  { id: 5, tagName: 'React' },
-  { id: 6, tagName: 'TypeScript' },
-  { id: 7, tagName: 'CSS' },
-  { id: 8, tagName: 'HTML5' },
-  { id: 9, tagName: 'Vue2' },
-  { id: 10, tagName: 'Spring Boot' },
-  { id: 11, tagName: 'MySQL' },
-  { id: 12, tagName: 'Redis' },
-  { id: 13, tagName: 'Git' },
-  { id: 14, tagName: 'Linux' },
-  { id: 15, tagName: 'Nginx' },
-  { id: 16, tagName: 'Kubernetes' },
-  { id: 17, tagName: 'Python' },
-  { id: 18, tagName: 'Java' },
-  { id: 19, tagName: 'WebSocket' },
-  { id: 20, tagName: 'RESTful' },
+  { id: 3, tagName: 'CSS' },
+  { id: 4, tagName: 'Node.js' },
+  { id: 5, tagName: 'Express' },
+  { id: 6, tagName: 'Tailwind' },
+  { id: 7, tagName: 'Vite' },
+  { id: 8, tagName: 'SQLite' },
+  { id: 9, tagName: '生活' },
+  { id: 10, tagName: '随笔' },
+  { id: 11, tagName: '前端' },
+  { id: 12, tagName: '学习' },
+  { id: 13, tagName: 'Docker' },
+  { id: 14, tagName: 'React' },
+  { id: 15, tagName: 'TypeScript' },
+  { id: 16, tagName: 'MySQL' },
+  { id: 17, tagName: 'Redis' },
+  { id: 18, tagName: 'Spring Boot' },
+  { id: 19, tagName: 'Kubernetes' },
+  { id: 20, tagName: 'Git' },
+  { id: 21, tagName: 'Linux' },
+  { id: 22, tagName: 'Nginx' },
+  { id: 23, tagName: 'Java' },
+  { id: 24, tagName: 'Python' },
+  { id: 25, tagName: 'HTML5' },
 ]
 
 const defaultCategories = [
-  { id: 1, categoryName: '前端开发' },
-  { id: 2, categoryName: '后端开发' },
-  { id: 3, categoryName: 'DevOps' },
-  { id: 4, categoryName: '生活感悟' },
-  { id: 5, categoryName: '感悟' },
-  { id: 6, categoryName: '生活' },
-  { id: 7, categoryName: '读书笔记' },
-  { id: 8, categoryName: '项目实战' },
-  { id: 9, categoryName: '工具推荐' },
+  { id: 1, categoryName: '前端' },
+  { id: 2, categoryName: '后端' },
+  { id: 3, categoryName: '生活' },
+  { id: 4, categoryName: '学习' },
+  { id: 5, categoryName: '项目' },
 ]
 
 const categoryDescriptions = {
@@ -280,67 +282,108 @@ const defaultFriendLinks = [
   { id: 2, linkName: '机智的鱼', linkUrl: 'https://github.com' },
 ]
 
-const loadLocalArticles = () => {
-  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
-  return saved
-}
-
 const TAGS_VERSION = 'v2'
 
-const loadLocalTags = () => {
-  const savedVersion = localStorage.getItem('blog_tags_version')
-  const saved = localStorage.getItem('blog_tags')
-  if (saved && savedVersion === TAGS_VERSION) {
-    return JSON.parse(saved)
+const loadLocalArticles = () => {
+  try {
+    const saved = localStorage.getItem('blog_articles')
+    if (!saved) return []
+    const parsed = JSON.parse(saved)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (e) {
+    return []
   }
-  localStorage.setItem('blog_tags', JSON.stringify(defaultTags))
-  localStorage.setItem('blog_tags_version', TAGS_VERSION)
+}
+
+const loadLocalTags = () => {
+  try {
+    const savedVersion = localStorage.getItem('blog_tags_version')
+    const saved = localStorage.getItem('blog_tags')
+    if (saved && savedVersion === TAGS_VERSION) {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed)) return parsed
+    }
+  } catch (e) {}
   return [...defaultTags]
 }
 
 const loadLocalCategories = () => {
-  const saved = localStorage.getItem('blog_categories')
-  if (saved) {
-    const savedCategories = JSON.parse(saved)
-    const merged = [...savedCategories]
-    
-    defaultCategories.forEach(dc => {
-      if (!merged.find(c => c.categoryName === dc.categoryName)) {
-        merged.push({ ...dc, categoryDescription: generateDescription(dc.categoryName) })
+  try {
+    const saved = localStorage.getItem('blog_categories')
+    if (saved) {
+      const savedCategories = JSON.parse(saved)
+      if (Array.isArray(savedCategories)) {
+        const merged = [...savedCategories]
+        defaultCategories.forEach(dc => {
+          if (!merged.find(c => c.categoryName === dc.categoryName)) {
+            merged.push({ ...dc, categoryDescription: generateDescription(dc.categoryName) })
+          }
+        })
+        merged.forEach(cat => {
+          if (!cat.categoryDescription || cat.categoryDescription === '暂无描述') {
+            cat.categoryDescription = generateDescription(cat.categoryName)
+          }
+        })
+        return merged
       }
-    })
-    
-    merged.forEach(cat => {
-      if (!cat.categoryDescription || cat.categoryDescription === '暂无描述') {
-        cat.categoryDescription = generateDescription(cat.categoryName)
-      }
-    })
-    
-    localStorage.setItem('blog_categories', JSON.stringify(merged))
-    return merged
-  }
-  const init = defaultCategories.map(c => ({ ...c, categoryDescription: generateDescription(c.categoryName) }))
-  localStorage.setItem('blog_categories', JSON.stringify(init))
-  return init
+    }
+  } catch (e) {}
+  return defaultCategories.map(c => ({ ...c, categoryDescription: generateDescription(c.categoryName) }))
 }
 
 const loadLocalTalks = () => {
-  const saved = localStorage.getItem('blog_talks')
-  if (saved) {
-    return JSON.parse(saved)
-  }
+  try {
+    const saved = localStorage.getItem('blog_talks')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return Array.isArray(parsed) ? parsed : []
+    }
+  } catch (e) {}
   return []
 }
 
-const allArticles = computed(() => {
-  const localArticles = loadLocalArticles()
-  return localArticles.concat(defaultArticles)
-})
+const loadLocalLinks = () => {
+  try {
+    const saved = localStorage.getItem('blog_links')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch (e) {}
+  return [...defaultFriendLinks]
+}
+
+const articlesData = ref([])
+const tagsData = ref([])
+const categoriesData = ref([])
+const talksData = ref([])
+const linksData = ref([])
+
+const initFromLocal = () => {
+  articlesData.value = loadLocalArticles()
+  tagsData.value = loadLocalTags()
+  categoriesData.value = loadLocalCategories()
+  talksData.value = loadLocalTalks()
+  linksData.value = loadLocalLinks()
+}
+
+const syncAndRefresh = async () => {
+  try {
+    await syncFromServer()
+    articlesData.value = loadLocalArticles()
+    tagsData.value = loadLocalTags()
+    categoriesData.value = loadLocalCategories()
+    talksData.value = loadLocalTalks()
+    linksData.value = loadLocalLinks()
+  } catch (e) {
+    console.warn('Sync failed:', e.message)
+  }
+}
 
 const stats = computed(() => {
-  const articles = allArticles.value
-  const categories = loadLocalCategories()
-  const tags = loadLocalTags()
+  const articles = articlesData.value
+  const categories = categoriesData.value
+  const tags = tagsData.value
   
   let viewCount = 0
   articles.forEach(a => {
@@ -356,22 +399,25 @@ const stats = computed(() => {
 })
 
 const getCommentCount = (articleId) => {
-  const saved = localStorage.getItem(`blog_comments_${articleId}`)
-  if (saved) {
-    const comments = JSON.parse(saved)
-    let count = comments.length
-    for (const c of comments) {
-      if (c.replies && Array.isArray(c.replies)) {
-        count += c.replies.length
+  try {
+    const saved = localStorage.getItem(`blog_comments_${articleId}`)
+    if (saved) {
+      const comments = JSON.parse(saved)
+      let count = comments.length
+      for (const c of comments) {
+        if (c.replies && Array.isArray(c.replies)) {
+          count += c.replies.length
+        }
       }
+      return count
     }
-    return count
-  }
+  } catch (e) {}
   return 0
 }
 
 const articles = computed(() => {
-  return allArticles.value.slice(0, 4).map(a => {
+  const source = articlesData.value.length > 0 ? articlesData.value : defaultArticles
+  return source.slice(0, 4).map(a => {
     const actualCommentCount = getCommentCount(a.id)
     return Object.assign({}, a, {
       tags: (a.tagNames || []).map((name, idx) => ({ id: idx + 100, tagName: name })),
@@ -381,11 +427,11 @@ const articles = computed(() => {
 })
 
 const tags = computed(() => {
-  return loadLocalTags()
+  return tagsData.value.length > 0 ? tagsData.value : defaultTags
 })
 
 const categories = computed(() => {
-  const articles = allArticles.value
+  const articles = articlesData.value.length > 0 ? articlesData.value : defaultArticles
   const countMap = {}
   
   articles.forEach(a => {
@@ -394,16 +440,19 @@ const categories = computed(() => {
     }
   })
   
-  return loadLocalCategories().map(c => {
+  const base = categoriesData.value.length > 0 ? categoriesData.value : defaultCategories
+  return base.map(c => {
     return Object.assign({}, c, {
-      articleCount: countMap[c.categoryName] || 0
+      articleCount: countMap[c.categoryName] || c.articleCount || 0
     })
   })
 })
 
 const comments = ref([...defaultComments])
 
-const friendLinks = ref([...defaultFriendLinks])
+const friendLinks = computed(() => {
+  return linksData.value.length > 0 ? linksData.value : defaultFriendLinks
+})
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -411,43 +460,9 @@ const formatDate = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-const initMockComments = () => {
-  const mockComments = [
-    { id: 1, nickname: '访客', commentContent: '文章写得很棒，收获很多！', createTime: new Date(), replies: [] },
-    { id: 2, nickname: '读者', commentContent: '感谢分享，期待更多内容', createTime: new Date(), replies: [] },
-  ]
-  
-  defaultArticles.forEach(article => {
-    const key = `blog_comments_${article.id}`
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, JSON.stringify(mockComments))
-    }
-  })
-}
-
 onMounted(async () => {
-  await syncFromServer()
-  initMockComments()
-  
-  const savedTalks = loadLocalTalks()
-  if (savedTalks.length > 0) {
-    const talkComments = []
-    savedTalks.forEach(t => {
-      if (t.comments && t.comments.length > 0) {
-        t.comments.forEach(c => {
-          talkComments.push({
-            id: c.id,
-            commentContent: c.commentContent,
-            nickname: c.nickname,
-            createTime: c.createTime,
-          })
-        })
-      }
-    })
-    if (talkComments.length > 0) {
-      comments.value = [...talkComments, ...defaultComments].slice(0, 6)
-    }
-  }
+  initFromLocal()
+  await syncAndRefresh()
 })
 </script>
 

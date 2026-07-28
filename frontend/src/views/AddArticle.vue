@@ -57,13 +57,14 @@
         </div>
 
         <div>
-          <label class="block text-slate-800 font-medium mb-2">分类</label>
+          <label class="block text-slate-800 font-medium mb-2">分类 <span class="text-red-500">*</span></label>
           <div class="flex gap-2 mb-3">
             <select 
               v-model="articleForm.categoryId"
+              required
               class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-blue-500"
             >
-              <option value="">请选择分类</option>
+              <option value="">请选择分类（必填）</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">
                 {{ category.categoryName }}
               </option>
@@ -163,15 +164,11 @@ import { blogApi } from '../service/api'
 const router = useRouter()
 
 const defaultCategories = [
-  { id: 1, categoryName: '前端开发', categoryDescription: '前端技术相关文章' },
-  { id: 2, categoryName: '后端开发', categoryDescription: '后端技术相关文章' },
-  { id: 3, categoryName: 'DevOps', categoryDescription: '运维与部署相关文章' },
-  { id: 4, categoryName: '生活感悟', categoryDescription: '生活随笔与感悟' },
-  { id: 5, categoryName: '感悟', categoryDescription: '人生感悟与思考' },
-  { id: 6, categoryName: '生活', categoryDescription: '日常生活点滴记录' },
-  { id: 7, categoryName: '读书笔记', categoryDescription: '读书笔记与好书推荐' },
-  { id: 8, categoryName: '项目实战', categoryDescription: '项目开发实战经验分享' },
-  { id: 9, categoryName: '工具推荐', categoryDescription: '开发工具与效率工具推荐' },
+  { id: 1, categoryName: '前端', categoryDescription: '前端开发技术分享' },
+  { id: 2, categoryName: '后端', categoryDescription: '后端开发技术分享' },
+  { id: 3, categoryName: '生活', categoryDescription: '生活随笔与感悟' },
+  { id: 4, categoryName: '学习', categoryDescription: '学习笔记与知识总结' },
+  { id: 5, categoryName: '项目', categoryDescription: '项目实战经验' },
 ]
 
 const categoryDescriptions = {
@@ -257,7 +254,7 @@ const loadCategories = () => {
   return [...defaultCategories]
 }
 
-const TAGS_VERSION = 'v2'
+const TAGS_VERSION = 'v3'
 
 const loadTags = () => {
   const savedVersion = localStorage.getItem('blog_tags_version')
@@ -377,6 +374,11 @@ const submitArticle = async () => {
     return
   }
 
+  if (!articleForm.value.categoryId) {
+    alert('请选择文章分类（必填项）')
+    return
+  }
+
   try {
     let selectedCategory = categories.value.find(c => c.id === articleForm.value.categoryId)
     
@@ -385,24 +387,22 @@ const submitArticle = async () => {
     }
     
     if (!selectedCategory) {
-      const fallbackCategory = categories.value[0]
-      if (fallbackCategory) {
-        articleForm.value.categoryId = fallbackCategory.id
-        selectedCategory = fallbackCategory
-      }
+      alert('分类不存在，请重新选择')
+      return
     }
     
     const selectedTagNames = tags.value
       .filter(t => selectedTags.value.includes(t.id))
       .map(t => t.tagName)
     
+    const tempId = Date.now()
     const newArticle = {
-      id: Date.now(),
+      id: tempId,
       articleTitle: articleForm.value.articleTitle,
       articleSummary: articleForm.value.articleSummary || '暂无摘要',
       articleCover: articleForm.value.articleCover || '',
-      categoryName: selectedCategory ? selectedCategory.categoryName : '生活感悟',
-      categoryId: articleForm.value.categoryId || (selectedCategory ? selectedCategory.id : ''),
+      categoryName: selectedCategory.categoryName,
+      categoryId: articleForm.value.categoryId,
       articleContent: articleForm.value.articleContent,
       isTop: articleForm.value.isTop,
       isFeatured: articleForm.value.isFeatured,
@@ -412,8 +412,22 @@ const submitArticle = async () => {
       commentCount: 0,
     }
 
+    const allArticles = loadArticles()
+    const title = newArticle.articleTitle
+    
+    const dedupedArticles = allArticles.filter(a => {
+      if (!a) return false
+      const aTitle = (a.articleTitle || a.title || '').trim().toLowerCase()
+      if (aTitle === title.trim().toLowerCase()) return false
+      return true
+    })
+    
+    dedupedArticles.unshift(newArticle)
+    saveArticles(dedupedArticles)
+    
+    let backendId = null
     try {
-      await blogApi.saveArticle({
+      const result = await blogApi.saveArticle({
         title: newArticle.articleTitle,
         summary: newArticle.articleSummary,
         content: newArticle.articleContent,
@@ -423,13 +437,22 @@ const submitArticle = async () => {
         is_top: newArticle.isTop,
         is_featured: newArticle.isFeatured,
       })
+      if (result && result.id) {
+        backendId = result.id
+        const articles = loadArticles()
+        const idx = articles.findIndex(a => a.id === tempId)
+        if (idx > -1) {
+          articles[idx] = {
+            ...articles[idx],
+            id: backendId,
+            _synced: true,
+          }
+          saveArticles(articles)
+        }
+      }
     } catch (apiErr) {
-      console.warn('API save failed, using localStorage:', apiErr.message)
+      console.warn('API save failed, article saved locally:', apiErr.message)
     }
-    
-    const allArticles = loadArticles()
-    allArticles.unshift(newArticle)
-    saveArticles(allArticles)
     
     if (selectedCategory) {
       selectedCategory.articleCount = (selectedCategory.articleCount || 0) + 1
@@ -448,7 +471,9 @@ const submitArticle = async () => {
     }
     selectedTags.value = []
     previewImage.value = ''
-    router.push('/articles')
+    
+    const navigateId = backendId || tempId
+    router.push(`/articles/${navigateId}`)
   } catch (error) {
     console.error('Failed to submit article:', error)
     alert('文章发布失败：' + error.message)

@@ -63,76 +63,43 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
 import { syncFromServer } from '../service/syncService'
+import { dataService } from '../service/dataService'
 
 const route = useRoute()
 
-const getDateStr = (daysAgo) => {
-  const date = new Date()
-  date.setDate(date.getDate() - daysAgo)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-const defaultArticles = [
-  { id: 1, articleTitle: 'Vue3 组合式API详解', articleSummary: '深入探讨Vue3的组合式API，包括setup、ref、reactive等核心概念...', categoryName: '前端开发', createTime: getDateStr(0), viewCount: 1234, commentCount: 45, tagNames: ['Vue3', 'JavaScript', 'CSS'] },
-  { id: 2, articleTitle: 'JavaScript 高级技巧', articleSummary: '掌握JavaScript的高级特性，提升代码质量和开发效率...', categoryName: '前端开发', createTime: getDateStr(1), viewCount: 892, commentCount: 32, tagNames: ['JavaScript', 'TypeScript'] },
-  { id: 3, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享Node.js应用性能优化的实用技巧和最佳实践...', categoryName: '后端开发', createTime: getDateStr(2), viewCount: 654, commentCount: 28, tagNames: ['Node.js', 'Redis'] },
-  { id: 4, articleTitle: 'Docker容器化部署指南', articleSummary: '从入门到精通Docker容器化部署，轻松管理你的应用...', categoryName: 'DevOps', createTime: getDateStr(3), viewCount: 1567, commentCount: 56, tagNames: ['Docker', 'Nginx'] },
-  { id: 5, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解React Hooks，掌握useState、useEffect等常用Hook...', categoryName: '前端开发', createTime: getDateStr(4), viewCount: 2134, commentCount: 89, tagNames: ['React', 'JavaScript'] },
-  { id: 6, articleTitle: 'Spring Boot 企业级开发', articleSummary: '使用Spring Boot快速构建企业级后端服务...', categoryName: '后端开发', createTime: getDateStr(5), viewCount: 789, commentCount: 34, tagNames: ['Spring Boot', 'MySQL', 'Java'] },
-  { id: 7, articleTitle: 'Vue2与Vue3迁移实战', articleSummary: '从Vue2迁移到Vue3的完整指南和最佳实践...', categoryName: '前端开发', createTime: getDateStr(6), viewCount: 567, commentCount: 23, tagNames: ['Vue2', 'Vue3'] },
-  { id: 8, articleTitle: 'Python数据分析入门', articleSummary: '使用Python进行数据分析的基础知识和常用库...', categoryName: '后端开发', createTime: getDateStr(7), viewCount: 445, commentCount: 19, tagNames: ['Python', 'Redis'] },
-  { id: 9, articleTitle: 'Linux服务器运维', articleSummary: 'Linux服务器运维常用命令和技巧...', categoryName: 'DevOps', createTime: getDateStr(8), viewCount: 398, commentCount: 15, tagNames: ['Linux', 'Git'] },
-  { id: 10, articleTitle: 'Kubernetes容器编排', articleSummary: '使用Kubernetes进行容器编排和管理...', categoryName: 'DevOps', createTime: getDateStr(9), viewCount: 512, commentCount: 21, tagNames: ['Kubernetes', 'Docker'] },
-]
-
-const TAGS_VERSION = 'v2'
+const TAGS_VERSION = 'v3'
 
 const defaultTags = [
   { id: 1, tagName: 'Vue3' },
   { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'Node.js' },
-  { id: 4, tagName: 'Docker' },
-  { id: 5, tagName: 'React' },
-  { id: 6, tagName: 'TypeScript' },
-  { id: 7, tagName: 'CSS' },
-  { id: 8, tagName: 'HTML5' },
-  { id: 9, tagName: 'Vue2' },
-  { id: 10, tagName: 'Spring Boot' },
-  { id: 11, tagName: 'MySQL' },
-  { id: 12, tagName: 'Redis' },
-  { id: 13, tagName: 'Git' },
-  { id: 14, tagName: 'Linux' },
-  { id: 15, tagName: 'Nginx' },
-  { id: 16, tagName: 'Kubernetes' },
-  { id: 17, tagName: 'Python' },
-  { id: 18, tagName: 'Java' },
-  { id: 19, tagName: 'WebSocket' },
-  { id: 20, tagName: 'RESTful' },
+  { id: 3, tagName: 'CSS' },
+  { id: 4, tagName: 'Node.js' },
+  { id: 5, tagName: 'Express' },
+  { id: 6, tagName: 'Tailwind' },
+  { id: 7, tagName: 'Vite' },
+  { id: 8, tagName: 'SQLite' },
+  { id: 9, tagName: '生活' },
+  { id: 10, tagName: '随笔' },
+  { id: 11, tagName: '前端' },
+  { id: 12, tagName: '学习' },
+  { id: 13, tagName: 'Docker' },
+  { id: 14, tagName: 'React' },
+  { id: 15, tagName: 'TypeScript' },
+  { id: 16, tagName: 'MySQL' },
+  { id: 17, tagName: 'Redis' },
+  { id: 18, tagName: 'Spring Boot' },
+  { id: 19, tagName: 'Kubernetes' },
+  { id: 20, tagName: 'Git' },
+  { id: 21, tagName: 'Linux' },
+  { id: 22, tagName: 'Nginx' },
+  { id: 23, tagName: 'Java' },
+  { id: 24, tagName: 'Python' },
+  { id: 25, tagName: 'HTML5' },
 ]
-
-const loadLocalArticles = () => {
-  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
-  return saved
-}
-
-const getCommentCount = (articleId) => {
-  const saved = localStorage.getItem(`blog_comments_${articleId}`)
-  if (saved) {
-    const comments = JSON.parse(saved)
-    let count = comments.length
-    for (const c of comments) {
-      if (c.replies && Array.isArray(c.replies)) {
-        count += c.replies.length
-      }
-    }
-    return count
-  }
-  return 0
-}
 
 const loadLocalTags = () => {
   const savedVersion = localStorage.getItem('blog_tags_version')
@@ -151,28 +118,149 @@ const tagName = computed(() => {
   return tag ? tag.tagName : '未知标签'
 })
 
-const allArticles = computed(() => {
-  const localArticles = loadLocalArticles()
-  const merged = localArticles.concat(defaultArticles)
-  return merged.map(a => {
+const articles = ref([])
+const total = ref(0)
+
+const getCommentCount = (articleId) => {
+  const saved = localStorage.getItem(`blog_comments_${articleId}`)
+  if (saved) {
+    try {
+      const comments = JSON.parse(saved)
+      let count = comments.length
+      for (const c of comments) {
+        if (c.replies && Array.isArray(c.replies)) {
+          count += c.replies.length
+        }
+      }
+      return count
+    } catch (e) {
+      return 0
+    }
+  }
+  return 0
+}
+
+const mapArticleFromBackend = (a) => {
+  const tagNames = (a.tags || []).map(t => t.name || t.tagName || '').filter(Boolean)
+  return {
+    id: a.id,
+    articleTitle: a.title || a.articleTitle || '',
+    articleSummary: a.summary || a.articleSummary || '',
+    articleCover: a.cover || a.articleCover || '',
+    categoryId: a.category_id ?? a.categoryId,
+    categoryName: a.category ? a.category.name : (a.categoryName || '未分类'),
+    createTime: a.created_at || a.createTime,
+    viewCount: a.view_count ?? a.viewCount ?? 0,
+    likeCount: a.like_count ?? a.likeCount ?? 0,
+    isTop: a.is_top ?? a.isTop ?? 0,
+    isFeatured: a.is_featured ?? a.isFeatured ?? 0,
+    tagNames,
+    status: a.status || 'published',
+  }
+}
+
+const mergeWithLocalData = (backendArticles) => {
+  const localSaved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
+  return backendArticles.map(ba => {
+    const localArticle = localSaved.find(la => la.id === ba.id)
+    const merged = { ...ba }
+    if (localArticle) {
+      if ((localArticle.viewCount || 0) > (merged.viewCount || 0)) {
+        merged.viewCount = localArticle.viewCount
+      }
+      if (localArticle._synced) {
+        merged._synced = true
+      }
+    }
+    const actualCommentCount = getCommentCount(ba.id)
+    if (actualCommentCount > 0) {
+      merged.commentCount = actualCommentCount
+    } else {
+      merged.commentCount = ba.commentCount || 0
+    }
+    return merged
+  })
+}
+
+const loadFromBackend = async () => {
+  try {
+    const result = await dataService.getArticlesByTag(tagId.value)
+    if (result && Array.isArray(result)) {
+      const mapped = result.map(a => mapArticleFromBackend(a))
+      const merged = mergeWithLocalData(mapped)
+      const name = tagName.value
+      const filtered = name === '未知标签' ? merged : merged.filter(a => {
+        const tagNames = a.tagNames || []
+        return tagNames.some(t => t === name)
+      })
+      articles.value = filtered
+      total.value = filtered.length
+      return true
+    }
+  } catch (e) {
+    console.warn('Failed to load from backend:', e.message)
+  }
+  return false
+}
+
+const loadFromLocalStorage = () => {
+  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
+  const name = tagName.value
+  if (name === '未知标签') {
+    articles.value = []
+    total.value = 0
+    return
+  }
+
+  const seenTitles = new Set()
+  const seenIds = new Set()
+  const deduped = saved.filter(a => {
+    if (!a) return false
+    const id = a.id
+    const title = (a.articleTitle || a.title || '').trim().toLowerCase()
+    if (!title) return true
+    if (seenTitles.has(title)) return false
+    if (id != null && seenIds.has(id)) return false
+    seenTitles.add(title)
+    if (id != null) seenIds.add(id)
+    return true
+  })
+
+  const filtered = deduped.filter(a => {
+    let tagNames = []
+    if (Array.isArray(a.tagNames) && a.tagNames.length > 0) {
+      tagNames = a.tagNames.filter(n => typeof n === 'string')
+    } else if (Array.isArray(a.tags) && a.tags.length > 0) {
+      tagNames = a.tags.map(t => (t && (t.tagName || t.name)) || '').filter(Boolean)
+    }
+    return tagNames.some(t => t === name)
+  })
+
+  const mapped = filtered.map(a => {
     const actualCommentCount = getCommentCount(a.id)
     return {
-      ...a,
+      id: a.id,
+      articleTitle: a.articleTitle || a.title,
+      articleSummary: a.articleSummary || a.summary || '',
+      articleCover: a.articleCover || a.cover || '',
+      categoryName: a.categoryName || (a.category ? a.category.name : '') || '未分类',
+      createTime: a.createTime || a.created_at,
+      viewCount: a.viewCount ?? a.view_count ?? 0,
       commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
+      tagNames: a.tagNames || [],
     }
   })
-})
 
-const articles = computed(() => {
-  const name = tagName.value
-  if (name === '未知标签') return []
-  return allArticles.value.filter(a => {
-    const tagNames = a.tagNames || []
-    return tagNames.includes(name)
-  })
-})
+  articles.value = mapped
+  total.value = mapped.length
+}
 
-const total = computed(() => articles.value.length)
+const fetchArticles = async () => {
+  const loaded = await loadFromBackend()
+  if (!loaded) {
+    loadFromLocalStorage()
+  }
+}
 
 const formatDate = (date) => {
   if (!date) return ''
@@ -182,5 +270,10 @@ const formatDate = (date) => {
 
 onMounted(async () => {
   await syncFromServer()
+  await fetchArticles()
+})
+
+watch(() => route.params.id, async () => {
+  await fetchArticles()
 })
 </script>

@@ -72,7 +72,7 @@ import SideBar from '../components/SideBar.vue'
 import { blogApi } from '../service/api'
 
 const mockAbout = {
-  aboutContent: '<p>欢迎来到我的个人博客！我是一名热爱技术的开发者，专注于前端和后端技术的学习与实践。</p><h2>技术栈</h2><ul><li>前端：Vue3、JavaScript、Tailwind CSS、Vanta.js</li><li>后端：Node.js、Express、MySQL、Redis</li><li>其他：Docker、Git、Linux</li></ul><h2>关于博客</h2><p>这个博客是我记录技术成长、分享生活感悟的地方。希望通过分享，能够帮助到更多的开发者，同时也督促自己不断学习和进步。</p>',
+  aboutContent: '<p>欢迎来到我的个人博客！我是一名热爱技术的开发者，专注于前端和后端技术的学习与实践。</p><h2>技术栈</h2><ul><li>前端：Vue3、JavaScript、Tailwind CSS、Vite</li><li>后端：Node.js、Express、SQLite</li><li>其他：Git</li></ul><h2>关于博客</h2><p>这个博客是我记录技术成长、分享生活感悟的地方。希望通过分享，能够帮助到更多的开发者，同时也督促自己不断学习和进步。</p>',
   nickname: '机智的鱼',
   email: '1146013446@qq.com',
   address: '地球',

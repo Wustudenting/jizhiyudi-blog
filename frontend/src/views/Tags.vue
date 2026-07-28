@@ -4,7 +4,7 @@
       <div class="lg:col-span-2">
         <h1 class="text-3xl font-bold text-slate-800 mb-8">标签云</h1>
         
-        <div class="flex flex-wrap gap-4">
+        <div v-if="tagsWithCount.length > 0" class="flex flex-wrap gap-4">
           <router-link 
             v-for="tag in tagsWithCount" 
             :key="tag.id"
@@ -17,7 +17,7 @@
           </router-link>
         </div>
 
-        <div v-if="tags.length === 0" class="text-center py-16">
+        <div v-else class="text-center py-16">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
@@ -38,68 +38,87 @@ import { syncFromServer } from '../service/syncService'
 const defaultTags = [
   { id: 1, tagName: 'Vue3' },
   { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'Node.js' },
-  { id: 4, tagName: 'Docker' },
-  { id: 5, tagName: 'React' },
-  { id: 6, tagName: 'TypeScript' },
-  { id: 7, tagName: 'CSS' },
-  { id: 8, tagName: 'HTML5' },
-  { id: 9, tagName: 'Vue2' },
-  { id: 10, tagName: 'Spring Boot' },
-  { id: 11, tagName: 'MySQL' },
-  { id: 12, tagName: 'Redis' },
-  { id: 13, tagName: 'Git' },
-  { id: 14, tagName: 'Linux' },
-  { id: 15, tagName: 'Nginx' },
-  { id: 16, tagName: 'Kubernetes' },
-  { id: 17, tagName: 'Python' },
-  { id: 18, tagName: 'Java' },
-  { id: 19, tagName: 'WebSocket' },
-  { id: 20, tagName: 'RESTful' },
+  { id: 3, tagName: 'CSS' },
+  { id: 4, tagName: 'Node.js' },
+  { id: 5, tagName: 'Express' },
+  { id: 6, tagName: 'Tailwind' },
+  { id: 7, tagName: 'Vite' },
+  { id: 8, tagName: 'SQLite' },
+  { id: 9, tagName: '生活' },
+  { id: 10, tagName: '随笔' },
+  { id: 11, tagName: '前端' },
+  { id: 12, tagName: '学习' },
+  { id: 13, tagName: 'Docker' },
+  { id: 14, tagName: 'React' },
+  { id: 15, tagName: 'TypeScript' },
+  { id: 16, tagName: 'MySQL' },
+  { id: 17, tagName: 'Redis' },
+  { id: 18, tagName: 'Spring Boot' },
+  { id: 19, tagName: 'Kubernetes' },
+  { id: 20, tagName: 'Git' },
+  { id: 21, tagName: 'Linux' },
+  { id: 22, tagName: 'Nginx' },
+  { id: 23, tagName: 'Java' },
+  { id: 24, tagName: 'Python' },
+  { id: 25, tagName: 'HTML5' },
 ]
 
 const defaultArticles = [
-  { id: 1, tagNames: ['Vue3', 'JavaScript', 'CSS'] },
-  { id: 2, tagNames: ['JavaScript', 'TypeScript'] },
-  { id: 3, tagNames: ['Node.js', 'Redis'] },
-  { id: 4, tagNames: ['Docker', 'Nginx'] },
-  { id: 5, tagNames: ['React', 'JavaScript'] },
-  { id: 6, tagNames: ['Spring Boot', 'MySQL', 'Java'] },
-  { id: 7, tagNames: ['Vue2', 'Vue3'] },
-  { id: 8, tagNames: ['Python', 'Redis'] },
-  { id: 9, tagNames: ['Linux', 'Git'] },
-  { id: 10, tagNames: ['Docker', 'Kubernetes'] },
-  { id: 11, tagNames: ['WebSocket', 'RESTful'] },
-  { id: 12, tagNames: ['HTML5', 'CSS', 'JavaScript'] },
+  { id: 1, tagNames: ['Vue3', 'JavaScript'] },
+  { id: 2, tagNames: ['Tailwind', 'JavaScript'] },
+  { id: 3, tagNames: ['Node.js', 'Express'] },
+  { id: 4, tagNames: ['前端', '学习'] },
+  { id: 5, tagNames: ['生活', '随笔'] },
+  { id: 6, tagNames: ['Vite', 'Vue3'] },
+  { id: 7, tagNames: ['React', 'JavaScript'] },
+  { id: 8, tagNames: ['Node.js', 'Redis'] },
+  { id: 9, tagNames: ['Docker', 'Nginx'] },
+  { id: 10, tagNames: ['MySQL'] },
+  { id: 11, tagNames: ['Kubernetes', 'Docker'] },
 ]
 
-const TAGS_VERSION = 'v2'
+const TAGS_VERSION = 'v3'
 
-const loadTags = () => {
+const safeParse = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : fallback
+  } catch (e) {
+    return fallback
+  }
+}
+
+const loadTagsSafe = () => {
   const savedVersion = localStorage.getItem('blog_tags_version')
-  const saved = localStorage.getItem('blog_tags')
-  if (saved && savedVersion === TAGS_VERSION) {
-    return JSON.parse(saved)
+  const saved = safeParse('blog_tags', null)
+  if (saved && saved.length > 0 && savedVersion === TAGS_VERSION) {
+    return saved
   }
   localStorage.setItem('blog_tags', JSON.stringify(defaultTags))
   localStorage.setItem('blog_tags_version', TAGS_VERSION)
   return [...defaultTags]
 }
 
-const loadArticles = () => {
-  const saved = localStorage.getItem('blog_articles')
-  const localArticles = saved ? JSON.parse(saved) : []
-  return localArticles.concat(defaultArticles)
+const loadArticlesSafe = () => {
+  const localArticles = safeParse('blog_articles', [])
+  return localArticles.length > 0 ? localArticles : defaultArticles
 }
 
 const tags = ref([])
 
 const tagsWithCount = computed(() => {
-  const articles = loadArticles()
+  const articles = loadArticlesSafe()
   const countMap = {}
   
   articles.forEach(article => {
-    const tagNames = article.tagNames || []
+    let tagNames = []
+    if (Array.isArray(article.tagNames) && article.tagNames.length > 0) {
+      tagNames = article.tagNames
+    } else if (Array.isArray(article.tags) && article.tags.length > 0) {
+      tagNames = article.tags.map(t => t.tagName || t.name || '').filter(Boolean)
+    }
     tagNames.forEach(name => {
       countMap[name] = (countMap[name] || 0) + 1
     })
@@ -113,8 +132,14 @@ const tagsWithCount = computed(() => {
 })
 
 onMounted(async () => {
-  await syncFromServer()
-  tags.value = loadTags()
+  tags.value = loadTagsSafe()
+  
+  try {
+    await syncFromServer()
+    tags.value = loadTagsSafe()
+  } catch (e) {
+    console.warn('Sync failed, using local data:', e.message)
+  }
 })
 </script>
 

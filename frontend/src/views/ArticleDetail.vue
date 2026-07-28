@@ -176,16 +176,108 @@ const route = useRoute()
 const router = useRouter()
 const article = ref(null)
 const comments = ref([])
+const initialized = ref(false)
 
-watch(() => route.params.id, async () => {
-  if (route.params.id) {
-    await syncArticleDetail(route.params.id)
-    loadArticle()
-    await syncComments(route.params.id)
-    const syncedComments = loadComments(route.params.id)
+const loadArticle = async (skipIncrement = false) => {
+  const id = Number(route.params.id)
+  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
+  const liked = loadLikedArticles()
+  
+  let found = saved.find(a => a.id === id)
+  
+  if (!found) {
+    try {
+      const resp = await fetch(`http://localhost:8080/articles/${id}`)
+      if (resp.ok) {
+        const data = await resp.json()
+        if (data && !data.message) {
+          found = {
+            id: data.id,
+            articleTitle: data.title || data.articleTitle,
+            articleContent: data.content || '',
+            articleSummary: data.summary || '',
+            articleCover: data.cover || '',
+            categoryName: data.category ? data.category.name : '未分类',
+            createTime: data.created_at,
+            viewCount: data.view_count || 0,
+            likeCount: data.like_count || 0,
+            tagNames: (data.tags || []).map(t => t.name),
+          }
+          if (!saved.find(a => a.id === id)) {
+            saved.push(found)
+            localStorage.setItem('blog_articles', JSON.stringify(saved))
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch article from backend:', e.message)
+    }
+  }
+
+  if (found) {
+    let newViewCount = found.viewCount || 0
+    if (!skipIncrement) {
+      const sessionViewed = sessionStorage.getItem(`blog_viewed_${id}`)
+      if (!sessionViewed) {
+        newViewCount = (found.viewCount || 0) + 1
+        sessionStorage.setItem(`blog_viewed_${id}`, '1')
+        const idx = saved.findIndex(a => a.id === id)
+        if (idx > -1) {
+          saved[idx].viewCount = newViewCount
+          localStorage.setItem('blog_articles', JSON.stringify(saved))
+        }
+      }
+    }
+    article.value = {
+      id: found.id,
+      articleTitle: found.articleTitle || found.title,
+      articleContent: found.articleContent || found.content || '',
+      articleSummary: found.articleSummary || found.summary || '',
+      articleCover: found.articleCover || found.cover || '',
+      categoryName: found.categoryName || '未分类',
+      createTime: found.createTime || found.created_at,
+      viewCount: newViewCount,
+      commentCount: found.commentCount || 0,
+      liked: liked.includes(found.id),
+      tags: (found.tagNames || found.tags || []).map((name, idx) => {
+        if (typeof name === 'string') return { id: idx + 100, tagName: name }
+        return { id: name.id || idx + 100, tagName: name.tagName || name.name }
+      }),
+    }
+    const savedComments = loadComments(found.id)
+    comments.value = savedComments || []
+    return
+  }
+
+  article.value = null
+  comments.value = []
+}
+
+const initPage = async () => {
+  if (!route.params.id || initialized.value) return
+  initialized.value = true
+  
+  await loadArticle()
+  const articleId = route.params.id
+  
+  syncArticleDetail(articleId).then(() => {
+    loadArticle(true)
+  }).catch(() => {})
+  
+  syncComments(articleId).then((syncedComments) => {
     if (syncedComments) {
       comments.value = syncedComments
+      if (article.value) {
+        saveComments(article.value.id, syncedComments)
+      }
     }
+  }).catch(() => {})
+}
+
+watch(() => route.params.id, () => {
+  initialized.value = false
+  if (route.params.id) {
+    initPage()
   }
 })
 
@@ -265,7 +357,7 @@ const showReplyBox = (commentId) => {
   replyContent.value = ''
 }
 
-const deleteArticle = () => {
+const deleteArticle = async () => {
   if (!article.value) return
   
   if (!confirm('确定要删除这篇文章吗？删除后不可恢复！')) {
@@ -273,6 +365,10 @@ const deleteArticle = () => {
   }
   
   try {
+    try {
+      await fetch(`http://localhost:8080/articles/${article.value.id}`, { method: 'DELETE' })
+    } catch (e) {}
+
     const saved = localStorage.getItem('blog_articles')
     if (saved) {
       const articles = JSON.parse(saved)
@@ -302,23 +398,51 @@ const deleteArticle = () => {
   }
 }
 
-const submitComment = () => {
+const submitComment = async () => {
   if (!commentForm.value.nickname || !commentForm.value.commentContent) {
     alert('请填写昵称和评论内容')
     return
   }
   
+  const tempId = Date.now()
   const newComment = {
-    id: Date.now(),
+    id: tempId,
     nickname: commentForm.value.nickname,
     commentContent: commentForm.value.commentContent,
-    createTime: new Date(),
+    createTime: new Date().toISOString(),
     replies: [],
   }
   
   comments.value.push(newComment)
   if (article.value) {
     saveComments(article.value.id, comments.value)
+  }
+
+  try {
+    const resp = await fetch('http://localhost:8080/comments/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        article_id: article.value?.id,
+        nickname: newComment.nickname,
+        content: newComment.commentContent,
+        avatar: '',
+        parent_id: 0,
+      })
+    })
+    if (resp.ok) {
+      const data = await resp.json()
+      if (data && data.id) {
+        const idx = comments.value.findIndex(c => c.id === tempId)
+        if (idx > -1) {
+          comments.value[idx].id = data.id
+          comments.value[idx]._backendId = data.id
+          saveComments(article.value.id, comments.value)
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to save comment to backend:', e.message)
   }
   commentForm.value = { nickname: '', commentContent: '' }
 }
@@ -352,191 +476,9 @@ const submitReply = (parentId) => {
   replyCommentId.value = null
 }
 
-const incrementViewCount = (articleId) => {
-  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
-  const index = saved.findIndex(a => a.id === articleId)
-  if (index > -1) {
-    saved[index].viewCount = (saved[index].viewCount || 0) + 1
-    localStorage.setItem('blog_articles', JSON.stringify(saved))
-    return saved[index].viewCount
-  }
-  return null
-}
-
-const loadArticle = () => {
-  const id = Number(route.params.id)
-  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
-  const liked = loadLikedArticles()
-  
-  const found = saved.find(a => a.id === id)
-  if (found) {
-    const newViewCount = incrementViewCount(found.id)
-    article.value = {
-      id: found.id,
-      articleTitle: found.articleTitle,
-      articleContent: found.articleContent,
-      articleSummary: found.articleSummary,
-      articleCover: found.articleCover || '',
-      categoryName: found.categoryName,
-      createTime: found.createTime,
-      viewCount: newViewCount !== null ? newViewCount : (found.viewCount || 0) + 1,
-      commentCount: found.commentCount || 0,
-      liked: liked.includes(found.id),
-      tags: (found.tagNames || []).map((name, idx) => ({ id: idx + 100, tagName: name })),
-    }
-    const savedComments = loadComments(found.id)
-    comments.value = savedComments || []
-    return
-  }
-  
-  const mockArticles = {
-    1: {
-      id: 1,
-      articleTitle: 'Vue3 组合式API详解',
-      articleContent: '<h2>什么是组合式API</h2><p>组合式API是Vue3引入的一种新的代码组织方式，它允许我们使用函数来组织组件逻辑，而不是选项对象。</p><h3>核心概念</h3><ul><li>setup: 组件的入口函数</li><li>ref: 创建响应式基本类型</li><li>reactive: 创建响应式对象</li><li>computed: 计算属性</li></ul><p>通过组合式API，我们可以更好地组织和复用组件逻辑，提高代码的可维护性。</p>',
-      categoryName: '前端开发',
-      createTime: getDateStr(0),
-      viewCount: 1234,
-      commentCount: 45,
-      tags: [{ id: 1, tagName: 'Vue3' }, { id: 2, tagName: 'JavaScript' }],
-    },
-    2: {
-      id: 2,
-      articleTitle: 'JavaScript 高级技巧',
-      articleContent: '<h2>JavaScript 高级技巧</h2><p>JavaScript是一门功能强大的语言，掌握高级技巧可以大幅提升代码质量。</p><h3>闭包与作用域</h3><p>理解闭包和作用域是掌握JavaScript的关键，它们决定了变量的可见性和生命周期。</p><h3>原型与继承</h3><p>JavaScript使用原型链实现继承，理解原型对象可以帮助我们更好地设计对象结构。</p><h3>异步编程</h3><p>掌握Promise、async/await等异步编程方式，可以处理复杂的异步任务。</p>',
-      categoryName: '前端开发',
-      createTime: getDateStr(1),
-      viewCount: 892,
-      commentCount: 32,
-      tags: [{ id: 3, tagName: 'JavaScript' }],
-    },
-    3: {
-      id: 3,
-      articleTitle: 'Node.js 性能优化实践',
-      articleContent: '<h2>Node.js 性能优化</h2><p>Node.js应用性能优化涉及多个方面，包括内存管理、异步处理、缓存策略等。</p><h3>内存优化</h3><p>避免内存泄漏，合理使用全局变量，及时释放不再使用的资源。</p><h3>异步优化</h3><p>使用异步IO、事件循环、Worker线程等技术提升并发处理能力。</p>',
-      categoryName: '后端开发',
-      createTime: getDateStr(2),
-      viewCount: 654,
-      commentCount: 28,
-      tags: [{ id: 4, tagName: 'Node.js' }, { id: 5, tagName: '性能优化' }],
-    },
-    4: {
-      id: 4,
-      articleTitle: 'Docker容器化部署指南',
-      articleContent: '<h2>Docker 容器化</h2><p>Docker是一个开源的容器化平台，使开发者能够将应用及其依赖打包到一个可移植的容器中。</p><h3>基本概念</h3><ul><li>镜像(Image)：只读的模板，包含创建容器的指令</li><li>容器(Container)：镜像的运行实例</li><li>仓库(Registry)：存储和分发镜像的服务</li></ul><h3>常用命令</h3><p>docker pull, docker run, docker build, docker push 等是Docker的核心命令。</p>',
-      categoryName: 'DevOps',
-      createTime: getDateStr(3),
-      viewCount: 1567,
-      commentCount: 56,
-      tags: [{ id: 6, tagName: 'Docker' }, { id: 7, tagName: 'DevOps' }],
-    },
-    5: {
-      id: 5,
-      articleTitle: 'React Hooks 深入解析',
-      articleContent: '<h2>React Hooks</h2><p>React Hooks是React 16.8引入的新特性，它让函数组件也能拥有状态和副作用。</p><h3>常用Hooks</h3><ul><li>useState: 状态管理</li><li>useEffect: 副作用处理</li><li>useContext: 上下文使用</li><li>useRef: 引用管理</li></ul><p>Hooks的出现让React代码更加简洁和可复用。</p>',
-      categoryName: '前端开发',
-      createTime: getDateStr(5),
-      viewCount: 780,
-      commentCount: 25,
-      tags: [{ id: 8, tagName: 'React' }, { id: 2, tagName: 'JavaScript' }],
-    },
-    6: {
-      id: 6,
-      articleTitle: 'Vite 构建优化实践',
-      articleContent: '<h2>Vite 构建优化</h2><p>Vite是新一代的前端构建工具，基于ES Module提供极速的开发体验。</p><h3>优化策略</h3><ul><li>代码分割</li><li>Tree Shaking</li><li>懒加载</li><li>资源压缩</li></ul><p>通过合理配置Vite，可以大幅提升项目的构建速度和加载性能。</p>',
-      categoryName: '前端开发',
-      createTime: getDateStr(6),
-      viewCount: 520,
-      commentCount: 18,
-      tags: [{ id: 9, tagName: 'Vite' }, { id: 1, tagName: 'Vue3' }],
-    },
-    7: {
-      id: 7,
-      articleTitle: 'MySQL 索引优化',
-      articleContent: '<h2>MySQL 索引优化</h2><p>索引是提高数据库查询性能的关键因素，合理使用索引可以大幅提升查询效率。</p><h3>索引类型</h3><ul><li>B+树索引</li><li>哈希索引</li><li>全文索引</li></ul><h3>优化建议</h3><p>避免在索引列上使用函数、不要过度使用索引、使用覆盖索引等。</p>',
-      categoryName: '后端开发',
-      createTime: getDateStr(7),
-      viewCount: 610,
-      commentCount: 22,
-      tags: [{ id: 10, tagName: 'MySQL' }, { id: 5, tagName: '性能优化' }],
-    },
-    8: {
-      id: 8,
-      articleTitle: 'Kubernetes 入门到精通',
-      articleContent: '<h2>Kubernetes</h2><p>Kubernetes是容器编排系统，用于自动化部署、扩展和管理容器化应用。</p><h3>核心概念</h3><ul><li>Pod: 最小部署单元</li><li>Service: 服务发现和负载均衡</li><li>Deployment: 部署管理</li><li>ConfigMap/Secret: 配置管理</li></ul><p>掌握Kubernetes对于云原生时代的开发者至关重要。</p>',
-      categoryName: 'DevOps',
-      createTime: getDateStr(8),
-      viewCount: 430,
-      commentCount: 15,
-      tags: [{ id: 11, tagName: 'Kubernetes' }, { id: 6, tagName: 'Docker' }],
-    },
-    9: {
-      id: 9,
-      articleTitle: '感悟',
-      articleContent: '<h2>生活感悟</h2><p>在技术学习的道路上，我逐渐明白，真正的成长不仅仅是技术的积累，更是思维方式的转变。</p><h3>学习心得</h3><p>保持好奇心、持续学习、善于总结、勇于实践，这些都是技术人成长的必经之路。</p><h3>生活态度</h3><p>工作与生活的平衡，是每个人都需要面对的课题。希望我能在代码中找到乐趣，在生活中发现美好。</p>',
-      categoryName: '感悟',
-      createTime: getDateStr(0),
-      viewCount: 280,
-      commentCount: 12,
-      tags: [{ id: 12, tagName: '感悟' }],
-    },
-    10: {
-      id: 10,
-      articleTitle: '生活',
-      articleContent: '<h2>生活随笔</h2><p>记录生活中的点滴，分享那些平凡而美好的瞬间。</p><h3>日常</h3><p>每一个清晨都是新的开始，每一次努力都不会被辜负。保持热爱，奔赴山海。</p><h3>思考</h3><p>生活的意义不在于长度，而在于深度。愿我们都能活出自己想要的样子。</p>',
-      categoryName: '生活',
-      createTime: getDateStr(0),
-      viewCount: 320,
-      commentCount: 8,
-      tags: [{ id: 13, tagName: '生活' }],
-    },
-    11: {
-      id: 11,
-      articleTitle: '百度',
-      articleContent: '<h2>关于百度</h2><p>百度是中国最大的搜索引擎和互联网服务提供商之一，由李彦宏于2000年创立。</p><h3>业务范围</h3><ul><li>搜索引擎</li><li>人工智能</li><li>自动驾驶</li><li>云计算</li></ul><p>百度在AI领域的布局尤其值得关注，文心一言大模型代表了国内AI的最高水平。</p>',
-      categoryName: '感悟',
-      createTime: getDateStr(0),
-      viewCount: 450,
-      commentCount: 20,
-      tags: [{ id: 14, tagName: '互联网' }],
-    },
-  }
-  
-  const defaultArticle = mockArticles[id] || mockArticles[1]
-  const viewSessionKey = `blog_viewed_${id}_${Date.now().toString().slice(0, -4)}`
-  const sessionViewed = sessionStorage.getItem(`blog_viewed_${id}`)
-  let newViewCount = defaultArticle.viewCount
-  if (!sessionViewed) {
-    newViewCount = (defaultArticle.viewCount || 0) + 1
-    sessionStorage.setItem(`blog_viewed_${id}`, '1')
-  }
-  article.value = Object.assign({}, defaultArticle, {
-    viewCount: newViewCount,
-    liked: liked.includes(defaultArticle.id)
-  })
-  
-  const savedComments = loadComments(article.value.id)
-  if (savedComments) {
-    comments.value = savedComments
-  } else {
-    const mockComments = [
-      { id: 1, nickname: '访客', commentContent: '文章写得很棒，收获很多！', createTime: new Date(), replies: [] },
-      { id: 2, nickname: '读者', commentContent: '感谢分享，期待更多内容', createTime: new Date(), replies: [] },
-    ]
-    comments.value = mockComments
-    saveComments(article.value.id, mockComments)
-  }
-}
-
-onMounted(async () => {
+onMounted(() => {
   if (route.params.id) {
-    await syncArticleDetail(route.params.id)
-    loadArticle()
-    await syncComments(route.params.id)
-    const syncedComments = loadComments(route.params.id)
-    if (syncedComments) {
-      comments.value = syncedComments
-    }
+    initPage()
   }
 })
 </script>

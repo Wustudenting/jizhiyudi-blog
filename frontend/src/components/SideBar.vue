@@ -121,7 +121,7 @@ const props = defineProps({
 })
 
 const defaultArticles = [
-  { id: 1, articleTitle: 'Vue3 组合式API详解', categoryName: '前端开发', createTime: '2026-07-26', articleCover: '' },
+  { id: 1, articleTitle: 'Vue 3 组合式 API 详解', categoryName: '前端开发', createTime: '2026-07-26', articleCover: '' },
   { id: 2, articleTitle: 'JavaScript 高级技巧', categoryName: '前端开发', createTime: '2026-07-25', articleCover: '' },
   { id: 3, articleTitle: 'Node.js 性能优化实践', categoryName: '后端开发', createTime: '2026-07-24', articleCover: '' },
   { id: 4, articleTitle: 'Docker 容器化部署指南', categoryName: 'DevOps', createTime: '2026-07-23', articleCover: '' },
@@ -131,7 +131,6 @@ const defaultArticles = [
   { id: 8, articleTitle: 'Kubernetes 入门到精通', categoryName: 'DevOps', createTime: '2026-07-19', articleCover: '' },
   { id: 9, articleTitle: '感悟', categoryName: '感悟', createTime: '2026-07-26', articleCover: '' },
   { id: 10, articleTitle: '生活', categoryName: '生活', createTime: '2026-07-26', articleCover: '' },
-  { id: 11, articleTitle: '百度', categoryName: '感悟', createTime: '2026-07-26', articleCover: '' },
 ]
 
 const defaultTags = [
@@ -159,7 +158,25 @@ const loadLocalCategories = () => {
 
 const allArticles = computed(() => {
   const local = loadLocalArticles()
-  return local.concat(defaultArticles)
+  if (local.length > 0) {
+    const seen = new Set()
+    return local.filter(a => {
+      if (!a) return false
+      const key = (a.articleTitle || a.title || '').trim().toLowerCase()
+      if (!key) return true
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }
+  const seen = new Set()
+  return defaultArticles.filter(a => {
+    const key = (a.articleTitle || '').trim().toLowerCase()
+    if (!key) return true
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
 })
 
 const stats = computed(() => {

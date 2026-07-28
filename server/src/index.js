@@ -30,9 +30,13 @@ app.use('/links', linksRouter)
 app.use('/users', usersRouter)
 
 app.post('/report', (req, res) => {
-  const db = require('./db')
+  const { run } = require('./db')
   const { ip, userAgent, path: pagePath } = req.body
-  db.prepare('INSERT INTO visitors (ip, user_agent, path) VALUES (?, ?, ?)').run(ip || req.ip, userAgent || req.headers['user-agent'], pagePath || '')
+  try {
+    run('INSERT INTO visitors (ip, user_agent, path) VALUES (?, ?, ?)', [ip || req.ip, userAgent || req.headers['user-agent'], pagePath || ''])
+  } catch (e) {
+    console.warn('Report error:', e.message)
+  }
   res.json({ message: 'ok' })
 })
 

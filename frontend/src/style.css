@@ -142,3 +142,23 @@ body {
 .markdown-body img {
   @apply max-w-full rounded-lg;
 }
+
+.nav-link-active {
+  color: #4f46e5 !important;
+}
+
+.nav-link-active .nav-underline {
+  width: 100% !important;
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #4f46e5 !important;
+}
+
+.nav-link:hover .nav-underline {
+  width: 100% !important;
+}

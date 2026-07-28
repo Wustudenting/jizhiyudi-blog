@@ -47,6 +47,12 @@ export const dataService = {
   async getFriendLinks() {
     return withFallback(blogApi.getFriendLinks, 'blog_links')
   },
+  async getArticlesByTag(tagId) {
+    return withFallback(() => blogApi.getArticlesByTag(tagId), 'blog_articles')
+  },
+  async getArticlesByCategory(categoryId) {
+    return withFallback(() => blogApi.getArticlesByCategory(categoryId), 'blog_articles')
+  },
   async getTopAndFeatured() {
     return withFallback(blogApi.getTopAndFeatured, 'blog_articles')
   },

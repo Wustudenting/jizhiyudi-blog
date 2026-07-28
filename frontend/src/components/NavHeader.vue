@@ -15,10 +15,11 @@
             :key="item.name" 
             :to="item.path"
             class="nav-link text-slate-600 hover:text-indigo-600 transition-colors relative group text-sm xl:text-base whitespace-nowrap"
-            active-class="nav-link-active"
+            :class="{ 'nav-link-active': isActive(item) }"
           >
             {{ item.label }}
-            <span class="nav-underline absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300"></span>
+            <span class="nav-underline absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300"
+                  :class="{ 'w-full': isActive(item), 'w-0': !isActive(item) }"></span>
           </router-link>
           <router-link 
             to="/articles/add"
@@ -100,10 +101,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const scrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const searchKeyword = ref('')
@@ -118,6 +120,13 @@ const navItems = [
   { name: 'About', label: '关于', path: '/about' },
   { name: 'Links', label: '友链', path: '/links' },
 ]
+
+const isActive = (item) => {
+  if (item.path === '/') {
+    return route.path === '/'
+  }
+  return route.path.startsWith(item.path)
+}
 
 const handleScroll = () => {
   scrolled.value = window.scrollY > 50

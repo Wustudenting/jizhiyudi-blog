@@ -98,7 +98,7 @@ const groupedArticles = computed(() => {
 
 const loadArticles = () => {
   const localArticles = loadLocalArticles()
-  articles.value = localArticles.concat(defaultArticles)
+  articles.value = localArticles.length > 0 ? localArticles : defaultArticles
 }
 
 onMounted(async () => {

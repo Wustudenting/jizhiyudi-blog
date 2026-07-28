@@ -7,6 +7,7 @@ import CategoryDetail from '../views/CategoryDetail.vue'
 import Tags from '../views/Tags.vue'
 import TagDetail from '../views/TagDetail.vue'
 import Talks from '../views/Talks.vue'
+import TalkDetail from '../views/TalkDetail.vue'
 import Archives from '../views/Archives.vue'
 import About from '../views/About.vue'
 import Links from '../views/Links.vue'
@@ -52,6 +53,11 @@ const routes = [
     path: '/talks',
     name: 'Talks',
     component: Talks,
+  },
+  {
+    path: '/talks/:id',
+    name: 'TalkDetail',
+    component: TalkDetail,
   },
   {
     path: '/archives',
