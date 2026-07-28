@@ -3,8 +3,16 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <router-link to="/" class="flex items-center space-x-2 group flex-shrink-0">
-          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <span class="text-white font-bold text-lg">智</span>
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-200 to-amber-300 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+            <svg viewBox="0 0 64 64" class="w-7 h-7" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="28" cy="32" rx="20" ry="12" fill="#fde047" stroke="#f59e0b" stroke-width="1.5"/>
+              <polygon points="48,32 62,20 62,44" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="20" cy="28" r="3" fill="#fff" stroke="#f59e0b" stroke-width="1"/>
+              <circle cx="20" cy="28" r="1.5" fill="#1e293b"/>
+              <path d="M32 32 Q36 26 40 32 Q36 38 32 32" fill="#f59e0b" opacity="0.4"/>
+              <path d="M36 24 Q42 20 44 26" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.5"/>
+              <path d="M36 40 Q42 44 44 38" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.5"/>
+            </svg>
           </div>
           <span class="text-xl font-bold text-slate-800">机智的鱼</span>
         </router-link>

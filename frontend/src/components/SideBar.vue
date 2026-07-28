@@ -5,7 +5,15 @@
         <div class="avatar-container w-24 h-24 mx-auto mb-4">
           <div class="avatar-ring"></div>
           <div class="avatar-inner">
-            <span class="avatar-fish">🐟</span>
+            <svg viewBox="0 0 64 64" class="w-12 h-12 fish-swim" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="28" cy="32" rx="20" ry="12" fill="#fde047" stroke="#f59e0b" stroke-width="2"/>
+              <polygon points="48,32 62,20 62,44" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+              <circle cx="20" cy="28" r="3.5" fill="#fff" stroke="#f59e0b" stroke-width="1.2"/>
+              <circle cx="20" cy="28" r="1.8" fill="#1e293b"/>
+              <path d="M32 32 Q36 26 40 32 Q36 38 32 32" fill="#f59e0b" opacity="0.4"/>
+              <path d="M36 24 Q42 20 44 26" stroke="#f59e0b" stroke-width="1.2" fill="none" opacity="0.5"/>
+              <path d="M36 40 Q42 44 44 38" stroke="#f59e0b" stroke-width="1.2" fill="none" opacity="0.5"/>
+            </svg>
           </div>
         </div>
         <h3 class="text-xl font-bold text-slate-800 mb-1">机智的鱼</h3>
@@ -240,7 +248,11 @@ const formatDate = (date) => {
 }
 
 .avatar-fish {
-  font-size: 2.5rem;
+  animation: fish-swim 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+.fish-swim {
   animation: fish-swim 3s ease-in-out infinite;
   display: inline-block;
 }
