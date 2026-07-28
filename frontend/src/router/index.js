@@ -12,6 +12,9 @@ import Archives from '../views/Archives.vue'
 import About from '../views/About.vue'
 import Links from '../views/Links.vue'
 import AddArticle from '../views/AddArticle.vue'
+import Resume from '../views/Resume.vue'
+import Projects from '../views/Projects.vue'
+import Skills from '../views/Skills.vue'
 
 const routes = [
   {
@@ -28,6 +31,11 @@ const routes = [
     path: '/articles/:id',
     name: 'ArticleDetail',
     component: ArticleDetail,
+  },
+  {
+    path: '/articles/add',
+    name: 'AddArticle',
+    component: AddArticle,
   },
   {
     path: '/categories',
@@ -65,6 +73,21 @@ const routes = [
     component: Archives,
   },
   {
+    path: '/resume',
+    name: 'Resume',
+    component: Resume,
+  },
+  {
+    path: '/projects',
+    name: 'Projects',
+    component: Projects,
+  },
+  {
+    path: '/skills',
+    name: 'Skills',
+    component: Skills,
+  },
+  {
     path: '/about',
     name: 'About',
     component: About,
@@ -73,11 +96,6 @@ const routes = [
     path: '/links',
     name: 'Links',
     component: Links,
-  },
-  {
-    path: '/articles/add',
-    name: 'AddArticle',
-    component: AddArticle,
   },
 ]
 

@@ -81,6 +81,18 @@
           清除筛选
         </button>
       </div>
+
+      <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-100">
+        <router-link to="/categories" class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-600 rounded-lg text-sm hover:shadow transition-shadow">
+          <span>📁</span> 全部分类
+        </router-link>
+        <router-link to="/tags" class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 rounded-lg text-sm hover:shadow transition-shadow">
+          <span>🏷️</span> 全部标签
+        </router-link>
+        <router-link to="/archives" class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-50 to-teal-50 text-green-600 rounded-lg text-sm hover:shadow transition-shadow">
+          <span>📚</span> 文章归档
+        </router-link>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

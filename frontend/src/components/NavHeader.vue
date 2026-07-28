@@ -113,10 +113,10 @@ const searchKeyword = ref('')
 const navItems = [
   { name: 'Home', label: '首页', path: '/' },
   { name: 'Articles', label: '文章', path: '/articles' },
-  { name: 'Categories', label: '分类', path: '/categories' },
-  { name: 'Tags', label: '标签', path: '/tags' },
+  { name: 'Resume', label: '个人简历', path: '/resume' },
+  { name: 'Projects', label: '项目经历', path: '/projects' },
+  { name: 'Skills', label: '专业技能', path: '/skills' },
   { name: 'Talks', label: '说说', path: '/talks' },
-  { name: 'Archives', label: '归档', path: '/archives' },
   { name: 'About', label: '关于', path: '/about' },
   { name: 'Links', label: '友链', path: '/links' },
 ]
