@@ -5,7 +5,7 @@
         <div class="max-w-4xl mx-auto space-y-6">
           <section class="glass-card p-8">
             <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
-              <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center flex-shrink-0 shadow-lg">
                 <span class="text-5xl">🐟</span>
               </div>
               <div class="flex-1 text-center md:text-left">

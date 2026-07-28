@@ -221,7 +221,7 @@ const formatDate = (date) => {
   height: 100%;
   border-radius: 50%;
   border: 3px solid transparent;
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6) border-box;
+  background: linear-gradient(45deg, #fde047, #fbbf24, #f59e0b, #fde047) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -232,7 +232,7 @@ const formatDate = (date) => {
   width: 80%;
   height: 80%;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #fde047, #fbbf24);
   display: flex;
   align-items: center;
   justify-content: center;

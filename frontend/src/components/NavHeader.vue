@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <router-link to="/" class="flex items-center space-x-2 group flex-shrink-0">
-          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
             <span class="text-white font-bold text-lg">智</span>
           </div>
           <span class="text-xl font-bold text-slate-800">机智的鱼</span>
@@ -22,10 +22,10 @@
                   :class="{ 'w-full': isActive(item), 'w-0': !isActive(item) }"></span>
           </router-link>
           <router-link 
-            to="/articles/add"
+            to="/talks"
             class="btn-primary text-sm px-4 py-1.5 whitespace-nowrap"
           >
-            写文章
+            随心写
           </router-link>
         </nav>
 
@@ -87,11 +87,11 @@
               </svg>
             </router-link>
             <router-link 
-              to="/articles/add"
+              to="/talks"
               @click="mobileMenuOpen = false"
               class="btn-primary text-center mt-3"
             >
-              写文章
+              随心写
             </router-link>
           </nav>
         </div>
@@ -116,7 +116,6 @@ const navItems = [
   { name: 'Resume', label: '个人简历', path: '/resume' },
   { name: 'Projects', label: '项目经历', path: '/projects' },
   { name: 'Skills', label: '专业技能', path: '/skills' },
-  { name: 'Talks', label: '说说', path: '/talks' },
   { name: 'About', label: '关于', path: '/about' },
   { name: 'Links', label: '友链', path: '/links' },
 ]
