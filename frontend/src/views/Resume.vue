@@ -5,15 +5,37 @@
         <div class="max-w-4xl mx-auto space-y-6">
           <section class="glass-card p-8">
             <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
-              <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-yellow-200 to-amber-300 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <svg viewBox="0 0 64 64" class="w-20 h-20" xmlns="http://www.w3.org/2000/svg">
-                  <ellipse cx="28" cy="32" rx="20" ry="12" fill="#fde047" stroke="#f59e0b" stroke-width="2"/>
-                  <polygon points="48,32 62,20 62,44" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
-                  <circle cx="20" cy="28" r="3.5" fill="#fff" stroke="#f59e0b" stroke-width="1.2"/>
-                  <circle cx="20" cy="28" r="1.8" fill="#1e293b"/>
-                  <path d="M32 32 Q36 26 40 32 Q36 38 32 32" fill="#f59e0b" opacity="0.4"/>
-                  <path d="M36 24 Q42 20 44 26" stroke="#f59e0b" stroke-width="1.2" fill="none" opacity="0.5"/>
-                  <path d="M36 40 Q42 44 44 38" stroke="#f59e0b" stroke-width="1.2" fill="none" opacity="0.5"/>
+              <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-yellow-100 to-amber-200 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <svg viewBox="0 0 80 80" class="w-20 h-20" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <radialGradient id="resBodyGrad" cx="40%" cy="40%" r="60%">
+                      <stop offset="0%" stop-color="#FEF9E7"/>
+                      <stop offset="50%" stop-color="#FDE68A"/>
+                      <stop offset="100%" stop-color="#F6C343"/>
+                    </radialGradient>
+                    <radialGradient id="resTailGrad" cx="40%" cy="50%" r="60%">
+                      <stop offset="0%" stop-color="#FDE68A"/>
+                      <stop offset="100%" stop-color="#F6B343"/>
+                    </radialGradient>
+                    <radialGradient id="resBlushGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#FCA5A5" stop-opacity="0.7"/>
+                      <stop offset="100%" stop-color="#FCA5A5" stop-opacity="0"/>
+                    </radialGradient>
+                  </defs>
+                  <ellipse cx="36" cy="42" rx="22" ry="16" fill="url(#resBodyGrad)" stroke="#E8A628" stroke-width="1.5"/>
+                  <path d="M56 42 Q70 30 74 42 Q70 54 56 42 Q62 42 56 42" fill="url(#resTailGrad)" stroke="#E8A628" stroke-width="1.5"/>
+                  <path d="M58 38 Q64 36 68 40" stroke="#D49520" stroke-width="1" fill="none" opacity="0.4"/>
+                  <ellipse cx="30" cy="38" rx="5.5" ry="6" fill="white" stroke="#E8A628" stroke-width="1.2"/>
+                  <ellipse cx="31.5" cy="39" rx="3" ry="3.5" fill="#2D3748"/>
+                  <circle cx="32.5" cy="37.5" r="1.2" fill="white"/>
+                  <circle cx="30" cy="40.5" r="0.5" fill="white" opacity="0.6"/>
+                  <ellipse cx="20" cy="46" rx="4" ry="2.5" fill="url(#resBlushGrad)"/>
+                  <path d="M26 46 Q30 49 34 46" stroke="#D49520" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                  <ellipse cx="42" cy="42" rx="6" ry="4" fill="white" opacity="0.5"/>
+                  <circle cx="62" cy="28" r="3" fill="white" opacity="0.7"/>
+                  <circle cx="68" cy="22" r="2" fill="white" opacity="0.5"/>
+                  <circle cx="20" cy="28" r="1.5" fill="white" opacity="0.6"/>
+                  <circle cx="48" cy="58" r="1" fill="white" opacity="0.4"/>
                 </svg>
               </div>
               <div class="flex-1 text-center md:text-left">

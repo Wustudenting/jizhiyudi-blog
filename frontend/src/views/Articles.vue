@@ -28,68 +28,76 @@
       </div>
     </div>
 
-    <div class="glass-card p-4 mb-6">
-      <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-slate-600 font-medium flex-shrink-0">📂 分类:</span>
+    <div class="bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 rounded-2xl p-5 mb-6 shadow-sm border border-white/60">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white/70 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-indigo-100/60">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-white text-sm shadow-sm">📂</span>
+            <h3 class="text-sm font-semibold text-indigo-700">分类筛选</h3>
+          </div>
           <div class="flex flex-wrap gap-1.5">
             <button
               v-for="cat in allCategories"
               :key="cat"
               @click="toggleCategory(cat)"
-              :class="['px-3 py-1 rounded-full text-xs font-medium transition-colors', selectedCategories.includes(cat) ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-indigo-100']"
+              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedCategories.includes(cat) ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm']"
             >
               {{ cat }}
             </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-slate-600 font-medium flex-shrink-0">🏷️ 标签:</span>
+        <div class="bg-white/70 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-purple-100/60">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-sm shadow-sm">🏷️</span>
+            <h3 class="text-sm font-semibold text-purple-700">标签筛选</h3>
+          </div>
           <div class="flex flex-wrap gap-1.5">
             <button
               v-for="tag in popularTags"
               :key="tag"
               @click="toggleTag(tag)"
-              :class="['px-3 py-1 rounded-full text-xs font-medium transition-colors', selectedTags.includes(tag) ? 'bg-purple-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-purple-100']"
+              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedTags.includes(tag) ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md' : 'bg-purple-50 text-purple-600 hover:bg-purple-100 hover:shadow-sm']"
             >
               {{ tag }}
             </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-slate-600 font-medium flex-shrink-0">📊 排序:</span>
+        <div class="bg-white/70 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-cyan-100/60">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center text-white text-sm shadow-sm">📊</span>
+            <h3 class="text-sm font-semibold text-cyan-700">排序方式</h3>
+          </div>
           <select
             v-model="sortBy"
-            class="px-3 py-1 bg-slate-100 text-slate-700 text-xs rounded-full border-none focus:outline-none cursor-pointer"
+            class="w-full px-3 py-2 bg-cyan-50 text-cyan-700 text-sm rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-cyan-300 cursor-pointer font-medium"
           >
-            <option value="date-desc">最新发布</option>
-            <option value="date-asc">最早发布</option>
-            <option value="views-desc">浏览最多</option>
-            <option value="views-asc">浏览最少</option>
-            <option value="comments-desc">评论最多</option>
-            <option value="title-asc">标题 A-Z</option>
+            <option value="date-desc">🕐 最新发布</option>
+            <option value="date-asc">🗓️ 最早发布</option>
+            <option value="views-desc">👁️ 浏览最多</option>
+            <option value="views-asc">📉 浏览最少</option>
+            <option value="comments-desc">💬 评论最多</option>
+            <option value="title-asc">🔤 标题 A-Z</option>
           </select>
+          <button
+            v-if="hasActiveFilters"
+            @click="clearFilters"
+            class="mt-3 text-xs text-rose-500 hover:text-rose-700 hover:underline flex items-center gap-1 transition-colors"
+          >
+            <span>✕</span> 清除所有筛选
+          </button>
         </div>
-
-        <button
-          v-if="hasActiveFilters"
-          @click="clearFilters"
-          class="text-sm text-indigo-500 hover:text-indigo-700 underline flex-shrink-0"
-        >
-          清除筛选
-        </button>
       </div>
 
-      <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-100">
-        <router-link to="/categories" class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-600 rounded-lg text-sm hover:shadow transition-shadow">
+      <div class="grid grid-cols-3 gap-3 mt-5">
+        <router-link to="/categories" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-400 to-blue-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <span>📁</span> 全部分类
         </router-link>
-        <router-link to="/tags" class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 rounded-lg text-sm hover:shadow transition-shadow">
+        <router-link to="/tags" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-400 to-pink-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <span>🏷️</span> 全部标签
         </router-link>
-        <router-link to="/archives" class="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-50 to-teal-50 text-green-600 rounded-lg text-sm hover:shadow transition-shadow">
+        <router-link to="/archives" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-400 to-emerald-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <span>📚</span> 文章归档
         </router-link>
       </div>

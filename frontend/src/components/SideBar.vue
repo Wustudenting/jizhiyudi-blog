@@ -5,14 +5,36 @@
         <div class="avatar-container w-24 h-24 mx-auto mb-4">
           <div class="avatar-ring"></div>
           <div class="avatar-inner">
-            <svg viewBox="0 0 64 64" class="w-12 h-12 fish-swim" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="28" cy="32" rx="20" ry="12" fill="#fde047" stroke="#f59e0b" stroke-width="2"/>
-              <polygon points="48,32 62,20 62,44" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
-              <circle cx="20" cy="28" r="3.5" fill="#fff" stroke="#f59e0b" stroke-width="1.2"/>
-              <circle cx="20" cy="28" r="1.8" fill="#1e293b"/>
-              <path d="M32 32 Q36 26 40 32 Q36 38 32 32" fill="#f59e0b" opacity="0.4"/>
-              <path d="M36 24 Q42 20 44 26" stroke="#f59e0b" stroke-width="1.2" fill="none" opacity="0.5"/>
-              <path d="M36 40 Q42 44 44 38" stroke="#f59e0b" stroke-width="1.2" fill="none" opacity="0.5"/>
+            <svg viewBox="0 0 80 80" class="w-14 h-14 fish-swim" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="bodyGrad" cx="40%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="#FEF9E7"/>
+                  <stop offset="50%" stop-color="#FDE68A"/>
+                  <stop offset="100%" stop-color="#F6C343"/>
+                </radialGradient>
+                <radialGradient id="tailGrad" cx="40%" cy="50%" r="60%">
+                  <stop offset="0%" stop-color="#FDE68A"/>
+                  <stop offset="100%" stop-color="#F6B343"/>
+                </radialGradient>
+                <radialGradient id="blushGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#FCA5A5" stop-opacity="0.7"/>
+                  <stop offset="100%" stop-color="#FCA5A5" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <ellipse cx="36" cy="42" rx="22" ry="16" fill="url(#bodyGrad)" stroke="#E8A628" stroke-width="1.5"/>
+              <path d="M56 42 Q70 30 74 42 Q70 54 56 42 Q62 42 56 42" fill="url(#tailGrad)" stroke="#E8A628" stroke-width="1.5"/>
+              <path d="M58 38 Q64 36 68 40" stroke="#D49520" stroke-width="1" fill="none" opacity="0.4"/>
+              <ellipse cx="30" cy="38" rx="5.5" ry="6" fill="white" stroke="#E8A628" stroke-width="1.2"/>
+              <ellipse cx="31.5" cy="39" rx="3" ry="3.5" fill="#2D3748"/>
+              <circle cx="32.5" cy="37.5" r="1.2" fill="white"/>
+              <circle cx="30" cy="40.5" r="0.5" fill="white" opacity="0.6"/>
+              <ellipse cx="20" cy="46" rx="4" ry="2.5" fill="url(#blushGrad)"/>
+              <path d="M26 46 Q30 49 34 46" stroke="#D49520" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="42" cy="42" rx="6" ry="4" fill="white" opacity="0.5"/>
+              <circle cx="62" cy="28" r="3" fill="white" opacity="0.7" class="bubble-1"/>
+              <circle cx="68" cy="22" r="2" fill="white" opacity="0.5" class="bubble-2"/>
+              <circle cx="20" cy="28" r="1.5" fill="white" opacity="0.6"/>
+              <circle cx="48" cy="58" r="1" fill="white" opacity="0.4"/>
             </svg>
           </div>
         </div>
@@ -229,7 +251,7 @@ const formatDate = (date) => {
   height: 100%;
   border-radius: 50%;
   border: 3px solid transparent;
-  background: linear-gradient(45deg, #fde047, #fbbf24, #f59e0b, #fde047) border-box;
+  background: linear-gradient(45deg, #FEF08A, #FDE68A, #FCD34D, #FEF08A) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -240,7 +262,7 @@ const formatDate = (date) => {
   width: 80%;
   height: 80%;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fde047, #fbbf24);
+  background: linear-gradient(135deg, #FEF9E7, #FDE68A);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -257,6 +279,14 @@ const formatDate = (date) => {
   display: inline-block;
 }
 
+.bubble-1 {
+  animation: bubble-float 2.5s ease-in-out infinite;
+}
+
+.bubble-2 {
+  animation: bubble-float 3s ease-in-out infinite 0.5s;
+}
+
 @keyframes ring-rotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -269,8 +299,13 @@ const formatDate = (date) => {
 
 @keyframes fish-swim {
   0%, 100% { transform: rotate(0deg) translateY(0); }
-  25% { transform: rotate(-10deg) translateY(-5px); }
+  25% { transform: rotate(-6deg) translateY(-3px); }
   50% { transform: rotate(0deg) translateY(0); }
-  75% { transform: rotate(10deg) translateY(-5px); }
+  75% { transform: rotate(6deg) translateY(-3px); }
+}
+
+@keyframes bubble-float {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-3px); opacity: 0.9; }
 }
 </style>
