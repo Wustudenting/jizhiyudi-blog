@@ -67,9 +67,6 @@
                     </span>
                   </div>
                 </div>
-                <div v-if="article.articleCover" class="ml-4 mt-4 md:mt-0">
-                  <img :src="article.articleCover" :alt="article.articleTitle" class="w-32 h-20 object-cover rounded-lg" />
-                </div>
               </div>
             </div>
           </div>
@@ -181,7 +178,7 @@
               :to="`/tags/${tag.id}`"
               class="px-3 py-1 bg-indigo-50 text-slate-600 text-sm rounded-full hover:bg-blue-500/30 hover:text-blue-500 transition-colors"
             >
-              {{ tag.tagName }}
+              {{ tag.tagName || tag.name }}
             </router-link>
           </div>
         </section>
@@ -194,7 +191,7 @@
                 :to="`/categories/${category.id}`"
                 class="flex items-center justify-between text-slate-600 hover:text-indigo-600 transition-colors"
               >
-                <span>{{ category.categoryName }}</span>
+                <span>{{ category.categoryName || category.name }}</span>
                 <span class="text-slate-500 text-sm">{{ category.articleCount || 0 }}</span>
               </router-link>
             </li>
@@ -205,11 +202,11 @@
           <h3 class="text-lg font-semibold text-slate-800 mb-4">友链</h3>
           <ul class="space-y-3">
             <li v-for="link in friendLinks" :key="link.id">
-              <a :href="link.linkUrl" target="_blank" class="text-slate-600 hover:text-blue-500 transition-colors flex items-center">
+              <a :href="link.linkUrl || link.url" target="_blank" class="text-slate-600 hover:text-blue-500 transition-colors flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
-                {{ link.linkName }}
+                {{ link.linkName || link.name }}
               </a>
             </li>
           </ul>
@@ -221,206 +218,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { syncFromServer } from '../service/syncService'
-
-const getDateStr = (daysAgo) => {
-  const date = new Date()
-  date.setDate(date.getDate() - daysAgo)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-const defaultArticles = [
-  { id: 1, articleTitle: 'Vue3 组合式API详解', articleSummary: '深入探讨Vue3的组合式API，包括setup、ref、reactive等核心概念...', categoryName: '前端', createTime: getDateStr(0), viewCount: 1234, articleCover: '', tagNames: ['Vue3', 'JavaScript'] },
-  { id: 2, articleTitle: 'Tailwind CSS 实战技巧', articleSummary: '分享 Tailwind CSS 在项目中的实用技巧...', categoryName: '前端', createTime: getDateStr(1), viewCount: 256, articleCover: '', tagNames: ['Tailwind', 'JavaScript'] },
-  { id: 3, articleTitle: 'Node.js Express 入门', articleSummary: '从零开始学习 Node.js Express 框架...', categoryName: '后端', createTime: getDateStr(2), viewCount: 654, articleCover: '', tagNames: ['Node.js', 'Express'] },
-  { id: 4, articleTitle: '我的前端学习之路', articleSummary: '记录我的前端学习历程与心得体会', categoryName: '学习', createTime: getDateStr(3), viewCount: 456, articleCover: '', tagNames: ['前端', '学习'] },
-  { id: 5, articleTitle: '生活中的小确幸', articleSummary: '记录生活中的美好瞬间', categoryName: '生活', createTime: getDateStr(4), viewCount: 68, articleCover: '', tagNames: ['生活', '随笔'] },
-  { id: 6, articleTitle: 'Vite 构建优化', articleSummary: 'Vite 项目的构建优化实践', categoryName: '前端', createTime: getDateStr(5), viewCount: 192, articleCover: '', tagNames: ['Vite', 'Vue3'] },
-  { id: 7, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解 React Hooks 使用方法...', categoryName: '前端', createTime: getDateStr(6), viewCount: 780, articleCover: '', tagNames: ['React', 'JavaScript'] },
-  { id: 8, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享 Node.js 性能优化的实用技巧...', categoryName: '后端', createTime: getDateStr(7), viewCount: 654, articleCover: '', tagNames: ['Node.js', 'Redis'] },
-  { id: 9, articleTitle: 'Docker 容器化部署指南', articleSummary: '从入门到精通 Docker 容器化部署...', categoryName: '学习', createTime: getDateStr(8), viewCount: 1567, articleCover: '', tagNames: ['Docker', 'Nginx'] },
-  { id: 10, articleTitle: 'MySQL 索引优化', articleSummary: 'MySQL 索引优化最佳实践', categoryName: '后端', createTime: getDateStr(9), viewCount: 610, articleCover: '', tagNames: ['MySQL'] },
-  { id: 11, articleTitle: 'Kubernetes 入门到精通', articleSummary: 'Kubernetes 容器编排系统学习', categoryName: '学习', createTime: getDateStr(10), viewCount: 430, articleCover: '', tagNames: ['Kubernetes', 'Docker'] },
-]
-
-const defaultTags = [
-  { id: 1, tagName: 'Vue3' },
-  { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'CSS' },
-  { id: 4, tagName: 'Node.js' },
-  { id: 5, tagName: 'Express' },
-  { id: 6, tagName: 'Tailwind' },
-  { id: 7, tagName: 'Vite' },
-  { id: 8, tagName: 'SQLite' },
-  { id: 9, tagName: '生活' },
-  { id: 10, tagName: '随笔' },
-  { id: 11, tagName: '前端' },
-  { id: 12, tagName: '学习' },
-  { id: 13, tagName: 'Docker' },
-  { id: 14, tagName: 'React' },
-  { id: 15, tagName: 'TypeScript' },
-  { id: 16, tagName: 'MySQL' },
-  { id: 17, tagName: 'Redis' },
-  { id: 18, tagName: 'Spring Boot' },
-  { id: 19, tagName: 'Kubernetes' },
-  { id: 20, tagName: 'Git' },
-  { id: 21, tagName: 'Linux' },
-  { id: 22, tagName: 'Nginx' },
-  { id: 23, tagName: 'Java' },
-  { id: 24, tagName: 'Python' },
-  { id: 25, tagName: 'HTML5' },
-]
-
-const defaultCategories = [
-  { id: 1, categoryName: '前端' },
-  { id: 2, categoryName: '后端' },
-  { id: 3, categoryName: '生活' },
-  { id: 4, categoryName: '学习' },
-  { id: 5, categoryName: '项目' },
-]
-
-const categoryDescriptions = {
-  '感悟': '人生感悟与思考',
-  '生活': '日常生活点滴记录',
-  '读书笔记': '读书笔记与好书推荐',
-  '项目实战': '项目开发实战经验分享',
-  '工具推荐': '开发工具与效率工具推荐',
-  '前端开发': '前端技术相关文章',
-  '后端开发': '后端技术相关文章',
-  'DevOps': '运维与部署相关文章',
-  '生活感悟': '生活随笔与感悟',
-  '购物': '购物心得与好物推荐',
-  '旅行': '旅行见闻与攻略分享',
-  '美食': '美食烹饪与探店分享',
-  '健身': '健身运动与健康生活',
-  '影视': '影视作品观后感',
-  '音乐': '音乐分享与评论',
-  '游戏': '游戏心得与攻略',
-  '教育': '教育学习经验分享',
-  '职场': '职场经验与职业发展',
-  '情感': '情感话题与心得',
-  '摄影': '摄影技巧与作品分享',
-}
-
-const generateDescription = (name) => {
-  if (categoryDescriptions[name]) return categoryDescriptions[name]
-  if (name.includes('开发') || name.includes('技术')) return `${name}相关文章`
-  if (name.includes('感悟') || name.includes('随笔') || name.includes('思考')) return `${name}与心得体会`
-  if (name.includes('生活') || name.includes('日常')) return '日常生活点滴记录'
-  if (name.includes('笔记') || name.includes('读书')) return '读书笔记与好书推荐'
-  if (name.includes('实战') || name.includes('项目')) return '项目开发实战经验分享'
-  if (name.includes('工具') || name.includes('效率')) return '工具与效率提升推荐'
-  if (name.includes('推荐') || name.includes('好物')) return `${name}与经验分享`
-  return `${name}相关内容分享`
-}
-
-const defaultComments = [
-  { id: 1, commentContent: '文章写得很棒，收获很多！', nickname: '访客', createTime: getDateStr(0) },
-  { id: 2, commentContent: '感谢分享，期待更多内容', nickname: '读者', createTime: getDateStr(1) },
-]
-
-const defaultFriendLinks = [
-  { id: 1, linkName: 'GitHub', linkUrl: 'https://github.com' },
-  { id: 2, linkName: '机智的鱼', linkUrl: 'https://github.com' },
-]
-
-const TAGS_VERSION = 'v2'
-
-const loadLocalArticles = () => {
-  try {
-    const saved = localStorage.getItem('blog_articles')
-    if (!saved) return []
-    const parsed = JSON.parse(saved)
-    return Array.isArray(parsed) ? parsed : []
-  } catch (e) {
-    return []
-  }
-}
-
-const loadLocalTags = () => {
-  try {
-    const savedVersion = localStorage.getItem('blog_tags_version')
-    const saved = localStorage.getItem('blog_tags')
-    if (saved && savedVersion === TAGS_VERSION) {
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed)) return parsed
-    }
-  } catch (e) {}
-  return [...defaultTags]
-}
-
-const loadLocalCategories = () => {
-  try {
-    const saved = localStorage.getItem('blog_categories')
-    if (saved) {
-      const savedCategories = JSON.parse(saved)
-      if (Array.isArray(savedCategories)) {
-        const merged = [...savedCategories]
-        defaultCategories.forEach(dc => {
-          if (!merged.find(c => c.categoryName === dc.categoryName)) {
-            merged.push({ ...dc, categoryDescription: generateDescription(dc.categoryName) })
-          }
-        })
-        merged.forEach(cat => {
-          if (!cat.categoryDescription || cat.categoryDescription === '暂无描述') {
-            cat.categoryDescription = generateDescription(cat.categoryName)
-          }
-        })
-        return merged
-      }
-    }
-  } catch (e) {}
-  return defaultCategories.map(c => ({ ...c, categoryDescription: generateDescription(c.categoryName) }))
-}
-
-const loadLocalTalks = () => {
-  try {
-    const saved = localStorage.getItem('blog_talks')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      return Array.isArray(parsed) ? parsed : []
-    }
-  } catch (e) {}
-  return []
-}
-
-const loadLocalLinks = () => {
-  try {
-    const saved = localStorage.getItem('blog_links')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
-    }
-  } catch (e) {}
-  return [...defaultFriendLinks]
-}
+import { blogApi } from '../service/api'
 
 const articlesData = ref([])
 const tagsData = ref([])
 const categoriesData = ref([])
-const talksData = ref([])
-const linksData = ref([])
-
-const initFromLocal = () => {
-  articlesData.value = loadLocalArticles()
-  tagsData.value = loadLocalTags()
-  categoriesData.value = loadLocalCategories()
-  talksData.value = loadLocalTalks()
-  linksData.value = loadLocalLinks()
-}
-
-const syncAndRefresh = async () => {
-  try {
-    await syncFromServer()
-    articlesData.value = loadLocalArticles()
-    tagsData.value = loadLocalTags()
-    categoriesData.value = loadLocalCategories()
-    talksData.value = loadLocalTalks()
-    linksData.value = loadLocalLinks()
-  } catch (e) {
-    console.warn('Sync failed:', e.message)
-  }
-}
+const friendLinksData = ref([])
 
 const stats = computed(() => {
   const articles = articlesData.value
@@ -440,60 +243,37 @@ const stats = computed(() => {
   }
 })
 
-const getCommentCount = (articleId) => {
-  try {
-    const saved = localStorage.getItem(`blog_comments_${articleId}`)
-    if (saved) {
-      const comments = JSON.parse(saved)
-      let count = comments.length
-      for (const c of comments) {
-        if (c.replies && Array.isArray(c.replies)) {
-          count += c.replies.length
-        }
-      }
-      return count
-    }
-  } catch (e) {}
-  return 0
-}
-
 const articles = computed(() => {
-  const source = articlesData.value.length > 0 ? articlesData.value : defaultArticles
-  return source.slice(0, 4).map(a => {
-    const actualCommentCount = getCommentCount(a.id)
-    return Object.assign({}, a, {
-      tags: (a.tagNames || []).map((name, idx) => ({ id: idx + 100, tagName: name })),
-      commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
-    })
-  })
+  return articlesData.value.slice(0, 4).map(a => ({
+    id: a.id,
+    articleTitle: a.articleTitle,
+    articleSummary: a.articleSummary,
+    categoryName: a.categoryName,
+    createTime: a.createTime,
+    viewCount: a.viewCount,
+    commentCount: a.commentCount,
+    articleCover: a.articleCover || a.cover || '',
+    tags: a.tags || [],
+  }))
 })
 
 const tags = computed(() => {
-  return tagsData.value.length > 0 ? tagsData.value : defaultTags
+  return tagsData.value.map(t => ({
+    id: t.id,
+    tagName: t.tagName || t.name,
+  }))
 })
 
 const categories = computed(() => {
-  const articles = articlesData.value.length > 0 ? articlesData.value : defaultArticles
-  const countMap = {}
-  
-  articles.forEach(a => {
-    if (a.categoryName) {
-      countMap[a.categoryName] = (countMap[a.categoryName] || 0) + 1
-    }
-  })
-  
-  const base = categoriesData.value.length > 0 ? categoriesData.value : defaultCategories
-  return base.map(c => {
-    return Object.assign({}, c, {
-      articleCount: countMap[c.categoryName] || c.articleCount || 0
-    })
-  })
+  return categoriesData.value.map(c => ({
+    id: c.id,
+    categoryName: c.categoryName || c.name,
+    articleCount: c.articleCount || c.count || 0,
+  }))
 })
 
-const comments = ref([...defaultComments])
-
 const friendLinks = computed(() => {
-  return linksData.value.length > 0 ? linksData.value : defaultFriendLinks
+  return friendLinksData.value
 })
 
 const formatDate = (date) => {
@@ -503,8 +283,53 @@ const formatDate = (date) => {
 }
 
 onMounted(async () => {
-  initFromLocal()
-  await syncAndRefresh()
+  try {
+    const [allArticles, topTags, categories, links] = await Promise.all([
+      blogApi.getArticles().catch(() => []),
+      blogApi.getTopTenTags().catch(() => []),
+      blogApi.getCategories().catch(() => []),
+      blogApi.getFriendLinks().catch(() => []),
+    ])
+
+    if (allArticles && Array.isArray(allArticles)) {
+      articlesData.value = allArticles.map(a => ({
+        id: a.id,
+        articleTitle: a.title || a.articleTitle || '',
+        articleSummary: a.summary || a.articleSummary || '',
+        categoryName: a.category ? a.category.name : (a.categoryName || '未分类'),
+        createTime: a.created_at || a.createTime,
+        viewCount: a.view_count ?? a.viewCount ?? 0,
+        likeCount: a.like_count ?? a.likeCount ?? 0,
+        commentCount: a.comment_count ?? a.commentCount ?? 0,
+        tags: (a.tags || []).map(t => ({ id: t.id, tagName: t.name || t.tagName || '' })),
+      }))
+    }
+
+    if (topTags && Array.isArray(topTags)) {
+      tagsData.value = topTags.map(t => ({
+        id: t.id,
+        tagName: t.name || t.tagName || '',
+      }))
+    }
+
+    if (categories && Array.isArray(categories)) {
+      categoriesData.value = categories.map(c => ({
+        id: c.id,
+        categoryName: c.name || c.categoryName || '',
+        articleCount: c.count ?? c.articleCount ?? 0,
+      }))
+    }
+
+    if (links && Array.isArray(links)) {
+      friendLinksData.value = links.map(l => ({
+        id: l.id,
+        linkName: l.name || l.linkName || '',
+        linkUrl: l.url || l.linkUrl || '',
+      }))
+    }
+  } catch (e) {
+    console.warn('Home page data fetch failed:', e.message)
+  }
 })
 </script>
 
