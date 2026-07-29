@@ -84,7 +84,7 @@ const projects = [
   },
   {
     id: 3,
-    title: '小兔鲜',
+    title: '鲜兔城',
     emoji: '🐰',
     gradient: 'from-orange-400 to-red-500',
     status: '电商项目',
