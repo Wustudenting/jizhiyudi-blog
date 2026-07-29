@@ -201,6 +201,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
+import { syncFromServer } from '../service/syncService'
 
 const route = useRoute()
 
@@ -501,6 +502,7 @@ watch([debouncedKeyword, selectedCategories, selectedTags, sortBy], () => {
 })
 
 onMounted(async () => {
+  await syncFromServer()
   loadArticles()
   
   if (route.query.keyword) {
