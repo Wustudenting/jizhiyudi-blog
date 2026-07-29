@@ -162,10 +162,11 @@ const props = defineProps({
 
 const tags = ref([])
 const recentArticles = ref([])
+const totalArticleCount = ref(0)
 const categoryCount = ref(0)
 
 const stats = computed(() => ({
-  articleCount: recentArticles.value.length || 0,
+  articleCount: totalArticleCount.value || 0,
   tagCount: tags.value.length || 0,
   categoryCount: categoryCount.value || 0,
 }))
@@ -178,23 +179,26 @@ const formatDate = (date) => {
 
 onMounted(async () => {
   try {
-    const [topTags, homeInfo, categories] = await Promise.all([
+    const [allArticles, topTags, categories] = await Promise.all([
+      blogApi.getArticles().catch(() => []),
       blogApi.getTopTenTags().catch(() => []),
-      blogApi.getHomeInfo().catch(() => ({})),
       blogApi.getCategories().catch(() => []),
     ])
 
-    if (topTags && Array.isArray(topTags)) {
-      tags.value = topTags
-    }
-
-    if (homeInfo && homeInfo.featured) {
-      const mapped = homeInfo.featured.map(a => ({
+    if (allArticles && Array.isArray(allArticles)) {
+      totalArticleCount.value = allArticles.length
+      const sorted = [...allArticles]
+        .sort((a, b) => new Date(b.created_at || b.createTime) - new Date(a.created_at || a.createTime))
+        .slice(0, 5)
+      recentArticles.value = sorted.map(a => ({
         id: a.id,
         articleTitle: a.title || a.articleTitle || '',
         createTime: a.created_at || a.createTime,
       }))
-      recentArticles.value = mapped
+    }
+
+    if (topTags && Array.isArray(topTags)) {
+      tags.value = topTags
     }
 
     if (categories && Array.isArray(categories)) {

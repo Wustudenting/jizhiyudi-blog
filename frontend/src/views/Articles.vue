@@ -114,79 +114,83 @@
           </span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div v-if="loading" class="text-center py-16">
+          <p class="text-slate-400">加载中...</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div 
-            v-for="article in articles" 
+            v-for="article in pagedArticles" 
             :key="article.id"
             class="glass-card glass-card-hover p-6 cursor-pointer transition-all h-full flex flex-col"
             @click="$router.push(`/articles/${article.id}`)"
           >
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded">{{ article.categoryName }}</span>
-          <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
-        </div>
-        <h3 class="text-xl font-semibold text-slate-800 mb-2 hover:text-blue-500 transition-colors">
-          {{ article.articleTitle }}
-        </h3>
-        <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1">{{ article.articleSummary }}</p>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4 text-slate-500 text-sm">
-            <span class="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              {{ article.viewCount || 0 }}
-            </span>
-            <span class="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              {{ article.commentCount || 0 }}
-            </span>
+              <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
+            </div>
+            <h3 class="text-xl font-semibold text-slate-800 mb-2 hover:text-blue-500 transition-colors">
+              {{ article.articleTitle }}
+            </h3>
+            <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1">{{ article.articleSummary }}</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4 text-slate-500 text-sm">
+                <span class="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  {{ article.viewCount || 0 }}
+                </span>
+                <span class="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  {{ article.commentCount || 0 }}
+                </span>
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <span 
+                  v-for="tag in article.tags" 
+                  :key="tag.id"
+                  class="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-500 rounded"
+                >
+                  {{ tag.tagName }}
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="flex flex-wrap gap-1">
-            <span 
-              v-for="tag in article.tags" 
-              :key="tag.id"
-              class="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-500 rounded"
+        </div>
+
+        <div v-if="!loading && filteredArticles.length > 0" class="flex justify-center mt-8">
+          <div class="flex items-center space-x-4">
+            <button 
+              @click="prevPage" 
+              :disabled="currentPage <= 1"
+              class="px-4 py-2 bg-indigo-50 text-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
             >
-              {{ tag.tagName }}
-            </span>
+              上一页
+            </button>
+            <span class="text-slate-800">{{ currentPage }} / {{ totalPages }}</span>
+            <button 
+              @click="nextPage" 
+              :disabled="currentPage >= totalPages"
+              class="px-4 py-2 bg-indigo-50 text-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
+            >
+              下一页
+            </button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div v-if="filteredArticles.length > 0" class="flex justify-center mt-8">
-      <div class="flex items-center space-x-4">
-        <button 
-          @click="prevPage" 
-          :disabled="currentPage <= 1"
-          class="px-4 py-2 bg-indigo-50 text-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
-        >
-          上一页
-        </button>
-        <span class="text-slate-800">{{ currentPage }} / {{ totalPages }}</span>
-        <button 
-          @click="nextPage" 
-          :disabled="currentPage >= totalPages"
-          class="px-4 py-2 bg-indigo-50 text-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
-        >
-          下一页
-        </button>
-      </div>
-    </div>
-
-    <div v-else class="text-center py-16">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p class="text-slate-400">暂无文章</p>
-    </div>
+        <div v-if="!loading && filteredArticles.length === 0" class="text-center py-16">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-slate-400">暂无文章</p>
+        </div>
       </div>
 
-      <SideBar v-once />
+      <SideBar />
     </div>
   </div>
 </template>
@@ -195,146 +199,17 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
-import { syncFromServer } from '../service/syncService'
+import { blogApi } from '../service/api'
 
 const route = useRoute()
 
-const getDateStr = (daysAgo) => {
-  const date = new Date()
-  date.setDate(date.getDate() - daysAgo)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-const defaultArticles = [
-  { id: 1, articleTitle: 'Vue 3 组合式 API 详解', articleSummary: '深入理解 Vue 3 的组合式 API 使用方法', categoryName: '前端', createTime: getDateStr(0), viewCount: 1234, commentCount: 45, tags: [{ id: 1, tagName: 'Vue3' }, { id: 2, tagName: 'JavaScript' }, { id: 11, tagName: '前端' }], articleCover: '' },
-  { id: 2, articleTitle: 'Tailwind CSS 实战技巧', articleSummary: '分享 Tailwind CSS 在项目中的实用技巧', categoryName: '前端', createTime: getDateStr(1), viewCount: 256, commentCount: 20, tags: [{ id: 6, tagName: 'Tailwind' }, { id: 3, tagName: 'CSS' }, { id: 11, tagName: '前端' }], articleCover: '' },
-  { id: 3, articleTitle: 'Node.js Express 入门', articleSummary: '从零开始学习 Node.js Express 框架...', categoryName: '后端', createTime: getDateStr(2), viewCount: 654, commentCount: 28, tags: [{ id: 4, tagName: 'Node.js' }, { id: 5, tagName: 'Express' }], articleCover: '' },
-  { id: 4, articleTitle: '我的前端学习之路', articleSummary: '记录我的前端学习历程与心得体会', categoryName: '学习', createTime: getDateStr(3), viewCount: 456, commentCount: 19, tags: [{ id: 11, tagName: '前端' }, { id: 12, tagName: '学习' }], articleCover: '' },
-  { id: 5, articleTitle: '生活中的小确幸', articleSummary: '记录生活中的美好瞬间', categoryName: '生活', createTime: getDateStr(4), viewCount: 68, commentCount: 2, tags: [{ id: 9, tagName: '生活' }, { id: 10, tagName: '随笔' }], articleCover: '' },
-  { id: 6, articleTitle: 'Vite 构建优化', articleSummary: 'Vite 项目的构建优化实践', categoryName: '前端', createTime: getDateStr(5), viewCount: 192, commentCount: 18, tags: [{ id: 7, tagName: 'Vite' }, { id: 1, tagName: 'Vue3' }], articleCover: '' },
-  { id: 7, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解 React Hooks 使用方法...', categoryName: '前端', createTime: getDateStr(6), viewCount: 780, commentCount: 25, tags: [{ id: 14, tagName: 'React' }, { id: 2, tagName: 'JavaScript' }], articleCover: '' },
-  { id: 8, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享 Node.js 性能优化的实用技巧...', categoryName: '后端', createTime: getDateStr(7), viewCount: 654, commentCount: 28, tags: [{ id: 4, tagName: 'Node.js' }, { id: 17, tagName: 'Redis' }], articleCover: '' },
-  { id: 9, articleTitle: 'Docker 容器化部署指南', articleSummary: '从入门到精通 Docker 容器化部署...', categoryName: '学习', createTime: getDateStr(8), viewCount: 1567, commentCount: 56, tags: [{ id: 13, tagName: 'Docker' }, { id: 22, tagName: 'Nginx' }], articleCover: '' },
-  { id: 10, articleTitle: 'MySQL 索引优化', articleSummary: 'MySQL 索引优化最佳实践', categoryName: '后端', createTime: getDateStr(9), viewCount: 610, commentCount: 22, tags: [{ id: 16, tagName: 'MySQL' }], articleCover: '' },
-  { id: 11, articleTitle: 'Kubernetes 入门到精通', articleSummary: 'Kubernetes 容器编排系统学习', categoryName: '学习', createTime: getDateStr(10), viewCount: 430, commentCount: 15, tags: [{ id: 19, tagName: 'Kubernetes' }, { id: 13, tagName: 'Docker' }], articleCover: '' },
-]
-
-const safeParse = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return fallback
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : fallback
-  } catch (e) {
-    console.warn(`Failed to parse ${key}:`, e.message)
-    return fallback
-  }
-}
-
-const getCommentCount = (articleId) => {
-  const saved = localStorage.getItem(`blog_comments_${articleId}`)
-  if (saved) {
-    try {
-      const comments = JSON.parse(saved)
-      let count = comments.length
-      for (const c of comments) {
-        if (c.replies && Array.isArray(c.replies)) {
-          count += c.replies.length
-        }
-      }
-      return count
-    } catch (e) {
-      return 0
-    }
-  }
-  return 0
-}
-
-const loadLocalArticles = () => {
-  const saved = safeParse('blog_articles', [])
-  const seenTitles = new Map()
-  const seenIds = new Set()
-  const deduped = saved.filter(a => {
-    if (!a) return false
-    const id = a.id
-    const title = (a.articleTitle || a.title || '').trim().toLowerCase()
-    if (!title) return true
-    if (id != null && seenIds.has(id)) return false
-    if (seenTitles.has(title)) {
-      const existing = seenTitles.get(title)
-      if (existing._backendId || (existing.id && existing.id > 1000)) {
-        return false
-      }
-      if (id != null) seenIds.add(id)
-      return false
-    }
-    seenTitles.set(title, a)
-    if (id != null) seenIds.add(id)
-    return true
-  })
-  return deduped.map(a => {
-    const actualCommentCount = getCommentCount(a.id)
-    let tags = []
-    const seenTagNames = new Set()
-    if (Array.isArray(a.tags) && a.tags.length > 0) {
-      a.tags.forEach((t, idx) => {
-        const name = t.tagName || t.name || ''
-        if (name && !seenTagNames.has(name)) {
-          seenTagNames.add(name)
-          tags.push({ id: t.id || idx + 100, tagName: name })
-        }
-      })
-    }
-    if (Array.isArray(a.tagNames) && a.tagNames.length > 0) {
-      a.tagNames.forEach((name, idx) => {
-        if (name && !seenTagNames.has(name)) {
-          seenTagNames.add(name)
-          tags.push({ id: idx + 100, tagName: name })
-        }
-      })
-    }
-    const result = {
-      id: a.id,
-      articleTitle: a.articleTitle || a.title,
-      articleSummary: a.articleSummary || a.summary || '',
-      articleCover: a.articleCover || a.cover || '',
-      categoryName: a.categoryName || (a.category ? a.category.name : '') || '未分类',
-      createTime: a.createTime || a.created_at,
-      viewCount: a.viewCount ?? a.view_count ?? 0,
-      commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
-      tags,
-      tagNames: tags.map(t => t.tagName),
-      _synced: a._synced || false,
-    }
-    return result
-  })
-}
-
-const getAllArticles = () => {
-  const localArticles = loadLocalArticles()
-  if (localArticles.length > 0) {
-    return localArticles.map(a => {
-      const actualCommentCount = getCommentCount(a.id)
-      return {
-        ...a,
-        commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
-      }
-    })
-  }
-  return defaultArticles.map(a => {
-    const actualCommentCount = getCommentCount(a.id)
-    return {
-      ...a,
-      commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
-    }
-  })
-}
-
+const articles = ref([])
 const allArticles = ref([])
 const currentPage = ref(1)
 const pageSize = ref(6)
 const searchKeyword = ref('')
 const debouncedKeyword = ref('')
+const loading = ref(false)
 let searchTimer = null
 
 watch(searchKeyword, (val) => {
@@ -343,6 +218,7 @@ watch(searchKeyword, (val) => {
     debouncedKeyword.value = val
   }, 200)
 })
+
 const selectedCategories = ref([])
 const selectedTags = ref([])
 const sortBy = ref('date-desc')
@@ -376,11 +252,10 @@ const filteredArticles = computed(() => {
   if (keyword) {
     const lowerKeyword = keyword.toLowerCase()
     result = result.filter(a =>
-      a.articleTitle.toLowerCase().includes(lowerKeyword) ||
+      a.articleTitle?.toLowerCase().includes(lowerKeyword) ||
       a.articleSummary?.toLowerCase().includes(lowerKeyword) ||
       a.categoryName?.toLowerCase().includes(lowerKeyword) ||
-      a.tags?.some(t => t.tagName?.toLowerCase().includes(lowerKeyword)) ||
-      a.tagNames?.some(t => t?.toLowerCase().includes(lowerKeyword))
+      a.tags?.some(t => t.tagName?.toLowerCase().includes(lowerKeyword))
     )
   }
 
@@ -393,8 +268,7 @@ const filteredArticles = computed(() => {
     const tags = selectedTags.value
     result = result.filter(a =>
       tags.every(tag =>
-        a.tags?.some(t => t.tagName === tag) ||
-        a.tagNames?.some(t => t === tag)
+        a.tags?.some(t => t.tagName === tag)
       )
     )
   }
@@ -425,7 +299,7 @@ const filteredArticles = computed(() => {
 
 const totalPages = computed(() => Math.ceil(filteredArticles.value.length / pageSize.value))
 
-const articles = computed(() => {
+const pagedArticles = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   return filteredArticles.value.slice(start, start + pageSize.value)
 })
@@ -459,9 +333,28 @@ const clearFilters = () => {
   currentPage.value = 1
 }
 
-const loadArticles = () => {
-  const all = getAllArticles()
-  allArticles.value = all
+const fetchArticles = async () => {
+  loading.value = true
+  try {
+    const backendArticles = await blogApi.getArticles()
+    const mapped = (backendArticles || []).map(a => ({
+      id: a.id,
+      articleTitle: a.title || a.articleTitle || '',
+      articleSummary: a.summary || a.articleSummary || '',
+      categoryName: a.category ? a.category.name : (a.categoryName || '未分类'),
+      createTime: a.created_at || a.createTime,
+      viewCount: a.view_count ?? a.viewCount ?? 0,
+      likeCount: a.like_count ?? a.likeCount ?? 0,
+      commentCount: a.comment_count ?? a.commentCount ?? 0,
+      tags: (a.tags || []).map(t => ({ id: t.id, tagName: t.name || t.tagName || '' })),
+    }))
+    allArticles.value = mapped
+  } catch (e) {
+    console.warn('Failed to fetch articles:', e.message)
+    allArticles.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 const formatDate = (date) => {
@@ -496,8 +389,7 @@ watch([debouncedKeyword, selectedCategories, selectedTags, sortBy], () => {
 })
 
 onMounted(async () => {
-  await syncFromServer()
-  loadArticles()
+  await fetchArticles()
   
   if (route.query.keyword) {
     searchKeyword.value = route.query.keyword
