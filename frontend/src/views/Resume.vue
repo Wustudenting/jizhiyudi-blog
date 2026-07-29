@@ -5,33 +5,33 @@
         <div class="max-w-4xl mx-auto space-y-6">
           <section class="glass-card p-8">
             <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
-              <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-yellow-100 to-amber-200 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-amber-200 to-amber-300 flex items-center justify-center flex-shrink-0 shadow-lg">
                 <svg viewBox="0 0 80 80" class="w-20 h-20" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <radialGradient id="resBodyGrad" cx="40%" cy="40%" r="60%">
-                      <stop offset="0%" stop-color="#FEF9E7"/>
-                      <stop offset="50%" stop-color="#FDE68A"/>
-                      <stop offset="100%" stop-color="#F6C343"/>
+                      <stop offset="0%" stop-color="#FFFBEB"/>
+                      <stop offset="40%" stop-color="#FEF3C7"/>
+                      <stop offset="100%" stop-color="#FCD34D"/>
                     </radialGradient>
                     <radialGradient id="resTailGrad" cx="40%" cy="50%" r="60%">
                       <stop offset="0%" stop-color="#FDE68A"/>
-                      <stop offset="100%" stop-color="#F6B343"/>
+                      <stop offset="100%" stop-color="#F59E0B"/>
                     </radialGradient>
                     <radialGradient id="resBlushGrad" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stop-color="#FCA5A5" stop-opacity="0.7"/>
-                      <stop offset="100%" stop-color="#FCA5A5" stop-opacity="0"/>
+                      <stop offset="0%" stop-color="#F87171" stop-opacity="0.6"/>
+                      <stop offset="100%" stop-color="#F87171" stop-opacity="0"/>
                     </radialGradient>
                   </defs>
-                  <ellipse cx="36" cy="42" rx="22" ry="16" fill="url(#resBodyGrad)" stroke="#E8A628" stroke-width="1.5"/>
-                  <path d="M56 42 Q70 30 74 42 Q70 54 56 42 Q62 42 56 42" fill="url(#resTailGrad)" stroke="#E8A628" stroke-width="1.5"/>
-                  <path d="M58 38 Q64 36 68 40" stroke="#D49520" stroke-width="1" fill="none" opacity="0.4"/>
-                  <ellipse cx="30" cy="38" rx="5.5" ry="6" fill="white" stroke="#E8A628" stroke-width="1.2"/>
-                  <ellipse cx="31.5" cy="39" rx="3" ry="3.5" fill="#2D3748"/>
+                  <ellipse cx="36" cy="42" rx="22" ry="16" fill="url(#resBodyGrad)" stroke="#92400E" stroke-width="2"/>
+                  <path d="M56 42 Q70 30 74 42 Q70 54 56 42 Q62 42 56 42" fill="url(#resTailGrad)" stroke="#92400E" stroke-width="2"/>
+                  <path d="M58 38 Q64 36 68 40" stroke="#78350F" stroke-width="1.2" fill="none" opacity="0.5"/>
+                  <ellipse cx="30" cy="38" rx="5.5" ry="6" fill="white" stroke="#92400E" stroke-width="1.5"/>
+                  <ellipse cx="31.5" cy="39" rx="3" ry="3.5" fill="#1E293B"/>
                   <circle cx="32.5" cy="37.5" r="1.2" fill="white"/>
                   <circle cx="30" cy="40.5" r="0.5" fill="white" opacity="0.6"/>
                   <ellipse cx="20" cy="46" rx="4" ry="2.5" fill="url(#resBlushGrad)"/>
-                  <path d="M26 46 Q30 49 34 46" stroke="#D49520" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                  <ellipse cx="42" cy="42" rx="6" ry="4" fill="white" opacity="0.5"/>
+                  <path d="M26 46 Q30 49 34 46" stroke="#92400E" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                  <ellipse cx="42" cy="42" rx="6" ry="4" fill="white" opacity="0.6"/>
                   <circle cx="62" cy="28" r="3" fill="white" opacity="0.7"/>
                   <circle cx="68" cy="22" r="2" fill="white" opacity="0.5"/>
                   <circle cx="20" cy="28" r="1.5" fill="white" opacity="0.6"/>
@@ -45,14 +45,14 @@
                     {{ currentProfile === 'fullstack' ? 'AI 全栈工程师' : 'AI 前端工程师' }}
                   </span>
                 </div>
-                <p class="text-slate-500 mb-4">{{ currentProfile === 'fullstack' ? '全栈开发工程师 | 精通前后端 + AI 应用' : '前端开发工程师 | 精通 Vue3 + AI 前端应用' }}</p>
+                <p class="text-slate-500 mb-4">{{ currentProfile === 'fullstack' ? 'AI 全栈开发工程师 | 精通前后端 + AI 应用' : 'AI 前端开发工程师 | 精通 Vue3 + AI 前端应用' }}</p>
                 <div class="flex flex-wrap justify-center md:justify-start gap-2">
                   <span v-if="currentProfile === 'fullstack'" class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">前端开发</span>
                   <span v-if="currentProfile === 'fullstack'" class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm">后端开发</span>
                   <span v-if="currentProfile === 'fullstack'" class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-sm">全栈架构</span>
                   <span v-if="currentProfile === 'fullstack'" class="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-sm">AI应用</span>
-                  <span v-if="currentProfile === 'frontend'" class="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm">Vue3专家</span>
-                  <span v-if="currentProfile === 'frontend'" class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">UI/UX设计</span>
+                  <span v-if="currentProfile === 'frontend'" class="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm">Vue3</span>
+                  <span v-if="currentProfile === 'frontend'" class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">JavaScript</span>
                   <span v-if="currentProfile === 'frontend'" class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm">前端工程化</span>
                   <span v-if="currentProfile === 'frontend'" class="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-sm">AI前端</span>
                 </div>

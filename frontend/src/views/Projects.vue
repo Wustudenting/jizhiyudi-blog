@@ -52,6 +52,38 @@ import SideBar from '../components/SideBar.vue'
 const projects = [
   {
     id: 1,
+    title: '机智的鱼博客系统',
+    emoji: '🐟',
+    gradient: 'from-amber-400 to-orange-500',
+    status: '个人博客',
+    statusClass: 'bg-amber-500',
+    description: '基于 Vue3 + Node.js 的前后端分离个人博客系统，支持文章发布、分类标签、评论互动、说说发布等功能，具备数据持久化和响应式设计。',
+    techStack: ['Vue3', 'Vite', 'Tailwind CSS', 'Node.js', 'Express', 'SQLite', 'JavaScript'],
+    highlights: [
+      '实现前后端分离架构，Vue3 组合式 API 开发',
+      '支持文章分类、标签关联、全文检索等功能',
+      '实现评论系统和说说（短博客）发布功能',
+      '响应式设计，支持多端访问，移动端友好'
+    ]
+  },
+  {
+    id: 2,
+    title: '心理健康AI助手',
+    emoji: '🧠',
+    gradient: 'from-green-500 to-teal-500',
+    status: 'AI应用',
+    statusClass: 'bg-green-500',
+    description: '基于大语言模型的心理健康 AI 助手，为用户提供情绪疏导、心理建议和正念冥想引导。致力于降低心理健康服务门槛，让每个人都能随时获得心理支持。',
+    techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'Vue Router', 'SCSS', 'Pinia', 'Axios', 'ECharts', 'Python', 'FastAPI'],
+    highlights: [
+      '集成大语言模型，实现自然流畅的心理咨询对话',
+      '设计了情绪识别算法，实时感知用户情绪变化',
+      '提供多种心理干预工具：呼吸训练、冥想引导、情绪日记',
+      '严格遵循心理咨询伦理，设置专业危机干预机制'
+    ]
+  },
+  {
+    id: 3,
     title: '基于YOLOv10和卷积神经网络的智能补货系统',
     emoji: '📦',
     gradient: 'from-blue-500 to-cyan-500',
@@ -67,7 +99,7 @@ const projects = [
     ]
   },
   {
-    id: 2,
+    id: 4,
     title: '潮风汕韵·智旅三城',
     emoji: '🏛️',
     gradient: 'from-purple-500 to-pink-500',
@@ -83,7 +115,7 @@ const projects = [
     ]
   },
   {
-    id: 3,
+    id: 5,
     title: '鲜兔城',
     emoji: '🐰',
     gradient: 'from-orange-400 to-red-500',
@@ -96,22 +128,6 @@ const projects = [
       '实现了基于位置的智能配送调度',
       '搭建了完整的电商后端服务，包括订单、支付、物流',
       '优化了移动端用户体验，加载速度提升 50%'
-    ]
-  },
-  {
-    id: 4,
-    title: '心理健康AI助手',
-    emoji: '🧠',
-    gradient: 'from-green-500 to-teal-500',
-    status: 'AI应用',
-    statusClass: 'bg-green-500',
-    description: '基于大语言模型的心理健康 AI 助手，为用户提供情绪疏导、心理建议和正念冥想引导。致力于降低心理健康服务门槛，让每个人都能随时获得心理支持。',
-    techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'Vue Router', 'SCSS', 'Pinia', 'Axios', 'ECharts', 'Python', 'FastAPI'],
-    highlights: [
-      '集成大语言模型，实现自然流畅的心理咨询对话',
-      '设计了情绪识别算法，实时感知用户情绪变化',
-      '提供多种心理干预工具：呼吸训练、冥想引导、情绪日记',
-      '严格遵循心理咨询伦理，设置专业危机干预机制'
     ]
   }
 ]
