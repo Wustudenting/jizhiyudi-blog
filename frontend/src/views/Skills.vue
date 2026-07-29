@@ -141,7 +141,7 @@
                   <p class="text-xs text-white/70">项目经验</p>
                 </div>
                 <div class="bg-white/15 backdrop-blur-sm rounded-lg py-2">
-                  <p class="text-lg font-bold">3+</p>
+                  <p class="text-lg font-bold">1</p>
                   <p class="text-xs text-white/70">年经验</p>
                 </div>
               </div>

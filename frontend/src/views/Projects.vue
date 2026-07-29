@@ -1,54 +1,60 @@
 <template>
   <div class="pt-24">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-2">
-        <div class="max-w-4xl mx-auto">
-          <div class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-800 mb-2">项目经历</h1>
-            <p class="text-slate-500">以下是我参与或主导开发的一些项目</p>
-          </div>
-
-          <div class="space-y-6">
-            <article v-for="project in projects" :key="project.id" class="glass-card p-6 hover:shadow-lg transition-shadow">
-              <div class="flex flex-col md:flex-row gap-6">
-                <div class="w-full md:w-48 h-32 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0" :class="project.gradient">
-                  <span class="text-4xl">{{ project.emoji }}</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
-                    <h2 class="text-xl font-bold text-slate-800">{{ project.title }}</h2>
-                    <span class="px-2 py-1 rounded text-xs text-white" :class="project.statusClass">{{ project.status }}</span>
-                  </div>
-                  <p class="text-slate-600 text-sm mb-4 leading-relaxed">{{ project.description }}</p>
-                  <div class="flex flex-wrap gap-2 mb-4">
-                    <span v-for="tech in project.techStack" :key="tech" class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded">
-                      {{ tech }}
-                    </span>
-                  </div>
-                  <div v-if="project.highlights" class="border-t border-slate-100 pt-4">
-                    <p class="text-xs text-slate-500 mb-2 font-medium">✨ 项目亮点</p>
-                    <ul class="text-sm text-slate-600 space-y-1">
-                      <li v-for="(highlight, idx) in project.highlights" :key="idx" class="flex items-start">
-                        <span class="text-indigo-500 mr-2">•</span>
-                        <span>{{ highlight }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </div>
+    <div class="max-w-6xl mx-auto px-4 pb-12">
+      <div class="mb-10 text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+          <span class="text-3xl">🚀</span>
+          <h1 class="text-3xl font-bold text-slate-800">项目经历</h1>
         </div>
+        <p class="text-slate-500">以下是我参与或主导开发的一些项目 · 点击卡片查看详情</p>
       </div>
 
-      <SideBar />
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <router-link
+          v-for="project in projects"
+          :key="project.id"
+          :to="`/projects/${project.id}`"
+          class="group relative bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+        >
+          <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br opacity-5 rounded-full blur-xl -translate-y-6 translate-x-6" :class="project.gradient"></div>
+
+          <div class="relative">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-4 shadow-sm border border-amber-100">
+              <span class="text-2xl">{{ project.emoji }}</span>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-800 mb-1.5 line-clamp-1">{{ project.title }}</h3>
+
+            <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-4">
+              {{ project.description }}
+            </p>
+
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span v-for="tech in project.techStack.slice(0, 3)" :key="tech" class="px-2 py-0.5 bg-slate-50 text-slate-500 rounded text-xs border border-slate-100">
+                {{ tech }}
+              </span>
+              <span v-if="project.techStack.length > 3" class="px-2 py-0.5 bg-slate-50 text-slate-400 rounded text-xs border border-slate-100">
+                +{{ project.techStack.length - 3 }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <span class="px-2.5 py-0.5 rounded-full text-xs text-white" :class="project.statusClass">{{ project.status }}</span>
+              <span class="text-xs text-indigo-500 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                查看项目详情
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import SideBar from '../components/SideBar.vue'
-
 const projects = [
   {
     id: 1,
@@ -57,13 +63,14 @@ const projects = [
     gradient: 'from-amber-400 to-orange-500',
     status: '个人博客',
     statusClass: 'bg-amber-500',
-    description: '基于 Vue3 + Node.js 的前后端分离个人博客系统，支持文章发布、分类标签、评论互动、说说发布等功能，具备数据持久化和响应式设计。',
+    description: '基于 Vue3 + Node.js 的前后端分离个人博客系统，支持文章发布、分类标签、评论互动、说说发布等功能',
     techStack: ['Vue3', 'Vite', 'Tailwind CSS', 'Node.js', 'Express', 'SQLite', 'JavaScript'],
     highlights: [
-      '实现前后端分离架构，Vue3 组合式 API 开发',
+      'Vue3 组合式 API + Vite 构建，开发体验流畅',
       '支持文章分类、标签关联、全文检索等功能',
       '实现评论系统和说说（短博客）发布功能',
-      '响应式设计，支持多端访问，移动端友好'
+      '本地持久化 + 后端同步，数据安全可靠',
+      'Tailwind CSS 响应式设计，界面美观现代'
     ]
   },
   {
@@ -73,8 +80,8 @@ const projects = [
     gradient: 'from-green-500 to-teal-500',
     status: 'AI应用',
     statusClass: 'bg-green-500',
-    description: '基于大语言模型的心理健康 AI 助手，为用户提供情绪疏导、心理建议和正念冥想引导。致力于降低心理健康服务门槛，让每个人都能随时获得心理支持。',
-    techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'Vue Router', 'SCSS', 'Pinia', 'Axios', 'ECharts', 'Python', 'FastAPI'],
+    description: '基于大语言模型的心理健康 AI 助手，提供情绪疏导与正念冥想引导',
+    techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'Vue Router', 'Pinia', 'Axios', 'ECharts', 'Python', 'FastAPI'],
     highlights: [
       '集成大语言模型，实现自然流畅的心理咨询对话',
       '设计了情绪识别算法，实时感知用户情绪变化',
@@ -84,12 +91,12 @@ const projects = [
   },
   {
     id: 3,
-    title: '基于YOLOv10和卷积神经网络的智能补货系统',
+    title: '基于YOLOv10的智能补货系统',
     emoji: '📦',
     gradient: 'from-blue-500 to-cyan-500',
     status: '大创项目',
     statusClass: 'bg-blue-500',
-    description: '基于 YOLOv10 目标检测算法和卷积神经网络，开发的智能零售补货系统。通过摄像头实时识别商品货架状态，自动检测缺货商品并生成补货订单，有效提升零售门店的运营效率。',
+    description: '基于 YOLOv10 目标检测和卷积神经网络的智能零售补货系统',
     techStack: ['Python', 'YOLOv10', 'PyTorch', 'OpenCV', 'Vue3', 'Spring Boot', 'MySQL'],
     highlights: [
       '使用 YOLOv10 实现商品检测，准确率达到 95% 以上',
@@ -105,7 +112,7 @@ const projects = [
     gradient: 'from-purple-500 to-pink-500',
     status: '文旅项目',
     statusClass: 'bg-purple-500',
-    description: '融合潮汕文化与智慧旅游的创新项目，通过数字化技术展现潮汕地区的历史文化魅力。为游客提供个性化的旅游路线推荐、文化景点讲解和互动体验。',
+    description: '融合潮汕文化与智慧旅游的创新项目，数字化展现潮汕文化魅力',
     techStack: ['Vue3', 'Element Plus', 'Vite', 'Node.js', 'MySQL', 'Redis', 'Vue Router', 'Pinia', 'Axios', 'ECharts'],
     highlights: [
       '整理并数字化潮汕三市的文化景点和历史资料',
@@ -121,8 +128,8 @@ const projects = [
     gradient: 'from-orange-400 to-red-500',
     status: '电商项目',
     statusClass: 'bg-orange-500',
-    description: '面向年轻用户的生鲜电商平台，提供新鲜、优质、便捷的购物体验。支持线上下单、线下自提和快速配送，打造社区新零售模式。',
-    techStack: ['Java', 'SSM', 'Spring Boot', 'MySQL', 'Navicat11', 'Vue3', 'HTML', 'CSS', 'JavaScript'],
+    description: '面向年轻用户的生鲜电商平台，支持线上下单、线下自提和快速配送',
+    techStack: ['Java', 'SSM', 'Spring Boot', 'MySQL', 'Vue3', 'HTML', 'CSS', 'JavaScript'],
     highlights: [
       '设计了高并发的商品秒杀系统',
       '实现了基于位置的智能配送调度',

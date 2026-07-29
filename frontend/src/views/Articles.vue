@@ -3,7 +3,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
       <div>
         <h1 class="text-3xl font-bold text-slate-800">文章列表</h1>
-        <p class="text-slate-400 mt-2">共 {{ total }} 篇文章</p>
+        <p class="text-slate-400 mt-2">共 {{ filteredArticles.length }} 篇文章</p>
       </div>
       <div class="mt-4 md:mt-0 flex items-center space-x-3">
         <div class="relative">
@@ -97,9 +97,6 @@
         <router-link to="/tags" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-400 to-pink-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <span>🏷️</span> 全部标签
         </router-link>
-        <router-link to="/archives" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-400 to-emerald-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-          <span>📚</span> 文章归档
-        </router-link>
       </div>
     </div>
 
@@ -167,7 +164,7 @@
       </div>
     </div>
 
-    <div v-if="total > 0" class="flex justify-center mt-8">
+    <div v-if="filteredArticles.length > 0" class="flex justify-center mt-8">
       <div class="flex items-center space-x-4">
         <button 
           @click="prevPage" 
@@ -195,16 +192,15 @@
     </div>
       </div>
 
-      <SideBar />
+      <SideBar v-once />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
-import { syncFromServer } from '../service/syncService'
 
 const route = useRoute()
 
@@ -284,15 +280,25 @@ const loadLocalArticles = () => {
   return deduped.map(a => {
     const actualCommentCount = getCommentCount(a.id)
     let tags = []
+    const seenTagNames = new Set()
     if (Array.isArray(a.tags) && a.tags.length > 0) {
-      tags = a.tags.map((t, idx) => ({
-        id: t.id || idx + 100,
-        tagName: t.tagName || t.name || ''
-      })).filter(t => t.tagName)
-    } else if (Array.isArray(a.tagNames) && a.tagNames.length > 0) {
-      tags = a.tagNames.map((name, idx) => ({ id: idx + 100, tagName: name }))
+      a.tags.forEach((t, idx) => {
+        const name = t.tagName || t.name || ''
+        if (name && !seenTagNames.has(name)) {
+          seenTagNames.add(name)
+          tags.push({ id: t.id || idx + 100, tagName: name })
+        }
+      })
     }
-    return {
+    if (Array.isArray(a.tagNames) && a.tagNames.length > 0) {
+      a.tagNames.forEach((name, idx) => {
+        if (name && !seenTagNames.has(name)) {
+          seenTagNames.add(name)
+          tags.push({ id: idx + 100, tagName: name })
+        }
+      })
+    }
+    const result = {
       id: a.id,
       articleTitle: a.articleTitle || a.title,
       articleSummary: a.articleSummary || a.summary || '',
@@ -302,8 +308,10 @@ const loadLocalArticles = () => {
       viewCount: a.viewCount ?? a.view_count ?? 0,
       commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
       tags,
+      tagNames: tags.map(t => t.tagName),
       _synced: a._synced || false,
     }
+    return result
   })
 }
 
@@ -328,10 +336,18 @@ const getAllArticles = () => {
 }
 
 const allArticles = ref([])
-const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(6)
 const searchKeyword = ref('')
+const debouncedKeyword = ref('')
+let searchTimer = null
+
+watch(searchKeyword, (val) => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    debouncedKeyword.value = val
+  }, 200)
+})
 const selectedCategories = ref([])
 const selectedTags = ref([])
 const sortBy = ref('date-desc')
@@ -359,25 +375,32 @@ const hasActiveFilters = computed(() => {
 })
 
 const filteredArticles = computed(() => {
-  let result = [...allArticles.value]
+  let result = allArticles.value
 
-  if (searchKeyword.value.trim()) {
-    const keyword = searchKeyword.value.toLowerCase()
+  const keyword = debouncedKeyword.value.trim()
+  if (keyword) {
+    const lowerKeyword = keyword.toLowerCase()
     result = result.filter(a =>
-      a.articleTitle.toLowerCase().includes(keyword) ||
-      a.articleSummary?.toLowerCase().includes(keyword) ||
-      a.categoryName?.toLowerCase().includes(keyword) ||
-      a.tags?.some(t => t.tagName?.toLowerCase().includes(keyword))
+      a.articleTitle.toLowerCase().includes(lowerKeyword) ||
+      a.articleSummary?.toLowerCase().includes(lowerKeyword) ||
+      a.categoryName?.toLowerCase().includes(lowerKeyword) ||
+      a.tags?.some(t => t.tagName?.toLowerCase().includes(lowerKeyword)) ||
+      a.tagNames?.some(t => t?.toLowerCase().includes(lowerKeyword))
     )
   }
 
   if (selectedCategories.value.length > 0) {
-    result = result.filter(a => selectedCategories.value.includes(a.categoryName))
+    const cats = selectedCategories.value
+    result = result.filter(a => cats.includes(a.categoryName))
   }
 
   if (selectedTags.value.length > 0) {
+    const tags = selectedTags.value
     result = result.filter(a =>
-      selectedTags.value.every(tag => a.tags?.some(t => t.tagName === tag))
+      tags.every(tag =>
+        a.tags?.some(t => t.tagName === tag) ||
+        a.tagNames?.some(t => t === tag)
+      )
     )
   }
 
@@ -405,7 +428,7 @@ const filteredArticles = computed(() => {
   return result
 })
 
-const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+const totalPages = computed(() => Math.ceil(filteredArticles.value.length / pageSize.value))
 
 const articles = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -420,7 +443,6 @@ const toggleCategory = (cat) => {
     selectedCategories.value.push(cat)
   }
   currentPage.value = 1
-  updateFiltered()
 }
 
 const toggleTag = (tag) => {
@@ -431,20 +453,20 @@ const toggleTag = (tag) => {
     selectedTags.value.push(tag)
   }
   currentPage.value = 1
-  updateFiltered()
 }
 
 const clearFilters = () => {
   selectedCategories.value = []
   selectedTags.value = []
   searchKeyword.value = ''
+  debouncedKeyword.value = ''
   sortBy.value = 'date-desc'
   currentPage.value = 1
-  updateFiltered()
 }
 
-const updateFiltered = () => {
-  total.value = filteredArticles.value.length
+const loadArticles = () => {
+  const all = getAllArticles()
+  allArticles.value = all
 }
 
 const formatDate = (date) => {
@@ -453,15 +475,13 @@ const formatDate = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-const loadArticles = () => {
-  const all = getAllArticles()
-  allArticles.value = all
-  updateFiltered()
-}
-
 const handleSearch = () => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+  debouncedKeyword.value = searchKeyword.value
   currentPage.value = 1
-  updateFiltered()
 }
 
 const prevPage = () => {
@@ -476,18 +496,16 @@ const nextPage = () => {
   }
 }
 
+watch([debouncedKeyword, selectedCategories, selectedTags, sortBy], () => {
+  currentPage.value = 1
+})
+
 onMounted(async () => {
   loadArticles()
   
   if (route.query.keyword) {
     searchKeyword.value = route.query.keyword
-  }
-  
-  try {
-    await syncFromServer()
-    loadArticles()
-  } catch (e) {
-    console.warn('Sync failed, using local data:', e.message)
+    debouncedKeyword.value = route.query.keyword
   }
 })
 </script>

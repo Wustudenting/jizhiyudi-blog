@@ -4,27 +4,30 @@
       <div class="flex items-center justify-between h-16">
         <router-link to="/" class="flex items-center space-x-2 group flex-shrink-0">
           <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-200 to-amber-300 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-            <svg viewBox="0 0 80 80" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 120 120" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <radialGradient id="navBodyGrad" cx="40%" cy="40%" r="60%">
-                  <stop offset="0%" stop-color="#FFFBEB"/>
-                  <stop offset="40%" stop-color="#FEF3C7"/>
-                  <stop offset="100%" stop-color="#FCD34D"/>
-                </radialGradient>
-                <radialGradient id="navTailGrad" cx="40%" cy="50%" r="60%">
-                  <stop offset="0%" stop-color="#FDE68A"/>
+                <linearGradient id="navBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FEF08A"/>
+                  <stop offset="50%" stop-color="#FCD34D"/>
                   <stop offset="100%" stop-color="#F59E0B"/>
-                </radialGradient>
+                </linearGradient>
+                <linearGradient id="navFinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FDE68A"/>
+                  <stop offset="100%" stop-color="#D97706"/>
+                </linearGradient>
               </defs>
-              <ellipse cx="36" cy="42" rx="22" ry="16" fill="url(#navBodyGrad)" stroke="#92400E" stroke-width="2"/>
-              <path d="M56 42 Q70 30 74 42 Q70 54 56 42 Q62 42 56 42" fill="url(#navTailGrad)" stroke="#92400E" stroke-width="2"/>
-              <ellipse cx="30" cy="38" rx="5.5" ry="6" fill="white" stroke="#92400E" stroke-width="1.5"/>
-              <ellipse cx="31.5" cy="39" rx="3" ry="3.5" fill="#1E293B"/>
-              <circle cx="32.5" cy="37.5" r="1.2" fill="white"/>
-              <ellipse cx="20" cy="46" rx="4" ry="2.5" fill="#F87171" opacity="0.4"/>
-              <path d="M26 46 Q30 49 34 46" stroke="#92400E" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-              <circle cx="62" cy="28" r="2.5" fill="white" opacity="0.6"/>
-              <circle cx="68" cy="22" r="1.8" fill="white" opacity="0.4"/>
+              <ellipse cx="50" cy="62" rx="32" ry="26" fill="url(#navBodyGrad)"/>
+              <ellipse cx="50" cy="70" rx="22" ry="14" fill="#FFFBEB" opacity="0.8"/>
+              <path d="M82 62 Q106 40 110 62 Q106 84 82 62" fill="url(#navFinGrad)"/>
+              <path d="M82 62 Q92 56 100 62 Q92 68 82 62" fill="#F59E0B" opacity="0.5"/>
+              <ellipse cx="38" cy="52" rx="11" ry="12" fill="white"/>
+              <ellipse cx="40" cy="54" rx="7" ry="8" fill="#1F2937"/>
+              <ellipse cx="42" cy="51" rx="3" ry="3.5" fill="white"/>
+              <circle cx="36" cy="57" r="1.5" fill="white" opacity="0.6"/>
+              <ellipse cx="24" cy="68" rx="7" ry="4" fill="#FB7185" opacity="0.3"/>
+              <path d="M36 74 Q42 80 48 74" stroke="#92400E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <circle cx="100" cy="30" r="4" fill="white" opacity="0.6"/>
+              <circle cx="22" cy="36" r="2" fill="white" opacity="0.5"/>
             </svg>
           </div>
           <span class="text-xl font-bold text-slate-800">机智的鱼</span>

@@ -8,12 +8,12 @@ import Tags from '../views/Tags.vue'
 import TagDetail from '../views/TagDetail.vue'
 import Talks from '../views/Talks.vue'
 import TalkDetail from '../views/TalkDetail.vue'
-import Archives from '../views/Archives.vue'
 import About from '../views/About.vue'
 import Links from '../views/Links.vue'
 import AddArticle from '../views/AddArticle.vue'
 import Resume from '../views/Resume.vue'
 import Projects from '../views/Projects.vue'
+import ProjectDetail from '../views/ProjectDetail.vue'
 import Skills from '../views/Skills.vue'
 
 const routes = [
@@ -68,11 +68,6 @@ const routes = [
     component: TalkDetail,
   },
   {
-    path: '/archives',
-    name: 'Archives',
-    component: Archives,
-  },
-  {
     path: '/resume',
     name: 'Resume',
     component: Resume,
@@ -81,6 +76,11 @@ const routes = [
     path: '/projects',
     name: 'Projects',
     component: Projects,
+  },
+  {
+    path: '/projects/:id',
+    name: 'ProjectDetail',
+    component: ProjectDetail,
   },
   {
     path: '/skills',

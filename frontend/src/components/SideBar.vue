@@ -5,36 +5,48 @@
         <div class="avatar-container w-24 h-24 mx-auto mb-4">
           <div class="avatar-ring"></div>
           <div class="avatar-inner">
-            <svg viewBox="0 0 80 80" class="w-14 h-14 fish-swim" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 120 120" class="w-16 h-16 fish-swim" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <radialGradient id="bodyGrad" cx="40%" cy="40%" r="60%">
-                  <stop offset="0%" stop-color="#FFFBEB"/>
-                  <stop offset="40%" stop-color="#FEF3C7"/>
-                  <stop offset="100%" stop-color="#FCD34D"/>
-                </radialGradient>
-                <radialGradient id="tailGrad" cx="40%" cy="50%" r="60%">
-                  <stop offset="0%" stop-color="#FDE68A"/>
+                <filter id="sideShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#F59E0B" flood-opacity="0.25"/>
+                </filter>
+                <linearGradient id="sideBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FEF08A"/>
+                  <stop offset="50%" stop-color="#FCD34D"/>
                   <stop offset="100%" stop-color="#F59E0B"/>
+                </linearGradient>
+                <linearGradient id="sideFinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FDE68A"/>
+                  <stop offset="100%" stop-color="#D97706"/>
+                </linearGradient>
+                <radialGradient id="sideEyeGrad" cx="40%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="#FFFFFF"/>
+                  <stop offset="100%" stop-color="#F3F4F6"/>
                 </radialGradient>
-                <radialGradient id="blushGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#F87171" stop-opacity="0.6"/>
-                  <stop offset="100%" stop-color="#F87171" stop-opacity="0"/>
+                <radialGradient id="sideBlushGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#FB7185" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#FB7185" stop-opacity="0"/>
                 </radialGradient>
               </defs>
-              <ellipse cx="36" cy="42" rx="22" ry="16" fill="url(#bodyGrad)" stroke="#92400E" stroke-width="2"/>
-              <path d="M56 42 Q70 30 74 42 Q70 54 56 42 Q62 42 56 42" fill="url(#tailGrad)" stroke="#92400E" stroke-width="2"/>
-              <path d="M58 38 Q64 36 68 40" stroke="#78350F" stroke-width="1.2" fill="none" opacity="0.5"/>
-              <ellipse cx="30" cy="38" rx="5.5" ry="6" fill="white" stroke="#92400E" stroke-width="1.5"/>
-              <ellipse cx="31.5" cy="39" rx="3" ry="3.5" fill="#1E293B"/>
-              <circle cx="32.5" cy="37.5" r="1.2" fill="white"/>
-              <circle cx="30" cy="40.5" r="0.5" fill="white" opacity="0.6"/>
-              <ellipse cx="20" cy="46" rx="4" ry="2.5" fill="url(#blushGrad)"/>
-              <path d="M26 46 Q30 49 34 46" stroke="#92400E" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-              <ellipse cx="42" cy="42" rx="6" ry="4" fill="white" opacity="0.6"/>
-              <circle cx="62" cy="28" r="3" fill="white" opacity="0.7" class="bubble-1"/>
-              <circle cx="68" cy="22" r="2" fill="white" opacity="0.5" class="bubble-2"/>
-              <circle cx="20" cy="28" r="1.5" fill="white" opacity="0.6"/>
-              <circle cx="48" cy="58" r="1" fill="white" opacity="0.4"/>
+              <g filter="url(#sideShadow)">
+                <ellipse cx="50" cy="62" rx="32" ry="26" fill="url(#sideBodyGrad)"/>
+                <ellipse cx="50" cy="70" rx="22" ry="14" fill="#FFFBEB" opacity="0.8"/>
+                <path d="M82 62 Q106 40 110 62 Q106 84 82 62" fill="url(#sideFinGrad)"/>
+                <path d="M82 62 Q92 56 100 62 Q92 68 82 62" fill="#F59E0B" opacity="0.5"/>
+                <path d="M72 50 Q86 34 94 50" stroke="#D97706" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.3"/>
+                <ellipse cx="38" cy="52" rx="11" ry="12" fill="url(#sideEyeGrad)"/>
+                <ellipse cx="40" cy="54" rx="7" ry="8" fill="#1F2937"/>
+                <ellipse cx="42" cy="51" rx="3" ry="3.5" fill="white"/>
+                <circle cx="36" cy="57" r="1.5" fill="white" opacity="0.6"/>
+                <ellipse cx="24" cy="68" rx="7" ry="4" fill="url(#sideBlushGrad)"/>
+                <path d="M36 74 Q42 80 48 74" stroke="#92400E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M44 46 Q50 38 56 46" stroke="#D97706" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.35"/>
+                <ellipse cx="58" cy="62" rx="5" ry="4" fill="#F59E0B" opacity="0.25"/>
+              </g>
+              <circle cx="100" cy="30" r="5" fill="white" opacity="0.7" class="bubble-1"/>
+              <circle cx="110" cy="18" r="3.5" fill="white" opacity="0.5" class="bubble-2"/>
+              <circle cx="22" cy="36" r="2.5" fill="white" opacity="0.6"/>
+              <circle cx="68" cy="96" r="2.5" fill="white" opacity="0.4"/>
             </svg>
           </div>
         </div>
@@ -262,12 +274,12 @@ const formatDate = (date) => {
   width: 80%;
   height: 80%;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
   display: flex;
   align-items: center;
   justify-content: center;
   animation: avatar-breath 2s ease-in-out infinite;
-  box-shadow: inset 0 2px 8px rgba(180, 83, 9, 0.15);
+  box-shadow: inset 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
 .avatar-fish {

@@ -85,7 +85,49 @@
             <div class="avatar-container w-24 h-24 mx-auto mb-4">
               <div class="avatar-ring"></div>
               <div class="avatar-inner">
-                <span class="avatar-fish">🐟</span>
+                <svg viewBox="0 0 120 120" class="w-16 h-16 fish-swim" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <filter id="homeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#F59E0B" flood-opacity="0.25"/>
+                    </filter>
+                    <linearGradient id="homeBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FEF08A"/>
+                      <stop offset="50%" stop-color="#FCD34D"/>
+                      <stop offset="100%" stop-color="#F59E0B"/>
+                    </linearGradient>
+                    <linearGradient id="homeFinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FDE68A"/>
+                      <stop offset="100%" stop-color="#D97706"/>
+                    </linearGradient>
+                    <radialGradient id="homeEyeGrad" cx="40%" cy="40%" r="60%">
+                      <stop offset="0%" stop-color="#FFFFFF"/>
+                      <stop offset="100%" stop-color="#F3F4F6"/>
+                    </radialGradient>
+                    <radialGradient id="homeBlushGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#FB7185" stop-opacity="0.4"/>
+                      <stop offset="100%" stop-color="#FB7185" stop-opacity="0"/>
+                    </radialGradient>
+                  </defs>
+                  <g filter="url(#homeShadow)">
+                    <ellipse cx="50" cy="62" rx="32" ry="26" fill="url(#homeBodyGrad)"/>
+                    <ellipse cx="50" cy="70" rx="22" ry="14" fill="#FFFBEB" opacity="0.8"/>
+                    <path d="M82 62 Q106 40 110 62 Q106 84 82 62" fill="url(#homeFinGrad)"/>
+                    <path d="M82 62 Q92 56 100 62 Q92 68 82 62" fill="#F59E0B" opacity="0.5"/>
+                    <path d="M72 50 Q86 34 94 50" stroke="#D97706" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.3"/>
+                    <ellipse cx="38" cy="52" rx="11" ry="12" fill="url(#homeEyeGrad)"/>
+                    <ellipse cx="40" cy="54" rx="7" ry="8" fill="#1F2937"/>
+                    <ellipse cx="42" cy="51" rx="3" ry="3.5" fill="white"/>
+                    <circle cx="36" cy="57" r="1.5" fill="white" opacity="0.6"/>
+                    <ellipse cx="24" cy="68" rx="7" ry="4" fill="url(#homeBlushGrad)"/>
+                    <path d="M36 74 Q42 80 48 74" stroke="#92400E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <path d="M44 46 Q50 38 56 46" stroke="#D97706" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.35"/>
+                    <ellipse cx="58" cy="62" rx="5" ry="4" fill="#F59E0B" opacity="0.25"/>
+                  </g>
+                  <circle cx="100" cy="30" r="5" fill="white" opacity="0.7" class="bubble-1"/>
+                  <circle cx="110" cy="18" r="3.5" fill="white" opacity="0.5" class="bubble-2"/>
+                  <circle cx="22" cy="36" r="2.5" fill="white" opacity="0.6"/>
+                  <circle cx="68" cy="96" r="2.5" fill="white" opacity="0.4"/>
+                </svg>
               </div>
             </div>
             <h3 class="text-xl font-bold text-slate-800 mb-1">机智的鱼</h3>
@@ -480,7 +522,7 @@ onMounted(async () => {
   height: 100%;
   border-radius: 50%;
   border: 3px solid transparent;
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6) border-box;
+  background: linear-gradient(45deg, #F59E0B, #D97706, #B45309, #F59E0B) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -491,17 +533,25 @@ onMounted(async () => {
   width: 80%;
   height: 80%;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
   display: flex;
   align-items: center;
   justify-content: center;
   animation: avatar-breath 2s ease-in-out infinite;
+  box-shadow: inset 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
-.avatar-fish {
-  font-size: 2.5rem;
+.fish-swim {
   animation: fish-swim 3s ease-in-out infinite;
   display: inline-block;
+}
+
+.bubble-1 {
+  animation: bubble-float 2.5s ease-in-out infinite;
+}
+
+.bubble-2 {
+  animation: bubble-float 3s ease-in-out infinite 0.5s;
 }
 
 @keyframes ring-rotate {
@@ -515,17 +565,14 @@ onMounted(async () => {
 }
 
 @keyframes fish-swim {
-  0%, 100% { 
-    transform: rotate(0deg) translateY(0); 
-  }
-  25% { 
-    transform: rotate(-10deg) translateY(-5px); 
-  }
-  50% { 
-    transform: rotate(0deg) translateY(0); 
-  }
-  75% { 
-    transform: rotate(10deg) translateY(-5px); 
-  }
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-6deg) translateY(-3px); }
+  50% { transform: rotate(0deg) translateY(0); }
+  75% { transform: rotate(6deg) translateY(-3px); }
+}
+
+@keyframes bubble-float {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-3px); opacity: 0.9; }
 }
 </style>

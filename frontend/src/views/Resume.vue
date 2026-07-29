@@ -91,8 +91,9 @@
                   我热衷于探索新技术，享受将想法变为现实的过程，尤其擅长将 AI 技术与全栈开发相结合。
                 </p>
                 <p>
-                  在前端领域，我精通 Vue3 框架，熟悉现代前端工程化体系；在后端方面，我熟练掌握 Node.js 和 Java，
-                  能够独立完成从设计到部署的全流程开发，同时具备 AI 应用开发能力。
+                  我独立设计并开发了<span class="font-semibold text-indigo-500">机智的鱼博客系统</span>，
+                  采用 Vue3 + Node.js + SQLite 全栈技术架构，支持文章管理、标签分类、评论互动、说说发布等完整功能，
+                  同时具备本地持久化与后端数据同步能力。
                 </p>
                 <p>
                   我关注大语言模型、机器学习在实际业务中的应用，致力于打造智能化的产品。
@@ -105,8 +106,9 @@
                   我专精于 Vue3 生态，注重用户体验和交互设计，同时积极探索 AI 技术在前端的应用。
                 </p>
                 <p>
-                  我精通 Vue3、TypeScript、Tailwind CSS 等现代前端技术栈，熟悉 Vite、Webpack 等工程化工具，
-                  能够独立完成复杂的前端架构设计和组件开发，同时具备 AI 前端应用开发能力。
+                  我独立开发了<span class="font-semibold text-pink-500">机智的鱼博客系统</span>的前端部分，
+                  使用 Vue3 组合式 API + Vite 构建，Tailwind CSS 实现响应式设计，支持文章发布、标签筛选、搜索等核心功能，
+                  注重组件化架构和性能优化。
                 </p>
                 <p>
                   我关注 AI 在前端的落地应用，如智能组件生成、代码辅助、AI 驱动的用户界面等。
@@ -149,14 +151,16 @@
                 <p class="text-slate-500 text-sm mb-2">机智的鱼工作室</p>
                 <ul class="text-slate-600 text-sm space-y-1 list-disc list-inside">
                   <template v-if="currentProfile === 'fullstack'">
-                    <li>独立设计并开发了多个 AI 全栈 Web 应用项目</li>
-                    <li>负责系统架构设计、数据库设计、API 开发和前后端实现</li>
-                    <li>使用 Vue3 + Node.js + AI 技术栈，构建智能化应用</li>
+                    <li>独立设计并开发了机智的鱼博客系统，完整覆盖前后端开发</li>
+                    <li>使用 Vue3 + Node.js + Express + SQLite 技术栈，构建全栈应用</li>
+                    <li>实现文章管理、标签分类、评论互动、说说发布、数据同步等核心功能</li>
+                    <li>采用 Tailwind CSS 实现响应式设计，支持多端访问</li>
                   </template>
                   <template v-else>
-                    <li>独立负责多个 AI 前端应用的开发与架构设计</li>
-                    <li>负责 Vue3 组件库开发、性能优化、用户体验提升</li>
-                    <li>使用 Vue3 + TypeScript + AI 技术，构建智能前端应用</li>
+                    <li>独立负责机智的鱼博客系统前端开发与架构设计</li>
+                    <li>使用 Vue3 组合式 API + Vite 构建，Tailwind CSS 实现 UI</li>
+                    <li>实现文章列表、搜索筛选、标签导航、评论交互等前端功能</li>
+                    <li>注重组件化设计和用户体验优化</li>
                   </template>
                 </ul>
               </div>

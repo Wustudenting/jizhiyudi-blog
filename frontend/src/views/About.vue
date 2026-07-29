@@ -72,10 +72,10 @@ import SideBar from '../components/SideBar.vue'
 import { blogApi } from '../service/api'
 
 const mockAbout = {
-  aboutContent: '<p>欢迎来到我的个人博客！我是一名热爱技术的开发者，专注于前端和后端技术的学习与实践。</p><h2>技术栈</h2><ul><li>前端：Vue3、JavaScript、Tailwind CSS、Vite</li><li>后端：Node.js、Express、SQLite</li><li>其他：Git</li></ul><h2>关于博客</h2><p>这个博客是我记录技术成长、分享生活感悟的地方。希望通过分享，能够帮助到更多的开发者，同时也督促自己不断学习和进步。</p>',
+  aboutContent: '<p>欢迎来到 <strong>机智的鱼</strong> 个人博客！这是一个基于 Vue3 + Node.js 全栈技术打造的个人博客系统，记录技术学习与生活感悟。</p><h2>技术栈</h2><ul><li><strong>前端：</strong>Vue3、JavaScript、Tailwind CSS、Vite</li><li><strong>后端：</strong>Node.js、Express、SQLite</li><li><strong>其他：</strong>Git、Docker、Nginx</li></ul><h2>项目特点</h2><ul><li>✨ Vue3 组合式 API + Vite 构建，开发体验流畅</li><li>🎨 Tailwind CSS 响应式设计，界面美观现代</li><li>📝 完整的文章管理、标签分类、评论互动功能</li><li>💾 本地持久化 + 后端同步，数据安全可靠</li></ul><h2>关于博客</h2><p>这个博客是我记录技术成长、分享生活感悟的地方。希望通过分享，能够帮助到更多的开发者，同时也督促自己不断学习和进步。</p>',
   nickname: '机智的鱼',
   email: '1146013446@qq.com',
-  address: '地球',
+  address: '中国',
   website: 'www.yuyi-blog.com',
 }
 

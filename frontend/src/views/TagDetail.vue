@@ -2,11 +2,12 @@
   <div class="pt-24">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <div class="flex items-center space-x-4 mb-8">
-          <button @click="$router.back()" class="p-2 text-slate-400 hover:text-slate-800 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mb-8">
+          <button @click="$router.back()" class="inline-flex items-center gap-1.5 px-3 py-1.5 mb-4 text-slate-500 hover:text-indigo-600 bg-white/60 hover:bg-white rounded-lg shadow-sm hover:shadow transition-all duration-200 text-sm font-medium border border-slate-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
+            返回
           </button>
           <div>
             <h1 class="text-3xl font-bold text-slate-800"># {{ tagName }}</h1>
@@ -66,8 +67,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
-import { syncFromServer } from '../service/syncService'
-import { dataService } from '../service/dataService'
 
 const route = useRoute()
 
@@ -101,6 +100,28 @@ const defaultTags = [
   { id: 25, tagName: 'HTML5' },
 ]
 
+const defaultArticles = [
+  { id: 1, tagNames: ['Vue3', 'JavaScript'] },
+  { id: 2, tagNames: ['Tailwind', 'JavaScript'] },
+  { id: 3, tagNames: ['Node.js', 'Express'] },
+  { id: 4, tagNames: ['前端', '学习'] },
+  { id: 5, tagNames: ['生活', '随笔'] },
+  { id: 6, tagNames: ['Vite', 'Vue3'] },
+  { id: 7, tagNames: ['React', 'JavaScript'] },
+  { id: 8, tagNames: ['Node.js', 'Redis'] },
+  { id: 9, tagNames: ['Docker', 'Nginx'] },
+  { id: 10, tagNames: ['MySQL'] },
+  { id: 11, tagNames: ['Kubernetes', 'Docker'] },
+]
+
+const titleTagMap = {
+  '淘宝闪购': ['前端', '生活', 'JavaScript'],
+  '数据持久化测试文章': ['前端', '学习', 'Node.js'],
+  '测试文章标题': ['前端', 'Vue3'],
+  '美团': ['生活', 'CSS'],
+  '百度': ['生活', '随笔'],
+}
+
 const loadLocalTags = () => {
   const savedVersion = localStorage.getItem('blog_tags_version')
   const saved = localStorage.getItem('blog_tags')
@@ -108,6 +129,22 @@ const loadLocalTags = () => {
     return JSON.parse(saved)
   }
   return [...defaultTags]
+}
+
+const safeParse = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : fallback
+  } catch (e) {
+    return fallback
+  }
+}
+
+const loadArticlesSafe = () => {
+  const localArticles = safeParse('blog_articles', [])
+  return localArticles.length > 0 ? localArticles : defaultArticles
 }
 
 const tagId = computed(() => Number(route.params.id))
@@ -140,71 +177,31 @@ const getCommentCount = (articleId) => {
   return 0
 }
 
-const mapArticleFromBackend = (a) => {
-  const tagNames = (a.tags || []).map(t => t.name || t.tagName || '').filter(Boolean)
-  return {
-    id: a.id,
-    articleTitle: a.title || a.articleTitle || '',
-    articleSummary: a.summary || a.articleSummary || '',
-    articleCover: a.cover || a.articleCover || '',
-    categoryId: a.category_id ?? a.categoryId,
-    categoryName: a.category ? a.category.name : (a.categoryName || '未分类'),
-    createTime: a.created_at || a.createTime,
-    viewCount: a.view_count ?? a.viewCount ?? 0,
-    likeCount: a.like_count ?? a.likeCount ?? 0,
-    isTop: a.is_top ?? a.isTop ?? 0,
-    isFeatured: a.is_featured ?? a.isFeatured ?? 0,
-    tagNames,
-    status: a.status || 'published',
+const getArticleTagNames = (article) => {
+  if (Array.isArray(article.tagNames) && article.tagNames.length > 0) {
+    return article.tagNames.filter(n => typeof n === 'string')
   }
-}
-
-const mergeWithLocalData = (backendArticles) => {
-  const localSaved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
-  return backendArticles.map(ba => {
-    const localArticle = localSaved.find(la => la.id === ba.id)
-    const merged = { ...ba }
-    if (localArticle) {
-      if ((localArticle.viewCount || 0) > (merged.viewCount || 0)) {
-        merged.viewCount = localArticle.viewCount
-      }
-      if (localArticle._synced) {
-        merged._synced = true
-      }
-    }
-    const actualCommentCount = getCommentCount(ba.id)
-    if (actualCommentCount > 0) {
-      merged.commentCount = actualCommentCount
-    } else {
-      merged.commentCount = ba.commentCount || 0
-    }
-    return merged
-  })
-}
-
-const loadFromBackend = async () => {
-  try {
-    const result = await dataService.getArticlesByTag(tagId.value)
-    if (result && Array.isArray(result)) {
-      const mapped = result.map(a => mapArticleFromBackend(a))
-      const merged = mergeWithLocalData(mapped)
-      const name = tagName.value
-      const filtered = name === '未知标签' ? merged : merged.filter(a => {
-        const tagNames = a.tagNames || []
-        return tagNames.some(t => t === name)
-      })
-      articles.value = filtered
-      total.value = filtered.length
-      return true
-    }
-  } catch (e) {
-    console.warn('Failed to load from backend:', e.message)
+  if (Array.isArray(article.tags) && article.tags.length > 0) {
+    const fromTags = article.tags.map(t => (t && (t.tagName || t.name)) || '').filter(Boolean)
+    if (fromTags.length > 0) return fromTags
   }
-  return false
+  const byId = defaultArticles.find(d => d.id === article.id)
+  if (byId) {
+    return byId.tagNames
+  }
+  const title = (article.articleTitle || article.title || '').trim()
+  if (title && titleTagMap[title]) {
+    return titleTagMap[title]
+  }
+  for (const [key, tags] of Object.entries(titleTagMap)) {
+    if (title && title.includes(key)) {
+      return tags
+    }
+  }
+  return []
 }
 
-const loadFromLocalStorage = () => {
-  const saved = JSON.parse(localStorage.getItem('blog_articles') || '[]')
+const fetchArticles = () => {
   const name = tagName.value
   if (name === '未知标签') {
     articles.value = []
@@ -212,54 +209,42 @@ const loadFromLocalStorage = () => {
     return
   }
 
-  const seenTitles = new Set()
-  const seenIds = new Set()
-  const deduped = saved.filter(a => {
-    if (!a) return false
-    const id = a.id
-    const title = (a.articleTitle || a.title || '').trim().toLowerCase()
-    if (!title) return true
-    if (seenTitles.has(title)) return false
-    if (id != null && seenIds.has(id)) return false
-    seenTitles.add(title)
-    if (id != null) seenIds.add(id)
-    return true
-  })
+  const localArticles = safeParse('blog_articles', [])
+  const sourceArticles = localArticles.length > 0 ? localArticles : defaultArticles
 
-  const filtered = deduped.filter(a => {
+  const filtered = sourceArticles.filter(article => {
     let tagNames = []
-    if (Array.isArray(a.tagNames) && a.tagNames.length > 0) {
-      tagNames = a.tagNames.filter(n => typeof n === 'string')
-    } else if (Array.isArray(a.tags) && a.tags.length > 0) {
-      tagNames = a.tags.map(t => (t && (t.tagName || t.name)) || '').filter(Boolean)
+    if (Array.isArray(article.tagNames) && article.tagNames.length > 0) {
+      tagNames = article.tagNames.filter(n => typeof n === 'string')
+    } else if (Array.isArray(article.tags) && article.tags.length > 0) {
+      tagNames = article.tags.map(t => t.tagName || t.name || '').filter(Boolean)
+    }
+    if (tagNames.length === 0) {
+      const title = (article.articleTitle || article.title || '').trim()
+      if (title && titleTagMap[title]) {
+        tagNames = titleTagMap[title]
+      }
     }
     return tagNames.some(t => t === name)
   })
 
-  const mapped = filtered.map(a => {
-    const actualCommentCount = getCommentCount(a.id)
+  const mapped = filtered.map(article => {
+    const actualCommentCount = getCommentCount(article.id)
     return {
-      id: a.id,
-      articleTitle: a.articleTitle || a.title,
-      articleSummary: a.articleSummary || a.summary || '',
-      articleCover: a.articleCover || a.cover || '',
-      categoryName: a.categoryName || (a.category ? a.category.name : '') || '未分类',
-      createTime: a.createTime || a.created_at,
-      viewCount: a.viewCount ?? a.view_count ?? 0,
-      commentCount: actualCommentCount > 0 ? actualCommentCount : (a.commentCount || 0),
-      tagNames: a.tagNames || [],
+      id: article.id,
+      articleTitle: article.articleTitle || article.title || `文章 #${article.id}`,
+      articleSummary: article.articleSummary || article.summary || '暂无摘要',
+      articleCover: article.articleCover || article.cover || '',
+      categoryName: article.categoryName || (article.category ? article.category.name : '') || '未分类',
+      createTime: article.createTime || article.created_at || article.createdAt,
+      viewCount: article.viewCount ?? article.view_count ?? 0,
+      commentCount: actualCommentCount > 0 ? actualCommentCount : (article.commentCount || 0),
+      tagNames: getArticleTagNames(article),
     }
   })
 
   articles.value = mapped
   total.value = mapped.length
-}
-
-const fetchArticles = async () => {
-  const loaded = await loadFromBackend()
-  if (!loaded) {
-    loadFromLocalStorage()
-  }
 }
 
 const formatDate = (date) => {
@@ -268,12 +253,11 @@ const formatDate = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-onMounted(async () => {
-  await syncFromServer()
-  await fetchArticles()
+onMounted(() => {
+  fetchArticles()
 })
 
-watch(() => route.params.id, async () => {
-  await fetchArticles()
+watch(() => route.params.id, () => {
+  fetchArticles()
 })
 </script>
