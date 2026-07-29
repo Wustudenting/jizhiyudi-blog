@@ -123,9 +123,8 @@ async function initDB() {
   } catch (e) {}
 
   const tagArtCount = query('SELECT COUNT(*) as count FROM article_tags')[0].count
-  if (schemaVer !== 'v4' || tagArtCount < 20) {
-    try { run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', 'v4')") } catch (e) {}
-    run('DELETE FROM article_tags WHERE article_id <= 11')
+  if (schemaVer !== 'v5' || tagArtCount < 20) {
+    try { run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', 'v5')") } catch (e) {}
     const getTagIdByName = (name) => {
       const row = get('SELECT id FROM tags WHERE name = ?', [name])
       return row ? row.id : null
@@ -228,32 +227,34 @@ function seedData() {
     articles.forEach(a => run('INSERT INTO articles (title, summary, content, category_id, view_count, is_featured, status) VALUES (?, ?, ?, ?, ?, ?, ?)', [...a, 'published']))
   }
 
-  run('DELETE FROM article_tags WHERE article_id <= 11')
-  const getTagIdByName = (name) => {
-    const row = get('SELECT id FROM tags WHERE name = ?', [name])
-    return row ? row.id : null
-  }
-  const articleTagMap = [
-    [1, 'Vue3'], [1, 'JavaScript'], [1, '前端'],
-    [2, 'Tailwind'], [2, 'CSS'], [2, '前端'],
-    [3, 'Node.js'], [3, 'Express'],
-    [4, '前端'], [4, '学习'],
-    [5, '生活'], [5, '随笔'],
-    [6, 'Vite'], [6, 'Vue3'],
-    [7, 'React'], [7, 'JavaScript'],
-    [8, 'Node.js'], [8, 'Redis'],
-    [9, 'Docker'], [9, 'Nginx'],
-    [10, 'MySQL'],
-    [11, 'Kubernetes'], [11, 'Docker'],
-  ]
-  articleTagMap.forEach(([articleId, tagName]) => {
-    const tagId = getTagIdByName(tagName)
-    if (tagId) {
-      try {
-        run('INSERT OR IGNORE INTO article_tags (article_id, tag_id) VALUES (?, ?)', [articleId, tagId])
-      } catch (e) {}
+  const tagArtCount2 = query('SELECT COUNT(*) as count FROM article_tags')[0].count
+  if (tagArtCount2 < 20) {
+    const getTagIdByName = (name) => {
+      const row = get('SELECT id FROM tags WHERE name = ?', [name])
+      return row ? row.id : null
     }
-  })
+    const articleTagMap = [
+      [1, 'Vue3'], [1, 'JavaScript'], [1, '前端'],
+      [2, 'Tailwind'], [2, 'CSS'], [2, '前端'],
+      [3, 'Node.js'], [3, 'Express'],
+      [4, '前端'], [4, '学习'],
+      [5, '生活'], [5, '随笔'],
+      [6, 'Vite'], [6, 'Vue3'],
+      [7, 'React'], [7, 'JavaScript'],
+      [8, 'Node.js'], [8, 'Redis'],
+      [9, 'Docker'], [9, 'Nginx'],
+      [10, 'MySQL'],
+      [11, 'Kubernetes'], [11, 'Docker'],
+    ]
+    articleTagMap.forEach(([articleId, tagName]) => {
+      const tagId = getTagIdByName(tagName)
+      if (tagId) {
+        try {
+          run('INSERT OR IGNORE INTO article_tags (article_id, tag_id) VALUES (?, ?)', [articleId, tagId])
+        } catch (e) {}
+      }
+    })
+  }
 
   const talkCount = query('SELECT COUNT(*) as count FROM talks')[0].count
   if (talkCount === 0) {

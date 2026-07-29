@@ -15,7 +15,11 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div v-if="loading" class="text-center py-16">
+          <p class="text-slate-400">加载中...</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div 
             v-for="article in articles" 
             :key="article.id"
@@ -50,7 +54,7 @@
           </div>
         </div>
 
-        <div v-if="total === 0" class="text-center py-16">
+        <div v-if="!loading && total === 0" class="text-center py-16">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -67,185 +71,50 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
-import { syncFromServer } from '../service/syncService'
+import { blogApi } from '../service/api'
 
 const route = useRoute()
 
-const TAGS_VERSION = 'v3'
-
-const defaultTags = [
-  { id: 1, tagName: 'Vue3' },
-  { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'CSS' },
-  { id: 4, tagName: 'Node.js' },
-  { id: 5, tagName: 'Express' },
-  { id: 6, tagName: 'Tailwind' },
-  { id: 7, tagName: 'Vite' },
-  { id: 8, tagName: 'SQLite' },
-  { id: 9, tagName: '生活' },
-  { id: 10, tagName: '随笔' },
-  { id: 11, tagName: '前端' },
-  { id: 12, tagName: '学习' },
-  { id: 13, tagName: 'Docker' },
-  { id: 14, tagName: 'React' },
-  { id: 15, tagName: 'TypeScript' },
-  { id: 16, tagName: 'MySQL' },
-  { id: 17, tagName: 'Redis' },
-  { id: 18, tagName: 'Spring Boot' },
-  { id: 19, tagName: 'Kubernetes' },
-  { id: 20, tagName: 'Git' },
-  { id: 21, tagName: 'Linux' },
-  { id: 22, tagName: 'Nginx' },
-  { id: 23, tagName: 'Java' },
-  { id: 24, tagName: 'Python' },
-  { id: 25, tagName: 'HTML5' },
-]
-
-const defaultArticles = [
-  { id: 1, tagNames: ['Vue3', 'JavaScript'] },
-  { id: 2, tagNames: ['Tailwind', 'JavaScript'] },
-  { id: 3, tagNames: ['Node.js', 'Express'] },
-  { id: 4, tagNames: ['前端', '学习'] },
-  { id: 5, tagNames: ['生活', '随笔'] },
-  { id: 6, tagNames: ['Vite', 'Vue3'] },
-  { id: 7, tagNames: ['React', 'JavaScript'] },
-  { id: 8, tagNames: ['Node.js', 'Redis'] },
-  { id: 9, tagNames: ['Docker', 'Nginx'] },
-  { id: 10, tagNames: ['MySQL'] },
-  { id: 11, tagNames: ['Kubernetes', 'Docker'] },
-]
-
-const titleTagMap = {
-  '淘宝闪购': ['前端', '生活', 'JavaScript'],
-  '数据持久化测试文章': ['前端', '学习', 'Node.js'],
-  '测试文章标题': ['前端', 'Vue3'],
-  '美团': ['生活', 'CSS'],
-  '百度': ['生活', '随笔'],
-}
-
-const loadLocalTags = () => {
-  const savedVersion = localStorage.getItem('blog_tags_version')
-  const saved = localStorage.getItem('blog_tags')
-  if (saved && savedVersion === TAGS_VERSION) {
-    return JSON.parse(saved)
-  }
-  return [...defaultTags]
-}
-
-const safeParse = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return fallback
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : fallback
-  } catch (e) {
-    return fallback
-  }
-}
-
-const loadArticlesSafe = () => {
-  const localArticles = safeParse('blog_articles', [])
-  return localArticles.length > 0 ? localArticles : defaultArticles
-}
-
 const tagId = computed(() => Number(route.params.id))
-
-const tagName = computed(() => {
-  const tags = loadLocalTags()
-  const tag = tags.find(t => t.id === tagId.value)
-  return tag ? tag.tagName : '未知标签'
-})
-
+const tagName = ref('加载中...')
 const articles = ref([])
 const total = ref(0)
+const loading = ref(false)
 
-const getCommentCount = (articleId) => {
-  const saved = localStorage.getItem(`blog_comments_${articleId}`)
-  if (saved) {
-    try {
-      const comments = JSON.parse(saved)
-      let count = comments.length
-      for (const c of comments) {
-        if (c.replies && Array.isArray(c.replies)) {
-          count += c.replies.length
-        }
-      }
-      return count
-    } catch (e) {
-      return 0
+const fetchArticles = async () => {
+  loading.value = true
+  try {
+    const tags = await blogApi.getTags()
+    const tag = tags.find(t => t.id === tagId.value)
+    if (tag) {
+      tagName.value = tag.name || tag.tagName || '未知标签'
+    } else {
+      tagName.value = '未知标签'
     }
-  }
-  return 0
-}
 
-const getArticleTagNames = (article) => {
-  if (Array.isArray(article.tagNames) && article.tagNames.length > 0) {
-    return article.tagNames.filter(n => typeof n === 'string')
-  }
-  if (Array.isArray(article.tags) && article.tags.length > 0) {
-    const fromTags = article.tags.map(t => (t && (t.tagName || t.name)) || '').filter(Boolean)
-    if (fromTags.length > 0) return fromTags
-  }
-  const byId = defaultArticles.find(d => d.id === article.id)
-  if (byId) {
-    return byId.tagNames
-  }
-  const title = (article.articleTitle || article.title || '').trim()
-  if (title && titleTagMap[title]) {
-    return titleTagMap[title]
-  }
-  for (const [key, tags] of Object.entries(titleTagMap)) {
-    if (title && title.includes(key)) {
-      return tags
-    }
-  }
-  return []
-}
-
-const fetchArticles = () => {
-  const name = tagName.value
-  if (name === '未知标签') {
+    const backendArticles = await blogApi.getArticlesByTag(tagId.value)
+    const mapped = (backendArticles || []).map(a => ({
+      id: a.id,
+      articleTitle: a.title || a.articleTitle || '',
+      articleSummary: a.summary || a.articleSummary || '',
+      articleCover: a.cover || a.articleCover || '',
+      categoryName: a.category ? a.category.name : (a.categoryName || '未分类'),
+      createTime: a.created_at || a.createTime,
+      viewCount: a.view_count ?? a.viewCount ?? 0,
+      likeCount: a.like_count ?? a.likeCount ?? 0,
+      tagNames: (a.tags || []).map(t => t.name || t.tagName || '').filter(Boolean),
+      tags: (a.tags || []).map(t => ({ id: t.id, tagName: t.name || t.tagName || '' })),
+    }))
+    articles.value = mapped
+    total.value = mapped.length
+  } catch (e) {
+    console.warn('Failed to fetch tag articles:', e.message)
+    tagName.value = '未知标签'
     articles.value = []
     total.value = 0
-    return
+  } finally {
+    loading.value = false
   }
-
-  const localArticles = safeParse('blog_articles', [])
-  const sourceArticles = localArticles.length > 0 ? localArticles : defaultArticles
-
-  const filtered = sourceArticles.filter(article => {
-    let tagNames = []
-    if (Array.isArray(article.tagNames) && article.tagNames.length > 0) {
-      tagNames = article.tagNames.filter(n => typeof n === 'string')
-    } else if (Array.isArray(article.tags) && article.tags.length > 0) {
-      tagNames = article.tags.map(t => t.tagName || t.name || '').filter(Boolean)
-    }
-    if (tagNames.length === 0) {
-      const title = (article.articleTitle || article.title || '').trim()
-      if (title && titleTagMap[title]) {
-        tagNames = titleTagMap[title]
-      }
-    }
-    return tagNames.some(t => t === name)
-  })
-
-  const mapped = filtered.map(article => {
-    const actualCommentCount = getCommentCount(article.id)
-    return {
-      id: article.id,
-      articleTitle: article.articleTitle || article.title || `文章 #${article.id}`,
-      articleSummary: article.articleSummary || article.summary || '暂无摘要',
-      articleCover: article.articleCover || article.cover || '',
-      categoryName: article.categoryName || (article.category ? article.category.name : '') || '未分类',
-      createTime: article.createTime || article.created_at || article.createdAt,
-      viewCount: article.viewCount ?? article.view_count ?? 0,
-      commentCount: actualCommentCount > 0 ? actualCommentCount : (article.commentCount || 0),
-      tagNames: getArticleTagNames(article),
-    }
-  })
-
-  articles.value = mapped
-  total.value = mapped.length
 }
 
 const formatDate = (date) => {
@@ -254,12 +123,13 @@ const formatDate = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-onMounted(async () => {
-  await syncFromServer()
+onMounted(() => {
   fetchArticles()
 })
 
 watch(() => route.params.id, () => {
-  fetchArticles()
+  if (route.params.id) {
+    fetchArticles()
+  }
 })
 </script>

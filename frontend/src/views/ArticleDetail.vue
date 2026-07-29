@@ -15,9 +15,6 @@
           <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
         </div>
         <h1 class="text-3xl font-bold text-slate-800 mb-6">{{ article.articleTitle }}</h1>
-        <div v-if="article.articleCover" class="mb-6">
-          <img :src="article.articleCover" :alt="article.articleTitle" class="w-full h-64 object-cover rounded-lg" />
-        </div>
         <div class="flex flex-wrap gap-2 mb-6">
           <router-link 
             v-for="tag in article.tags" 

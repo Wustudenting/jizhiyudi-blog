@@ -113,10 +113,7 @@
       <ul class="space-y-3">
         <li v-for="article in recentArticles" :key="article.id">
           <router-link :to="`/articles/${article.id}`" class="flex items-start space-x-3 group">
-            <div v-if="article.articleCover" class="w-12 h-12 rounded overflow-hidden flex-shrink-0">
-              <img :src="article.articleCover" :alt="article.articleTitle" class="w-full h-full object-cover" />
-            </div>
-            <div v-else class="w-12 h-12 rounded bg-gradient-to-br from-blue-400 to-purple-500 flex-shrink-0 flex items-center justify-center text-white text-xs">
+            <div class="w-12 h-12 rounded bg-gradient-to-br from-blue-400 to-purple-500 flex-shrink-0 flex items-center justify-center text-white text-sm">
               {{ (article.articleTitle || '').charAt(0) }}
             </div>
             <div class="flex-1 min-w-0">
@@ -137,7 +134,7 @@
           :to="`/tags/${tag.id}`"
           class="px-3 py-1 bg-indigo-50 text-indigo-600 text-sm rounded-full hover:bg-indigo-100 transition-colors"
         >
-          {{ tag.tagName }}
+          {{ tag.name || tag.tagName }}
         </router-link>
       </div>
     </section>
@@ -146,6 +143,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { blogApi } from '../service/api'
 
 const props = defineProps({
   showToc: {
@@ -162,91 +160,50 @@ const props = defineProps({
   }
 })
 
-const defaultArticles = [
-  { id: 1, articleTitle: 'Vue 3 组合式 API 详解', categoryName: '前端开发', createTime: '2026-07-26', articleCover: '' },
-  { id: 2, articleTitle: 'JavaScript 高级技巧', categoryName: '前端开发', createTime: '2026-07-25', articleCover: '' },
-  { id: 3, articleTitle: 'Node.js 性能优化实践', categoryName: '后端开发', createTime: '2026-07-24', articleCover: '' },
-  { id: 4, articleTitle: 'Docker 容器化部署指南', categoryName: 'DevOps', createTime: '2026-07-23', articleCover: '' },
-  { id: 5, articleTitle: 'React Hooks 深入解析', categoryName: '前端开发', createTime: '2026-07-22', articleCover: '' },
-  { id: 6, articleTitle: 'Vite 构建优化实践', categoryName: '前端开发', createTime: '2026-07-21', articleCover: '' },
-  { id: 7, articleTitle: 'MySQL 索引优化', categoryName: '后端开发', createTime: '2026-07-20', articleCover: '' },
-  { id: 8, articleTitle: 'Kubernetes 入门到精通', categoryName: 'DevOps', createTime: '2026-07-19', articleCover: '' },
-  { id: 9, articleTitle: '感悟', categoryName: '感悟', createTime: '2026-07-26', articleCover: '' },
-  { id: 10, articleTitle: '生活', categoryName: '生活', createTime: '2026-07-26', articleCover: '' },
-]
+const tags = ref([])
+const recentArticles = ref([])
+const categoryCount = ref(0)
 
-const defaultTags = [
-  { id: 1, tagName: 'Vue3' },
-  { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'Node.js' },
-  { id: 4, tagName: 'Docker' },
-  { id: 5, tagName: 'React' },
-]
-
-const loadLocalArticles = () => {
-  const saved = localStorage.getItem('blog_articles')
-  return saved ? JSON.parse(saved) : []
-}
-
-const loadLocalTags = () => {
-  const saved = localStorage.getItem('blog_tags')
-  return saved ? JSON.parse(saved) : [...defaultTags]
-}
-
-const loadLocalCategories = () => {
-  const saved = localStorage.getItem('blog_categories')
-  return saved ? JSON.parse(saved) : []
-}
-
-const allArticles = computed(() => {
-  const local = loadLocalArticles()
-  if (local.length > 0) {
-    const seen = new Set()
-    return local.filter(a => {
-      if (!a) return false
-      const key = (a.articleTitle || a.title || '').trim().toLowerCase()
-      if (!key) return true
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-  }
-  const seen = new Set()
-  return defaultArticles.filter(a => {
-    const key = (a.articleTitle || '').trim().toLowerCase()
-    if (!key) return true
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
-})
-
-const stats = computed(() => {
-  const articles = allArticles.value
-  const categories = loadLocalCategories()
-  const tags = loadLocalTags()
-  return {
-    articleCount: articles.length,
-    categoryCount: categories.length || 9,
-    tagCount: tags.length,
-  }
-})
-
-const recentArticles = computed(() => {
-  return allArticles.value
-    .sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
-    .slice(0, 5)
-})
-
-const tags = computed(() => {
-  return loadLocalTags().slice(0, 10)
-})
+const stats = computed(() => ({
+  articleCount: recentArticles.value.length || 0,
+  tagCount: tags.value.length || 0,
+  categoryCount: categoryCount.value || 0,
+}))
 
 const formatDate = (date) => {
   if (!date) return ''
   const d = new Date(date)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
+
+onMounted(async () => {
+  try {
+    const [topTags, homeInfo, categories] = await Promise.all([
+      blogApi.getTopTenTags().catch(() => []),
+      blogApi.getHomeInfo().catch(() => ({})),
+      blogApi.getCategories().catch(() => []),
+    ])
+
+    if (topTags && Array.isArray(topTags)) {
+      tags.value = topTags
+    }
+
+    if (homeInfo && homeInfo.featured) {
+      const mapped = homeInfo.featured.map(a => ({
+        id: a.id,
+        articleTitle: a.title || a.articleTitle || '',
+        createTime: a.created_at || a.createTime,
+      }))
+      recentArticles.value = mapped
+    }
+
+    if (categories && Array.isArray(categories)) {
+      categoryCount.value = categories.length
+    }
+  } catch (e) {
+    console.warn('SideBar data fetch failed:', e.message)
+  }
+})
 </script>
 
 <style scoped>

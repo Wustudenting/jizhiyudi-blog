@@ -121,12 +121,6 @@
             class="glass-card glass-card-hover p-6 cursor-pointer transition-all h-full flex flex-col"
             @click="$router.push(`/articles/${article.id}`)"
           >
-            <div v-if="article.articleCover" class="mb-4">
-              <img :src="article.articleCover" :alt="article.articleTitle" class="w-full h-40 object-cover rounded-lg" />
-            </div>
-            <div v-else class="mb-4 h-40 bg-slate-100 rounded-lg flex items-center justify-center">
-              <span class="text-slate-300 text-sm">无封面</span>
-            </div>
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded">{{ article.categoryName }}</span>
           <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
