@@ -123,8 +123,9 @@ async function initDB() {
   } catch (e) {}
 
   const tagArtCount = query('SELECT COUNT(*) as count FROM article_tags')[0].count
-  if (schemaVer !== 'v5' || tagArtCount < 20) {
-    try { run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', 'v5')") } catch (e) {}
+  if (schemaVer !== 'v6' || tagArtCount < 20) {
+    try { run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', 'v6')") } catch (e) {}
+    try { run("DELETE FROM article_tags") } catch (e) {}
     const getTagIdByName = (name) => {
       const row = get('SELECT id FROM tags WHERE name = ?', [name])
       return row ? row.id : null
@@ -136,11 +137,14 @@ async function initDB() {
       [4, '前端'], [4, '学习'],
       [5, '生活'], [5, '随笔'],
       [6, 'Vite'], [6, 'Vue3'],
-      [7, 'React'], [7, 'JavaScript'],
-      [8, 'Node.js'], [8, 'Redis'],
-      [9, 'Docker'], [9, 'Nginx'],
-      [10, 'MySQL'],
-      [11, 'Kubernetes'], [11, 'Docker'],
+      [7, '随笔'],
+      [8, '随笔'],
+      [9, '随笔'],
+      [10, '学习'],
+      [11, '随笔'],
+      [12, 'Vue3'], [12, 'Node.js'], [12, '前端'],
+      [13, 'Node.js'], [13, '前端'],
+      [14, 'Vue3'], [14, 'Node.js'], [14, '前端'],
     ]
     articleTagMap.forEach(([articleId, tagName]) => {
       const tagId = getTagIdByName(tagName)
@@ -240,11 +244,14 @@ function seedData() {
       [4, '前端'], [4, '学习'],
       [5, '生活'], [5, '随笔'],
       [6, 'Vite'], [6, 'Vue3'],
-      [7, 'React'], [7, 'JavaScript'],
-      [8, 'Node.js'], [8, 'Redis'],
-      [9, 'Docker'], [9, 'Nginx'],
-      [10, 'MySQL'],
-      [11, 'Kubernetes'], [11, 'Docker'],
+      [7, '随笔'],
+      [8, '随笔'],
+      [9, '随笔'],
+      [10, '学习'],
+      [11, '随笔'],
+      [12, 'Vue3'], [12, 'Node.js'], [12, '前端'],
+      [13, 'Node.js'], [13, '前端'],
+      [14, 'Vue3'], [14, 'Node.js'], [14, '前端'],
     ]
     articleTagMap.forEach(([articleId, tagName]) => {
       const tagId = getTagIdByName(tagName)
