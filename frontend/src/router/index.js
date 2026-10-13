@@ -14,7 +14,8 @@ import AddArticle from '../views/AddArticle.vue'
 import Resume from '../views/Resume.vue'
 import Projects from '../views/Projects.vue'
 import ProjectDetail from '../views/ProjectDetail.vue'
-import Skills from '../views/Skills.vue'
+// Skills 页面用了 echarts（很重），改成懒加载 ——
+// 否则访客打开首页也得把整个 echarts 下下来，而首页根本用不到图表。
 
 const routes = [
   {
@@ -85,7 +86,7 @@ const routes = [
   {
     path: '/skills',
     name: 'Skills',
-    component: Skills,
+    component: () => import('../views/Skills.vue'),
   },
   {
     path: '/about',
