@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
         <div v-if="article" class="max-w-4xl mx-auto">
-          <button @click="$router.back()" class="mb-4 flex items-center space-x-2 text-slate-400 hover:text-slate-800 transition-colors">
+          <button @click="$router.back()" class="mb-4 flex items-center space-x-2 text-slate-400 dark:text-slate-500 hover:text-slate-800 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -12,9 +12,9 @@
       <article class="glass-card p-8 mb-8">
         <div class="flex items-center space-x-2 mb-4">
           <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded">{{ article.categoryName }}</span>
-          <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(article.createTime) }}</span>
         </div>
-        <h1 class="text-3xl font-bold text-slate-800 mb-6">{{ article.articleTitle }}</h1>
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6">{{ article.articleTitle }}</h1>
         <div class="flex flex-wrap gap-2 mb-6">
           <router-link 
             v-for="tag in article.tags" 
@@ -26,8 +26,8 @@
           </router-link>
         </div>
         <div class="markdown-body" v-html="article.articleContent"></div>
-        <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
-          <div class="flex items-center space-x-4 text-slate-500">
+        <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <div class="flex items-center space-x-4 text-slate-500 dark:text-slate-400">
             <span class="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -46,7 +46,7 @@
             <button 
               @click="toggleLike" 
               class="p-2 transition-colors"
-              :class="article.liked ? 'text-red-400' : 'text-slate-400 hover:text-red-400'"
+              :class="article.liked ? 'text-red-400' : 'text-slate-400 dark:text-slate-500 hover:text-red-400'"
               :title="article.liked ? '取消点赞' : '点赞'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :fill="article.liked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
@@ -57,7 +57,7 @@
             <button
               v-if="article.source !== 'yuque'"
               @click="deleteArticle"
-              class="p-2 text-slate-400 hover:text-red-400 transition-colors"
+              class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-400 transition-colors"
               title="删除文章"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,32 +79,32 @@
       </div>
 
       <section class="glass-card p-8 mb-8">
-        <h2 class="text-xl font-semibold text-slate-800 mb-6">评论 ({{ totalCommentCount }})</h2>
+        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-6">评论 ({{ totalCommentCount }})</h2>
         
         <div v-if="comments.length > 0" class="space-y-6">
-          <div v-for="comment in comments" :key="comment.id" class="border-b border-slate-200 pb-6">
+          <div v-for="comment in comments" :key="comment.id" class="border-b border-slate-200 dark:border-slate-700 pb-6">
             <div class="flex items-start space-x-4">
               <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                <span class="text-slate-800 font-medium">{{ comment.nickname?.charAt(0) || 'U' }}</span>
+                <span class="text-slate-800 dark:text-slate-100 font-medium">{{ comment.nickname?.charAt(0) || 'U' }}</span>
               </div>
               <div class="flex-1">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="font-medium text-slate-800">{{ comment.nickname }}</span>
-                  <span class="text-sm text-slate-500">{{ formatDate(comment.createTime) }}</span>
+                  <span class="font-medium text-slate-800 dark:text-slate-100">{{ comment.nickname }}</span>
+                  <span class="text-sm text-slate-500 dark:text-slate-400">{{ formatDate(comment.createTime) }}</span>
                 </div>
-                <p class="text-slate-600">{{ comment.commentContent }}</p>
+                <p class="text-slate-600 dark:text-slate-400">{{ comment.commentContent }}</p>
                 
-                <div v-if="comment.replies?.length > 0" class="mt-4 ml-4 pl-4 border-l-2 border-slate-200">
+                <div v-if="comment.replies?.length > 0" class="mt-4 ml-4 pl-4 border-l-2 border-slate-200 dark:border-slate-700">
                   <div v-for="reply in comment.replies" :key="reply.id" class="mb-3">
                     <div class="flex items-center space-x-2 mb-1">
                       <span class="text-sm text-blue-500">{{ reply.nickname }}</span>
-                      <span class="text-xs text-slate-500">{{ formatDate(reply.createTime) }}</span>
+                      <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(reply.createTime) }}</span>
                     </div>
-                    <p class="text-sm text-slate-600">{{ reply.commentContent }}</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">{{ reply.commentContent }}</p>
                   </div>
                 </div>
                 
-                <button @click="showReplyBox(comment.id)" class="mt-3 text-sm text-slate-400 hover:text-blue-500 transition-colors">
+                <button @click="showReplyBox(comment.id)" class="mt-3 text-sm text-slate-400 dark:text-slate-500 hover:text-blue-500 transition-colors">
                   回复
                 </button>
                 
@@ -112,7 +112,7 @@
                   <textarea 
                     v-model="replyContent"
                     placeholder="输入回复内容..."
-                    class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                    class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
                     rows="3"
                   ></textarea>
                   <div class="flex justify-end mt-3">
@@ -125,22 +125,22 @@
         </div>
         
         <div v-else class="text-center py-8">
-          <p class="text-slate-500">暂无评论，快来发表第一条评论吧！</p>
+          <p class="text-slate-500 dark:text-slate-400">暂无评论，快来发表第一条评论吧！</p>
         </div>
         
-        <div class="mt-8 pt-6 border-t border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-800 mb-4">发表评论</h3>
+        <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">发表评论</h3>
           <form @submit.prevent="submitComment" class="space-y-4">
             <input 
               v-model="commentForm.nickname"
               type="text" 
               placeholder="昵称"
-              class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500"
             />
             <textarea 
               v-model="commentForm.commentContent"
               placeholder="输入评论内容..."
-              class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+              class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
               rows="4"
             ></textarea>
             <div class="flex justify-end">
@@ -152,10 +152,10 @@
     </div>
 
     <div v-else class="text-center py-16">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 dark:text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <p class="text-slate-400">文章不存在</p>
+      <p class="text-slate-400 dark:text-slate-500">文章不存在</p>
         </div>
       </div>
 

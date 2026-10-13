@@ -18,13 +18,17 @@ import * as echarts from 'echarts/core'
 import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
+import { useTheme } from '../composables/useTheme'
 
 // 按需引入，避免把整个 echarts 打进包里
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 const props = defineProps({
   items: { type: Array, required: true }, // [{ name, value }]
+  /** 亮色系列色 */
   color: { type: String, default: '#6366f1' },
+  /** 暗色系列色。默认是验证器在暗色卡片底 #1a2334 上跑过的蓝（>=3:1，亮度在暗色带内） */
+  darkColor: { type: String, default: '#3987e5' },
   unit: { type: String, default: '' },
   /** 每行高度，用来算总高；16 行以内图表自己撑开，不出现内部滚动条 */
   rowHeight: { type: Number, default: 34 },
@@ -34,22 +38,35 @@ const props = defineProps({
   nameWidth: { type: Number, default: 96 },
 })
 
+const { theme } = useTheme()
+const isDark = computed(() => theme.value === 'dark')
+
 const el = ref(null)
 let chart = null
 
 const chartHeight = computed(() => props.items.length * props.rowHeight + 16)
 
-const buildOption = () => ({
+const buildOption = () => {
+  const dark = isDark.value
+  const series = dark ? props.darkColor : props.color
+  // 轴/标签一律用文本色，不用系列色
+  const ink = dark ? '#94a3b8' : '#475569'
+  const inkMuted = dark ? '#94a3b8' : '#64748b'
+
+  return {
   animationDuration: 600,
   grid: { left: props.nameWidth, right: 44, top: 6, bottom: 6, containLabel: false },
   tooltip: {
     trigger: 'axis',
-    axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(99,102,241,0.06)' } },
-    backgroundColor: 'rgba(255,255,255,0.97)',
-    borderColor: 'rgba(99,102,241,0.2)',
+    axisPointer: {
+      type: 'shadow',
+      shadowStyle: { color: dark ? 'rgba(129,140,248,0.10)' : 'rgba(99,102,241,0.06)' },
+    },
+    backgroundColor: dark ? 'rgba(15,23,42,0.97)' : 'rgba(255,255,255,0.97)',
+    borderColor: dark ? 'rgba(129,140,248,0.35)' : 'rgba(99,102,241,0.2)',
     borderWidth: 1,
     padding: [8, 12],
-    textStyle: { color: '#1e293b', fontSize: 12 },
+    textStyle: { color: dark ? '#e2e8f0' : '#1e293b', fontSize: 12 },
     formatter: (p) => {
       const d = p[0]
       return `${d.name}<br/><b>${d.value}${props.unit}</b>`
@@ -68,7 +85,7 @@ const buildOption = () => ({
     axisTick: { show: false },
     // 名字过长时截断，避免把绘图区挤没（完整名字仍在 tooltip 里）
     axisLabel: {
-      color: '#475569',
+      color: ink,
       fontSize: 12,
       width: props.nameWidth - 12,
       overflow: 'truncate',
@@ -81,20 +98,21 @@ const buildOption = () => ({
       barWidth: 10, // 细条
       barCategoryGap: '52%', // 条与条之间留出呼吸空间
       itemStyle: {
-        color: props.color,
+        color: series,
         borderRadius: [0, 4, 4, 0], // 只圆数值端，基线端保持方
       },
       label: {
         show: true,
         position: 'right',
-        color: '#64748b', // 文本色，不是系列色
+        color: inkMuted, // 文本色，不是系列色
         fontSize: 12,
         formatter: (p) => `${p.value}${props.unit}`,
       },
-      emphasis: { itemStyle: { color: props.color, opacity: 0.85 } },
+      emphasis: { itemStyle: { color: series, opacity: 0.85 } },
     },
   ],
-})
+  }
+}
 
 const render = () => {
   if (!el.value) return
@@ -116,5 +134,9 @@ onUnmounted(() => {
   chart = null
 })
 
-watch(() => [props.items, props.color, props.max], render, { deep: true })
+watch(
+  () => [props.items, props.color, props.darkColor, props.max, theme.value],
+  render,
+  { deep: true },
+)
 </script>

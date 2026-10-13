@@ -4,6 +4,9 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  // 用 class 策略切换暗色：<html class="dark"> 由 useTheme() 控制，
+  // 而不是跟随系统（站点要的是用户手动切换 + 记住选择）
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {

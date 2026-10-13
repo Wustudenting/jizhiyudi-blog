@@ -4,12 +4,12 @@
       <div class="lg:col-span-2">
         <div v-if="about" class="max-w-3xl mx-auto">
           <article class="glass-card p-8 mb-8">
-            <h1 class="text-3xl font-bold text-slate-800 mb-6">关于我</h1>
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6">关于我</h1>
             <div class="markdown-body" v-html="about.aboutContent"></div>
           </article>
 
           <section class="glass-card p-8">
-            <h2 class="text-xl font-semibold text-slate-800 mb-6">基本信息</h2>
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-6">基本信息</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="flex items-center space-x-4">
                 <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
@@ -18,8 +18,8 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-slate-500 text-sm">昵称</p>
-                  <p class="text-slate-800 font-medium">{{ about.nickname || '机智的鱼' }}</p>
+                  <p class="text-slate-500 dark:text-slate-400 text-sm">昵称</p>
+                  <p class="text-slate-800 dark:text-slate-100 font-medium">{{ about.nickname || '机智的鱼' }}</p>
                 </div>
               </div>
               <div class="flex items-center space-x-4">
@@ -29,8 +29,8 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-slate-500 text-sm">邮箱</p>
-                  <p class="text-slate-800 font-medium">{{ about.email || '1146013446@qq.com' }}</p>
+                  <p class="text-slate-500 dark:text-slate-400 text-sm">邮箱</p>
+                  <p class="text-slate-800 dark:text-slate-100 font-medium">{{ about.email || '1146013446@qq.com' }}</p>
                 </div>
               </div>
               <div class="flex items-center space-x-4">
@@ -41,8 +41,8 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-slate-500 text-sm">地址</p>
-                  <p class="text-slate-800 font-medium">{{ about.address || '地球' }}</p>
+                  <p class="text-slate-500 dark:text-slate-400 text-sm">地址</p>
+                  <p class="text-slate-800 dark:text-slate-100 font-medium">{{ about.address || '地球' }}</p>
                 </div>
               </div>
               <div class="flex items-center space-x-4">
@@ -52,7 +52,7 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-slate-500 text-sm">个人网站</p>
+                  <p class="text-slate-500 dark:text-slate-400 text-sm">个人网站</p>
                   <a :href="about.website" target="_blank" class="text-blue-500 hover:text-blue-300 font-medium">{{ about.website || 'www.yuyi-blog.com' }}</a>
                 </div>
               </div>

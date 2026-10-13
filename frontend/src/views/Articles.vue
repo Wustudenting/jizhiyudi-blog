@@ -2,8 +2,8 @@
   <div class="pt-24">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-slate-800">文章列表</h1>
-        <p class="text-slate-400 mt-2">共 {{ filteredArticles.length }} 篇文章</p>
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">文章列表</h1>
+        <p class="text-slate-400 dark:text-slate-500 mt-2">共 {{ filteredArticles.length }} 篇文章</p>
       </div>
       <div class="mt-4 md:mt-0 flex items-center space-x-3">
         <div class="relative">
@@ -12,11 +12,11 @@
             v-model="searchKeyword"
             @keyup.enter="handleSearch"
             placeholder="搜索文章..."
-            class="w-full md:w-64 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            class="w-full md:w-64 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500"
           />
           <button 
             @click="handleSearch"
-            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-800 transition-colors"
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 dark:text-slate-500 hover:text-slate-800 transition-colors"
             title="搜索"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -28,50 +28,50 @@
       </div>
     </div>
 
-    <div class="bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 rounded-2xl p-5 mb-6 shadow-sm border border-white/60">
+    <div class="bg-gradient-to-br from-indigo-50 dark:from-indigo-500/10 via-blue-50 dark:via-blue-500/10 to-purple-50 dark:to-purple-500/10 rounded-2xl p-5 mb-6 shadow-sm border border-white/60 dark:border-slate-700/50">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white/70 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-indigo-100/60">
+        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-indigo-100/60">
           <div class="flex items-center gap-2 mb-3">
             <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-white text-sm shadow-sm">📂</span>
-            <h3 class="text-sm font-semibold text-indigo-700">分类筛选</h3>
+            <h3 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">分类筛选</h3>
           </div>
           <div class="flex flex-wrap gap-1.5">
             <button
               v-for="cat in allCategories"
               :key="cat"
               @click="toggleCategory(cat)"
-              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedCategories.includes(cat) ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm']"
+              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedCategories.includes(cat) ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md' : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 hover:shadow-sm']"
             >
               {{ cat }}
             </button>
           </div>
         </div>
 
-        <div class="bg-white/70 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-purple-100/60">
+        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-purple-100/60">
           <div class="flex items-center gap-2 mb-3">
             <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-sm shadow-sm">🏷️</span>
-            <h3 class="text-sm font-semibold text-purple-700">标签筛选</h3>
+            <h3 class="text-sm font-semibold text-purple-700 dark:text-purple-300">标签筛选</h3>
           </div>
           <div class="flex flex-wrap gap-1.5">
             <button
               v-for="tag in popularTags"
               :key="tag"
               @click="toggleTag(tag)"
-              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedTags.includes(tag) ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md' : 'bg-purple-50 text-purple-600 hover:bg-purple-100 hover:shadow-sm']"
+              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedTags.includes(tag) ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-300 hover:bg-purple-100 hover:shadow-sm']"
             >
               {{ tag }}
             </button>
           </div>
         </div>
 
-        <div class="bg-white/70 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-cyan-100/60">
+        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-cyan-100/60">
           <div class="flex items-center gap-2 mb-3">
             <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center text-white text-sm shadow-sm">📊</span>
-            <h3 class="text-sm font-semibold text-cyan-700">排序方式</h3>
+            <h3 class="text-sm font-semibold text-cyan-700 dark:text-cyan-300">排序方式</h3>
           </div>
           <select
             v-model="sortBy"
-            class="w-full px-3 py-2 bg-cyan-50 text-cyan-700 text-sm rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-cyan-300 cursor-pointer font-medium"
+            class="w-full px-3 py-2 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-sm rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-cyan-300 cursor-pointer font-medium"
           >
             <option value="date-desc">🕐 最新发布</option>
             <option value="date-asc">🗓️ 最早发布</option>
@@ -103,19 +103,19 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
         <div v-if="hasActiveFilters" class="mb-4 flex flex-wrap gap-2 items-center">
-          <span class="text-sm text-slate-500">已选筛选:</span>
-          <span v-for="cat in selectedCategories" :key="'c-'+cat" class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full flex items-center gap-1">
+          <span class="text-sm text-slate-500 dark:text-slate-400">已选筛选:</span>
+          <span v-for="cat in selectedCategories" :key="'c-'+cat" class="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs rounded-full flex items-center gap-1">
             {{ cat }}
             <button @click="toggleCategory(cat)" class="hover:text-indigo-900">×</button>
           </span>
-          <span v-for="tag in selectedTags" :key="'t-'+tag" class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
+          <span v-for="tag in selectedTags" :key="'t-'+tag" class="px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded-full flex items-center gap-1">
             {{ tag }}
             <button @click="toggleTag(tag)" class="hover:text-purple-900">×</button>
           </span>
         </div>
 
         <div v-if="loading" class="text-center py-16">
-          <p class="text-slate-400">加载中...</p>
+          <p class="text-slate-400 dark:text-slate-500">加载中...</p>
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -127,14 +127,14 @@
           >
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded">{{ article.categoryName }}</span>
-              <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(article.createTime) }}</span>
             </div>
-            <h3 class="text-xl font-semibold text-slate-800 mb-2 hover:text-blue-500 transition-colors">
+            <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2 hover:text-blue-500 transition-colors">
               {{ article.articleTitle }}
             </h3>
-            <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1">{{ article.articleSummary }}</p>
+            <p class="text-slate-400 dark:text-slate-500 text-sm line-clamp-3 mb-4 flex-1">{{ article.articleSummary }}</p>
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-4 text-slate-500 text-sm">
+              <div class="flex items-center space-x-4 text-slate-500 dark:text-slate-400 text-sm">
                 <span class="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -167,15 +167,15 @@
             <button 
               @click="prevPage" 
               :disabled="currentPage <= 1"
-              class="px-4 py-2 bg-indigo-50 text-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
+              class="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/15 text-slate-800 dark:text-slate-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
             >
               上一页
             </button>
-            <span class="text-slate-800">{{ currentPage }} / {{ totalPages }}</span>
+            <span class="text-slate-800 dark:text-slate-100">{{ currentPage }} / {{ totalPages }}</span>
             <button 
               @click="nextPage" 
               :disabled="currentPage >= totalPages"
-              class="px-4 py-2 bg-indigo-50 text-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
+              class="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/15 text-slate-800 dark:text-slate-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-100 transition-colors"
             >
               下一页
             </button>
@@ -183,10 +183,10 @@
         </div>
 
         <div v-if="!loading && filteredArticles.length === 0" class="text-center py-16">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 dark:text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p class="text-slate-400">暂无文章</p>
+          <p class="text-slate-400 dark:text-slate-500">暂无文章</p>
         </div>
       </div>
 

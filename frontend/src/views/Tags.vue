@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto px-4">
       <button 
         @click="$router.back()" 
-        class="inline-flex items-center gap-2 px-4 py-2 mb-6 text-slate-600 hover:text-indigo-600 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium border border-slate-200"
+        class="inline-flex items-center gap-2 px-4 py-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-indigo-600 bg-white/80 dark:bg-slate-800/70 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium border border-slate-200 dark:border-slate-700"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -13,7 +13,7 @@
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <h1 class="text-3xl font-bold text-slate-800 mb-8">标签云</h1>
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-8">标签云</h1>
         
         <div v-if="tagsWithCount.length > 0" class="flex flex-wrap gap-4">
           <router-link 
@@ -23,16 +23,16 @@
             class="tag-block"
             :style="{ fontSize: `${14 + (tag.articleCount || 0) * 0.5}px` }"
           >
-            <span class="text-slate-800 font-medium">{{ tag.tagName }}</span>
+            <span class="text-slate-800 dark:text-slate-100 font-medium">{{ tag.tagName }}</span>
             <span class="text-blue-500 ml-2">({{ tag.articleCount || 0 }})</span>
           </router-link>
         </div>
 
         <div v-else class="text-center py-16">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 dark:text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
-          <p class="text-slate-400">暂无标签</p>
+          <p class="text-slate-400 dark:text-slate-500">暂无标签</p>
         </div>
       </div>
 

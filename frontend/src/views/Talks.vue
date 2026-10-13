@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
         <div class="flex items-center justify-between mb-8">
-          <h1 class="text-3xl font-bold text-slate-800">说说</h1>
+          <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">说说</h1>
           <button 
             @click="showPublishForm = !showPublishForm" 
             class="btn-primary flex items-center space-x-2"
@@ -16,18 +16,18 @@
         </div>
 
     <div v-if="showPublishForm" class="glass-card p-6 mb-8">
-      <h2 class="text-xl font-semibold text-slate-800 mb-4">发布新说说</h2>
+      <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">发布新说说</h2>
       <form @submit.prevent="publishTalk" class="space-y-4">
         <textarea 
           v-model="newTalk.content"
           placeholder="此刻的想法..."
-          class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+          class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
           rows="4"
           required
         ></textarea>
         
         <div>
-          <label class="block text-slate-400 text-sm mb-2">添加图片（可选，最多3张）</label>
+          <label class="block text-slate-400 dark:text-slate-500 text-sm mb-2">添加图片（可选，最多3张）</label>
           <div class="flex flex-wrap gap-2">
             <div 
               v-for="(img, index) in newTalk.images" 
@@ -38,7 +38,7 @@
               <button 
                 type="button"
                 @click="removeImage(index)"
-                class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-slate-800 rounded-full flex items-center justify-center text-xs"
+                class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-slate-800 dark:text-slate-100 rounded-full flex items-center justify-center text-xs"
               >
                 ×
               </button>
@@ -51,7 +51,7 @@
                 class="hidden"
                 multiple
               />
-              <span class="text-2xl text-slate-500">+</span>
+              <span class="text-2xl text-slate-500 dark:text-slate-400">+</span>
             </label>
           </div>
         </div>
@@ -71,14 +71,14 @@
       >
         <div class="flex items-start space-x-4">
           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <span class="text-slate-800 font-medium">A</span>
+            <span class="text-slate-800 dark:text-slate-100 font-medium">A</span>
           </div>
           <div class="flex-1">
             <div class="flex items-center justify-between mb-2">
-              <span class="font-medium text-slate-800">{{ talk.nickname || '作者' }}</span>
-              <span class="text-sm text-slate-500">{{ formatDate(talk.createTime) }}</span>
+              <span class="font-medium text-slate-800 dark:text-slate-100">{{ talk.nickname || '作者' }}</span>
+              <span class="text-sm text-slate-500 dark:text-slate-400">{{ formatDate(talk.createTime) }}</span>
             </div>
-            <p class="text-slate-600 leading-relaxed cursor-pointer hover:text-blue-500 hover:underline" @click="goToDetail(talk.id)">{{ talk.talkContent }}</p>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed cursor-pointer hover:text-blue-500 hover:underline" @click="goToDetail(talk.id)">{{ talk.talkContent }}</p>
             <div v-if="talk.talkImages?.length > 0" class="flex flex-wrap gap-2 mt-4">
               <img 
                 v-for="(img, index) in talk.talkImages" 
@@ -88,7 +88,7 @@
                 class="w-24 h-24 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform"
               />
             </div>
-            <div class="flex items-center space-x-6 mt-4 text-slate-500 text-sm">
+            <div class="flex items-center space-x-6 mt-4 text-slate-500 dark:text-slate-400 text-sm">
               <button 
                 @click="toggleLike(talk.id)" 
                 class="flex items-center transition-colors"
@@ -110,17 +110,17 @@
               </button>
             </div>
 
-            <div v-if="activeTalkId === talk.id" class="mt-4 pt-4 border-t border-slate-200">
+            <div v-if="activeTalkId === talk.id" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div v-if="talk.comments?.length > 0" class="space-y-3 mb-4">
-                <div v-for="comment in talk.comments" :key="comment.id" class="text-sm bg-white p-3 rounded-lg">
+                <div v-for="comment in talk.comments" :key="comment.id" class="text-sm bg-white dark:bg-slate-800 p-3 rounded-lg">
                   <div class="flex items-center justify-between mb-1">
                     <span class="font-medium text-blue-500">{{ comment.nickname }}</span>
-                    <span class="text-xs text-slate-500">{{ comment.createTime }}</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ comment.createTime }}</span>
                   </div>
-                  <p class="text-slate-600">{{ comment.content }}</p>
+                  <p class="text-slate-600 dark:text-slate-400">{{ comment.content }}</p>
                 </div>
               </div>
-              <div v-else class="text-center py-2 text-slate-500 text-sm">
+              <div v-else class="text-center py-2 text-slate-500 dark:text-slate-400 text-sm">
                 暂无评论
               </div>
               
@@ -129,15 +129,15 @@
                   v-model="newComment.nickname"
                   type="text" 
                   placeholder="昵称"
-                  class="w-24 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm"
+                  class="w-24 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 text-sm"
                 />
                 <input 
                   v-model="newComment.content"
                   type="text" 
                   placeholder="评论内容..."
-                  class="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm"
+                  class="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 text-sm"
                 />
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-slate-800 rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-slate-800 dark:text-slate-100 rounded-lg hover:bg-blue-600 transition-colors text-sm">
                   发送
                 </button>
               </form>
@@ -148,10 +148,10 @@
     </div>
 
     <div v-if="talks.length === 0" class="text-center py-16">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 dark:text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
-      <p class="text-slate-400">暂无说说</p>
+      <p class="text-slate-400 dark:text-slate-500">暂无说说</p>
       </div>
       </div>
 

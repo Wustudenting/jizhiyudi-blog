@@ -5,9 +5,9 @@
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-2">
           <span class="text-3xl">💎</span>
-          <h1 class="text-3xl font-bold text-slate-800">专业技能</h1>
+          <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">专业技能</h1>
         </div>
-        <p class="text-slate-500 flex items-center gap-2">
+        <p class="text-slate-500 dark:text-slate-400 flex items-center gap-2">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
           持续学习，不断精进 · 全栈技术探索中
         </p>
@@ -18,45 +18,66 @@
         <div
           v-for="stat in stats"
           :key="stat.label"
-          class="bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-4 border border-white/80 shadow-sm"
+          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl px-5 py-4 border border-white/80 dark:border-slate-700/50 shadow-sm"
         >
-          <p class="text-3xl font-bold text-slate-800 leading-none">{{ stat.value }}</p>
-          <p class="text-xs text-slate-500 mt-2">{{ stat.label }}</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">{{ stat.hint }}</p>
+          <p class="text-3xl font-bold text-slate-800 dark:text-slate-100 leading-none">{{ stat.value }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">{{ stat.label }}</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{{ stat.hint }}</p>
         </div>
       </div>
 
-      <!-- 主图：技术沉淀分布 -->
-      <section
-        class="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/80 shadow-sm mb-6"
-      >
-        <div class="flex items-baseline justify-between mb-1">
-          <h2 class="text-lg font-bold text-slate-800">技术沉淀分布</h2>
-          <span class="text-xs text-slate-400">数据来源：语雀知识库</span>
-        </div>
-        <p class="text-xs text-slate-500 mb-4">
-          各技术方向已经整理成笔记的文章数量 —— 写得越多，说明这块挖得越深
-        </p>
+      <!-- 图表区：两张，形态不同（横向条形 / 柱 + 面积线） -->
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        <section
+          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm"
+        >
+          <div class="flex items-baseline justify-between mb-1">
+            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">技术沉淀分布</h2>
+            <span class="text-xs text-slate-400 dark:text-slate-500">语雀知识库</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            各方向已整理成笔记的文章数 —— 写得越多，说明这块挖得越深
+          </p>
 
-        <BarChart
-          v-if="articleStats.length"
-          :items="articleStats"
-          :row-height="38"
-          :name-width="150"
-          unit=" 篇"
-        />
-        <p v-else class="text-sm text-slate-400 py-8 text-center">
-          正在读取语雀数据…
-        </p>
-      </section>
+          <BarChart
+            v-if="articleStats.length"
+            :items="articleStats"
+            :row-height="36"
+            :name-width="140"
+            unit=" 篇"
+          />
+          <p v-else class="text-sm text-slate-400 dark:text-slate-500 py-8 text-center">
+            正在读取语雀数据…
+          </p>
+        </section>
+
+        <section
+          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm"
+        >
+          <div class="flex items-baseline justify-between mb-1">
+            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">笔记积累趋势</h2>
+            <span class="text-xs text-slate-400 dark:text-slate-500">按创建月份</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            柱是当月新增，线是累计总量 —— 看的是写作节奏，不是单篇长短
+          </p>
+
+          <TrendChart v-if="trendPoints.length" :points="trendPoints" :height="286" />
+          <p v-else class="text-sm text-slate-400 dark:text-slate-500 py-8 text-center">
+            正在读取语雀数据…
+          </p>
+        </section>
+      </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div class="lg:col-span-2 space-y-6">
-          <!-- 技能矩阵 -->
+          <!-- 技能矩阵。这里刻意用进度条(meter)而不是图表：
+               熟练度是「一个比值对上限(100%)」，规范里对应的形态就是 meter，
+               而且四个分类各来一张条形图本来就会长得一模一样。 -->
           <section
             v-for="category in skillCategories"
             :key="category.name"
-            class="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/80 shadow-sm hover:shadow-md transition-shadow"
+            class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow"
           >
             <div class="flex items-center mb-5">
               <div
@@ -68,24 +89,31 @@
                 <span>{{ category.icon }}</span>
               </div>
               <div>
-                <h2 class="text-lg font-bold text-slate-800">{{ category.name }}</h2>
-                <p class="text-xs text-slate-400">{{ category.desc }}</p>
+                <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ category.name }}</h2>
+                <p class="text-xs text-slate-400 dark:text-slate-500">{{ category.desc }}</p>
               </div>
             </div>
 
-            <BarChart
-              :items="category.skills"
-              :row-height="32"
-              :name-width="118"
-              :max="100"
-              unit="%"
-            />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <div v-for="skill in category.skills" :key="skill.name" class="group">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-slate-700 dark:text-slate-300 text-sm font-medium">{{ skill.name }}</span>
+                  <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ skill.value }}%</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700 group-hover:brightness-110"
+                    :style="{ width: skill.value + '%' }"
+                  ></div>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
 
         <!-- 侧栏 -->
         <div class="lg:col-span-1 space-y-5">
-          <div class="relative bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-500 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200/50 overflow-hidden">
+          <div class="relative bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-500 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200/50 dark:shadow-indigo-950/50 overflow-hidden">
             <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full"></div>
             <div class="absolute -bottom-12 -left-8 w-24 h-24 bg-white/5 rounded-full"></div>
 
@@ -118,43 +146,43 @@
           </div>
 
           <!-- 最新笔记：真实数据，跳转到文章详情 -->
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-purple-100/60 shadow-sm">
+          <div class="bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-purple-100/60 dark:border-slate-700/50 shadow-sm">
             <div class="flex items-center gap-2 mb-4">
               <span class="text-base">💡</span>
-              <h4 class="text-sm font-semibold text-slate-800">最新笔记</h4>
+              <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">最新笔记</h4>
             </div>
             <div v-if="recentNotes.length" class="space-y-3">
               <router-link
                 v-for="note in recentNotes"
                 :key="note.id"
                 :to="`/articles/${note.id}`"
-                class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-indigo-50/50 transition-colors group"
+                class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors group"
               >
                 <span class="text-sm mt-0.5">📄</span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate">
+                  <p class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors truncate">
                     {{ note.title }}
                   </p>
-                  <p class="text-xs text-slate-400 truncate">
+                  <p class="text-xs text-slate-400 dark:text-slate-500 truncate">
                     {{ note.category?.name || '未分类' }} · {{ formatDate(note.created_at) }}
                   </p>
                 </div>
               </router-link>
             </div>
-            <p v-else class="text-xs text-slate-400 py-4 text-center">正在读取…</p>
+            <p v-else class="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">正在读取…</p>
           </div>
 
           <!-- 工具箱 -->
-          <section class="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm">
+          <section class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-white/80 dark:border-slate-700/50 shadow-sm">
             <div class="flex items-center gap-2 mb-4">
               <span class="text-base">🛠️</span>
-              <h4 class="text-sm font-semibold text-slate-800">工具与其他</h4>
+              <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">工具与其他</h4>
             </div>
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="tool in tools"
                 :key="tool"
-                class="px-3.5 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 text-slate-600 rounded-lg text-xs font-medium hover:from-indigo-50 hover:to-purple-50 hover:text-indigo-600 hover:shadow-sm transition-all cursor-default border border-slate-200/60"
+                class="px-3.5 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700/50 dark:to-slate-700/30 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-medium hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-500/20 dark:hover:to-purple-500/20 hover:text-indigo-600 dark:hover:text-indigo-300 hover:shadow-sm transition-all cursor-default border border-slate-200/60 dark:border-slate-600/40"
               >
                 {{ tool }}
               </span>
@@ -162,32 +190,32 @@
           </section>
 
           <!-- 语言能力 -->
-          <section class="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm">
+          <section class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-white/80 dark:border-slate-700/50 shadow-sm">
             <div class="flex items-center gap-2 mb-4">
               <span class="text-base">🌟</span>
-              <h4 class="text-sm font-semibold text-slate-800">语言能力</h4>
+              <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">语言能力</h4>
             </div>
             <!-- 这一栏在侧边栏里很窄，保持单列，双列会被挤扁 -->
             <div class="space-y-3">
-              <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100">
+              <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-700/40 dark:to-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-700/40">
                 <div class="flex items-center gap-3">
                   <span class="text-2xl">🇨🇳</span>
                   <div>
-                    <p class="font-medium text-slate-800 text-sm">中文</p>
-                    <p class="text-xs text-slate-400">母语</p>
+                    <p class="font-medium text-slate-800 dark:text-slate-100 text-sm">中文</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">母语</p>
                   </div>
                 </div>
-                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-medium">精通</span>
+                <span class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 rounded-full text-xs font-medium">精通</span>
               </div>
-              <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100">
+              <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-700/40 dark:to-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-700/40">
                 <div class="flex items-center gap-3">
                   <span class="text-2xl">🇬🇧</span>
                   <div>
-                    <p class="font-medium text-slate-800 text-sm">英语</p>
-                    <p class="text-xs text-slate-400">CET-4</p>
+                    <p class="font-medium text-slate-800 dark:text-slate-100 text-sm">英语</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">CET-4</p>
                   </div>
                 </div>
-                <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">良好</span>
+                <span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-300 rounded-full text-xs font-medium">良好</span>
               </div>
             </div>
           </section>
@@ -200,11 +228,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import BarChart from '../components/BarChart.vue'
+import TrendChart from '../components/TrendChart.vue'
 import { yuqueApi } from '../service/yuqueApi'
 
 /**
  * 技能清单与熟练度是自评，不来自语雀；
- * 语雀只提供「文章沉淀量」这类可核实的数据（见下方 articleStats）。
+ * 语雀只提供「文章沉淀量」这类可核实的数据（见下方 articleStats / trendPoints）。
  *
  * 本轮按语雀实际覆盖做了调整：
  * - 新增 React（语雀 React 库 7 篇）、小程序/UniApp（2 篇）、Shell（linux和shell 库）
@@ -215,7 +244,7 @@ const skillCategories = [
   {
     name: '前端开发',
     icon: '🎨',
-    iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100',
+    iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-500/25 dark:to-cyan-500/25',
     desc: '现代前端技术栈与小程序',
     skills: [
       { name: 'HTML5', value: 95 },
@@ -235,7 +264,7 @@ const skillCategories = [
   {
     name: '后端与数据库',
     icon: '⚙️',
-    iconBg: 'bg-gradient-to-br from-purple-100 to-pink-100',
+    iconBg: 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-500/25 dark:to-pink-500/25',
     desc: '服务端开发、API 设计与数据存储',
     skills: [
       { name: 'Python', value: 88 },
@@ -253,7 +282,7 @@ const skillCategories = [
   {
     name: '工程化与运维',
     icon: '🔧',
-    iconBg: 'bg-gradient-to-br from-orange-100 to-red-100',
+    iconBg: 'bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-500/25 dark:to-red-500/25',
     desc: '开发工具、版本控制与部署环境',
     skills: [
       { name: 'VS Code', value: 92 },
@@ -269,7 +298,7 @@ const skillCategories = [
   {
     name: 'AI 与数据',
     icon: '🤖',
-    iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100',
+    iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-500/25 dark:to-teal-500/25',
     desc: '计算机视觉与数据处理',
     skills: [
       { name: 'YOLOv10', value: 75 },
@@ -288,6 +317,7 @@ const tools = [
 
 // ---- 以下都是语雀真实数据 ----
 const articleStats = ref([])
+const trendPoints = ref([])
 const recentNotes = ref([])
 const categoryCount = ref(0)
 const articleCount = ref(0)
@@ -320,10 +350,27 @@ onMounted(async () => {
 
     articleCount.value = articles.length
     categoryCount.value = categories.length
+
     articleStats.value = [...categories]
       .filter((c) => c.count > 0)
       .sort((a, b) => b.count - a.count)
       .map((c) => ({ name: c.name, value: c.count }))
+
+    // 按月聚合：柱=当月新增，线=累计。累计是逐月累加出来的，不是另算的。
+    const perMonth = {}
+    for (const a of articles) {
+      const d = new Date(a.created_at || a.updated_at)
+      if (Number.isNaN(d.getTime())) continue
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      perMonth[key] = (perMonth[key] || 0) + 1
+    }
+    let running = 0
+    trendPoints.value = Object.keys(perMonth)
+      .sort()
+      .map((key) => {
+        running += perMonth[key]
+        return { label: `${Number(key.slice(5))}月`, monthly: perMonth[key], cumulative: running }
+      })
 
     recentNotes.value = [...articles]
       .sort(

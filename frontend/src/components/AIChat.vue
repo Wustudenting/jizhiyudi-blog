@@ -8,14 +8,14 @@
           </svg>
         </div>
         <div>
-          <h3 class="font-bold text-slate-800 text-sm">AI 智能助手</h3>
-          <p class="text-xs text-slate-500">关于这篇文章的任何问题</p>
+          <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">AI 智能助手</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">关于这篇文章的任何问题</p>
         </div>
       </div>
       <button
         v-if="messages.length > 1"
         @click="clearChat"
-        class="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+        class="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 transition-colors"
       >
         清空对话
       </button>
@@ -23,18 +23,18 @@
 
     <div class="h-64 overflow-y-auto mb-4 space-y-3 pr-2" ref="chatContainer">
       <div v-if="messages.length === 0" class="text-center py-8">
-        <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-3">
+        <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mx-auto mb-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <p class="text-sm text-slate-500 mb-3">你可以问我关于这篇文章的任何问题</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">你可以问我关于这篇文章的任何问题</p>
         <div class="flex flex-wrap gap-2 justify-center">
           <button
             v-for="suggestion in suggestions"
             :key="suggestion"
             @click="sendSuggestion(suggestion)"
-            class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs rounded-full hover:bg-indigo-100 transition-colors"
+            class="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 text-xs rounded-full hover:bg-indigo-100 transition-colors"
           >
             {{ suggestion }}
           </button>
@@ -51,7 +51,7 @@
               'px-3 py-2 rounded-2xl text-sm',
               msg.role === 'user'
                 ? 'bg-indigo-500 text-white rounded-br-sm'
-                : 'bg-slate-100 text-slate-700 rounded-bl-sm'
+                : 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 rounded-bl-sm'
             ]"
           >
             <span v-html="formatMessage(msg.content)"></span>
@@ -66,7 +66,7 @@
         <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center">
           <span class="text-white text-xs font-bold">AI</span>
         </div>
-        <div class="px-3 py-2 rounded-2xl rounded-bl-sm bg-slate-100">
+        <div class="px-3 py-2 rounded-2xl rounded-bl-sm bg-slate-100 dark:bg-slate-700/60">
           <div class="flex gap-1">
             <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
             <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
@@ -82,7 +82,7 @@
         @keyup.enter="sendMessage"
         :disabled="isTyping"
         placeholder="问我关于这篇文章的问题..."
-        class="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-400 disabled:opacity-50"
+        class="flex-1 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-400 disabled:opacity-50"
       />
       <button
         @click="sendMessage"

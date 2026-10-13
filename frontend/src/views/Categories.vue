@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto px-4">
       <button 
         @click="$router.back()" 
-        class="inline-flex items-center gap-2 px-4 py-2 mb-6 text-slate-600 hover:text-indigo-600 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium border border-slate-200"
+        class="inline-flex items-center gap-2 px-4 py-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-indigo-600 bg-white/80 dark:bg-slate-800/70 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium border border-slate-200 dark:border-slate-700"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -13,7 +13,7 @@
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <h1 class="text-3xl font-bold text-slate-800 mb-8">文章分类</h1>
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-8">文章分类</h1>
         
         <div v-if="categoriesWithCount.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <router-link 
@@ -24,22 +24,22 @@
           >
             <div class="flex items-center justify-between mb-4">
               <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-800 dark:text-slate-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
               <span class="text-2xl font-bold text-blue-500">{{ category.articleCount || 0 }}</span>
             </div>
-            <h3 class="text-xl font-semibold text-slate-800 mb-2">{{ category.categoryName }}</h3>
-            <p class="text-slate-400 text-sm">{{ category.categoryDescription || '暂无描述' }}</p>
+            <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">{{ category.categoryName }}</h3>
+            <p class="text-slate-400 dark:text-slate-500 text-sm">{{ category.categoryDescription || '暂无描述' }}</p>
           </router-link>
         </div>
 
         <div v-else class="text-center py-16">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 dark:text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
-          <p class="text-slate-400">暂无分类</p>
+          <p class="text-slate-400 dark:text-slate-500">暂无分类</p>
         </div>
       </div>
 

@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto px-4 pb-12">
       <button 
         @click="$router.back()" 
-        class="inline-flex items-center gap-2 px-4 py-2 mb-6 text-slate-600 hover:text-indigo-600 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium border border-slate-200"
+        class="inline-flex items-center gap-2 px-4 py-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-indigo-600 bg-white/80 dark:bg-slate-800/70 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium border border-slate-200 dark:border-slate-700"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -21,17 +21,17 @@
               <div class="flex items-center gap-2 mb-2">
                 <span class="px-2.5 py-0.5 rounded-full text-xs text-white" :class="project.statusClass">{{ project.status }}</span>
               </div>
-              <h1 class="text-2xl font-bold text-slate-800 mb-2">{{ project.title }}</h1>
-              <p class="text-slate-500 text-sm leading-relaxed">{{ project.description }}</p>
+              <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">{{ project.title }}</h1>
+              <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{{ project.description }}</p>
             </div>
           </div>
 
-          <div class="border-t border-slate-100 pt-5">
-            <h3 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+          <div class="border-t border-slate-100 dark:border-slate-700/60 pt-5">
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
               <span>🔧</span> 技术栈
             </h3>
             <div class="flex flex-wrap gap-2">
-              <span v-for="tech in project.techStack" :key="tech" class="px-3 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 text-slate-600 rounded-lg text-xs font-medium border border-slate-200 hover:from-indigo-50 hover:to-purple-50 hover:text-indigo-600 transition-all cursor-default">
+              <span v-for="tech in project.techStack" :key="tech" class="px-3 py-1.5 bg-gradient-to-r from-slate-50 dark:from-slate-700/40 to-slate-100 dark:to-slate-700/50 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 hover:from-indigo-50 hover:to-purple-50 hover:text-indigo-600 transition-all cursor-default">
                 {{ tech }}
               </span>
             </div>
@@ -39,26 +39,26 @@
         </section>
 
         <section v-if="project.highlights && project.highlights.length" class="glass-card p-8">
-          <h2 class="text-lg font-semibold text-slate-800 mb-5 flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-5 flex items-center gap-2">
             <span>✨</span> 项目亮点
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div v-for="(highlight, idx) in project.highlights" :key="idx" class="flex items-start gap-3 p-4 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100">
+            <div v-for="(highlight, idx) in project.highlights" :key="idx" class="flex items-start gap-3 p-4 bg-gradient-to-r from-slate-50 dark:from-slate-700/40 to-white dark:to-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-700/60">
               <span class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs flex-shrink-0 font-bold">{{ idx + 1 }}</span>
-              <p class="text-sm text-slate-600 leading-relaxed">{{ highlight }}</p>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ highlight }}</p>
             </div>
           </div>
         </section>
 
         <section class="glass-card p-8">
-          <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
             <span>📖</span> 项目介绍
           </h2>
-          <p class="text-slate-600 text-sm leading-relaxed">
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
             {{ project.description }}
           </p>
-          <div class="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-            <p class="text-sm text-slate-700 leading-relaxed">
+          <div class="mt-4 p-4 bg-gradient-to-r from-indigo-50 dark:from-indigo-500/10 to-purple-50 dark:to-purple-500/10 rounded-xl border border-indigo-100 dark:border-indigo-500/20">
+            <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
               该项目采用 Vue3 组合式 API + Node.js Express 全栈架构，使用 SQLite 作为数据库，Tailwind CSS 构建响应式界面。
               通过本地持久化与后端同步相结合，实现了高效、稳定、可扩展的个人博客系统解决方案。
             </p>
@@ -68,7 +68,7 @@
 
       <div v-else class="text-center py-20">
         <span class="text-5xl mb-4 block">🔍</span>
-        <p class="text-slate-500">项目不存在或已下线</p>
+        <p class="text-slate-500 dark:text-slate-400">项目不存在或已下线</p>
         <button @click="$router.push('/projects')" class="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600 transition-colors">
           返回项目列表
         </button>

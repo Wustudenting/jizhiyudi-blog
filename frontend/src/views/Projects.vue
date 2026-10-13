@@ -4,9 +4,9 @@
       <div class="mb-10 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
           <span class="text-3xl">🚀</span>
-          <h1 class="text-3xl font-bold text-slate-800">项目经历</h1>
+          <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">项目经历</h1>
         </div>
-        <p class="text-slate-500">以下是我参与或主导开发的一些项目 · 点击卡片查看详情</p>
+        <p class="text-slate-500 dark:text-slate-400">以下是我参与或主导开发的一些项目 · 点击卡片查看详情</p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -14,31 +14,31 @@
           v-for="project in projects"
           :key="project.id"
           :to="`/projects/${project.id}`"
-          class="group relative bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
+          class="group relative bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-white/80 dark:border-slate-700/50 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
         >
           <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br opacity-5 rounded-full blur-xl -translate-y-6 translate-x-6" :class="project.gradient"></div>
 
           <div class="relative">
-            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-4 shadow-sm border border-amber-100">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mb-4 shadow-sm border border-amber-100 dark:border-amber-500/20">
               <span class="text-2xl">{{ project.emoji }}</span>
             </div>
 
-            <h3 class="text-base font-bold text-slate-800 mb-1.5 line-clamp-1">{{ project.title }}</h3>
+            <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-1.5 line-clamp-1">{{ project.title }}</h3>
 
-            <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-4">
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-4">
               {{ project.description }}
             </p>
 
             <div class="flex flex-wrap gap-1.5 mb-4">
-              <span v-for="tech in project.techStack.slice(0, 3)" :key="tech" class="px-2 py-0.5 bg-slate-50 text-slate-500 rounded text-xs border border-slate-100">
+              <span v-for="tech in project.techStack.slice(0, 3)" :key="tech" class="px-2 py-0.5 bg-slate-50 dark:bg-slate-700/40 text-slate-500 dark:text-slate-400 rounded text-xs border border-slate-100 dark:border-slate-700/60">
                 {{ tech }}
               </span>
-              <span v-if="project.techStack.length > 3" class="px-2 py-0.5 bg-slate-50 text-slate-400 rounded text-xs border border-slate-100">
+              <span v-if="project.techStack.length > 3" class="px-2 py-0.5 bg-slate-50 dark:bg-slate-700/40 text-slate-400 dark:text-slate-500 rounded text-xs border border-slate-100 dark:border-slate-700/60">
                 +{{ project.techStack.length - 3 }}
               </span>
             </div>
 
-            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700/60">
               <span class="px-2.5 py-0.5 rounded-full text-xs text-white" :class="project.statusClass">{{ project.status }}</span>
               <span class="text-xs text-indigo-500 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                 查看项目详情

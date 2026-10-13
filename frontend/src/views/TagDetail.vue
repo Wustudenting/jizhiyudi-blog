@@ -3,20 +3,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
         <div class="mb-8">
-          <button @click="$router.back()" class="inline-flex items-center gap-1.5 px-3 py-1.5 mb-4 text-slate-500 hover:text-indigo-600 bg-white/60 hover:bg-white rounded-lg shadow-sm hover:shadow transition-all duration-200 text-sm font-medium border border-slate-200">
+          <button @click="$router.back()" class="inline-flex items-center gap-1.5 px-3 py-1.5 mb-4 text-slate-500 dark:text-slate-400 hover:text-indigo-600 bg-white/60 dark:bg-slate-800/50 hover:bg-white rounded-lg shadow-sm hover:shadow transition-all duration-200 text-sm font-medium border border-slate-200 dark:border-slate-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
             返回
           </button>
           <div>
-            <h1 class="text-3xl font-bold text-slate-800"># {{ tagName }}</h1>
-            <p class="text-slate-400 mt-1">共 {{ total }} 篇文章</p>
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100"># {{ tagName }}</h1>
+            <p class="text-slate-400 dark:text-slate-500 mt-1">共 {{ total }} 篇文章</p>
           </div>
         </div>
 
         <div v-if="loading" class="text-center py-16">
-          <p class="text-slate-400">加载中...</p>
+          <p class="text-slate-400 dark:text-slate-500">加载中...</p>
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -28,14 +28,14 @@
           >
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded">{{ article.categoryName }}</span>
-              <span class="text-xs text-slate-500">{{ formatDate(article.createTime) }}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(article.createTime) }}</span>
             </div>
-            <h3 class="text-xl font-semibold text-slate-800 mb-2 hover:text-blue-500 transition-colors">
+            <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2 hover:text-blue-500 transition-colors">
               {{ article.articleTitle }}
             </h3>
-            <p class="text-slate-400 text-sm line-clamp-3 mb-4">{{ article.articleSummary }}</p>
+            <p class="text-slate-400 dark:text-slate-500 text-sm line-clamp-3 mb-4">{{ article.articleSummary }}</p>
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-4 text-slate-500 text-sm">
+              <div class="flex items-center space-x-4 text-slate-500 dark:text-slate-400 text-sm">
                 <span class="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -55,10 +55,10 @@
         </div>
 
         <div v-if="!loading && total === 0" class="text-center py-16">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-600 dark:text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p class="text-slate-400">该标签暂无文章</p>
+          <p class="text-slate-400 dark:text-slate-500">该标签暂无文章</p>
         </div>
       </div>
 

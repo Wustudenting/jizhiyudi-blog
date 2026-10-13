@@ -13,12 +13,36 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import NavHeader from './components/NavHeader.vue'
 import Footer from './components/Footer.vue'
+import { useTheme } from './composables/useTheme'
+
+const { theme } = useTheme()
 
 const canvas = ref(null)
 let animationId = null
 let particles = []
 let mouse = { x: null, y: null }
 let ctx = null
+
+/**
+ * 两套配色。canvas 是逐帧重绘的，所以主题一变下一帧就跟着变，
+ * 不需要额外的重绘逻辑 —— 只在每帧读一次 theme.value 即可。
+ */
+const PALETTE = {
+  light: {
+    bg: ['#dbeafe', '#e0e7ff', '#ede9fe'], // 白天：浅蓝 → 浅靛 → 浅紫
+    dot: 'rgba(99, 102, 241, 0.6)',
+    link: '139, 92, 246', // 粒子之间的连线
+    linkMouse: '99, 102, 241', // 鼠标连线
+  },
+  dark: {
+    bg: ['#0b1220', '#111a2e', '#1a1430'], // 黑夜：深海军蓝 → 深靛
+    dot: 'rgba(129, 140, 248, 0.7)',
+    link: '129, 140, 248',
+    linkMouse: '165, 180, 252',
+  },
+}
+
+const palette = () => PALETTE[theme.value] || PALETTE.light
 
 class Particle {
   constructor() {
@@ -51,7 +75,7 @@ class Particle {
   draw() {
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(99, 102, 241, 0.6)'
+    ctx.fillStyle = palette().dot
     ctx.fill()
   }
 }
@@ -65,6 +89,7 @@ const initParticles = () => {
 }
 
 const drawLines = () => {
+  const { link } = palette()
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const dx = particles[i].x - particles[j].x
@@ -74,7 +99,7 @@ const drawLines = () => {
         ctx.beginPath()
         ctx.moveTo(particles[i].x, particles[i].y)
         ctx.lineTo(particles[j].x, particles[j].y)
-        ctx.strokeStyle = `rgba(139, 92, 246, ${0.15 * (1 - dist / 150)})`
+        ctx.strokeStyle = `rgba(${link}, ${0.15 * (1 - dist / 150)})`
         ctx.lineWidth = 0.5
         ctx.stroke()
       }
@@ -83,10 +108,12 @@ const drawLines = () => {
 }
 
 const animate = () => {
+  const { bg, linkMouse } = palette()
+
   const gradient = ctx.createLinearGradient(0, 0, canvas.value.width, canvas.value.height)
-  gradient.addColorStop(0, '#dbeafe')
-  gradient.addColorStop(0.5, '#e0e7ff')
-  gradient.addColorStop(1, '#ede9fe')
+  gradient.addColorStop(0, bg[0])
+  gradient.addColorStop(0.5, bg[1])
+  gradient.addColorStop(1, bg[2])
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, canvas.value.width, canvas.value.height)
 
@@ -106,7 +133,7 @@ const animate = () => {
         ctx.beginPath()
         ctx.moveTo(mouse.x, mouse.y)
         ctx.lineTo(p.x, p.y)
-        ctx.strokeStyle = `rgba(99, 102, 241, ${0.4 * (1 - dist / 200)})`
+        ctx.strokeStyle = `rgba(${linkMouse}, ${0.4 * (1 - dist / 200)})`
         ctx.lineWidth = 1
         ctx.stroke()
       }

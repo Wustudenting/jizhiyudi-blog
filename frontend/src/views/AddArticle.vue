@@ -2,46 +2,46 @@
   <div class="pt-24">
     <div class="max-w-4xl mx-auto">
       <div class="flex items-center space-x-4 mb-8">
-        <button @click="router.back()" class="p-2 text-slate-400 hover:text-slate-800 transition-colors">
+        <button @click="router.back()" class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-800 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 class="text-3xl font-bold text-slate-800">添加文章</h1>
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">添加文章</h1>
       </div>
 
       <form @submit.prevent="submitArticle" class="glass-card p-8 space-y-6">
         <div>
-          <label class="block text-slate-800 font-medium mb-2">文章标题</label>
+          <label class="block text-slate-800 dark:text-slate-100 font-medium mb-2">文章标题</label>
           <input 
             v-model="articleForm.articleTitle"
             type="text" 
             placeholder="请输入文章标题"
-            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500"
             required
           />
         </div>
 
         <div>
-          <label class="block text-slate-800 font-medium mb-2">文章摘要</label>
+          <label class="block text-slate-800 dark:text-slate-100 font-medium mb-2">文章摘要</label>
           <textarea 
             v-model="articleForm.articleSummary"
             placeholder="请输入文章摘要"
-            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+            class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
             rows="3"
           ></textarea>
         </div>
 
         <div>
-          <label class="block text-slate-800 font-medium mb-2">文章封面</label>
+          <label class="block text-slate-800 dark:text-slate-100 font-medium mb-2">文章封面</label>
           <div class="flex gap-2">
             <input 
               v-model="articleForm.articleCover"
               type="text" 
               placeholder="粘贴图片URL或上传图片"
-              class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              class="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500"
             />
-            <label class="px-4 py-3 bg-indigo-50 text-slate-800 rounded-lg hover:bg-indigo-100 cursor-pointer transition-colors whitespace-nowrap">
+            <label class="px-4 py-3 bg-indigo-50 dark:bg-indigo-500/15 text-slate-800 dark:text-slate-100 rounded-lg hover:bg-indigo-100 cursor-pointer transition-colors whitespace-nowrap">
               <input 
                 type="file" 
                 accept="image/*" 
@@ -57,12 +57,12 @@
         </div>
 
         <div>
-          <label class="block text-slate-800 font-medium mb-2">分类 <span class="text-red-500">*</span></label>
+          <label class="block text-slate-800 dark:text-slate-100 font-medium mb-2">分类 <span class="text-red-500">*</span></label>
           <div class="flex gap-2 mb-3">
             <select 
               v-model="articleForm.categoryId"
               required
-              class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-blue-500"
+              class="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"
             >
               <option value="">请选择分类（必填）</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -73,12 +73,12 @@
               v-model="newCategoryName"
               type="text" 
               placeholder="新分类名"
-              class="w-32 px-3 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm"
+              class="w-32 px-3 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 text-sm"
             />
             <button 
               type="button" 
               @click="addNewCategory"
-              class="px-4 py-3 bg-purple-600 text-slate-800 rounded-lg hover:bg-purple-700 transition-colors text-sm whitespace-nowrap"
+              class="px-4 py-3 bg-purple-600 text-slate-800 dark:text-slate-100 rounded-lg hover:bg-purple-700 transition-colors text-sm whitespace-nowrap"
             >
               + 添加
             </button>
@@ -86,7 +86,7 @@
         </div>
 
         <div>
-          <label class="block text-slate-800 font-medium mb-2">标签</label>
+          <label class="block text-slate-800 dark:text-slate-100 font-medium mb-2">标签</label>
           <div class="flex flex-wrap gap-2 mb-3">
             <button 
               v-for="tag in tags" 
@@ -94,7 +94,7 @@
               type="button"
               @click="toggleTag(tag)"
               class="px-3 py-1 rounded-full text-sm transition-colors"
-              :class="selectedTags.includes(tag.id) ? 'bg-blue-500 text-slate-800' : 'bg-indigo-50 text-slate-600 hover:bg-indigo-100'"
+              :class="selectedTags.includes(tag.id) ? 'bg-blue-500 text-slate-800 dark:text-slate-100' : 'bg-indigo-50 dark:bg-indigo-500/10 text-slate-600 dark:text-slate-400 hover:bg-indigo-100'"
             >
               {{ tag.tagName }}
             </button>
@@ -104,12 +104,12 @@
               v-model="newTag"
               type="text" 
               placeholder="输入新标签名称"
-              class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              class="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500"
             />
             <button 
               type="button" 
               @click="addNewTag"
-              class="px-4 py-3 bg-purple-600 text-slate-800 rounded-lg hover:bg-purple-700 transition-colors text-sm whitespace-nowrap"
+              class="px-4 py-3 bg-purple-600 text-slate-800 dark:text-slate-100 rounded-lg hover:bg-purple-700 transition-colors text-sm whitespace-nowrap"
             >
               + 添加标签
             </button>
@@ -117,11 +117,11 @@
         </div>
 
         <div>
-          <label class="block text-slate-800 font-medium mb-2">文章内容</label>
+          <label class="block text-slate-800 dark:text-slate-100 font-medium mb-2">文章内容</label>
           <textarea 
             v-model="articleForm.articleContent"
             placeholder="请输入文章内容"
-            class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none font-mono"
+            class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none font-mono"
             rows="12"
             required
           ></textarea>
@@ -134,7 +134,7 @@
               type="checkbox" 
               class="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500"
             />
-            <span class="text-slate-600">置顶文章</span>
+            <span class="text-slate-600 dark:text-slate-400">置顶文章</span>
           </label>
           <label class="flex items-center space-x-2">
             <input 
@@ -142,7 +142,7 @@
               type="checkbox" 
               class="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500"
             />
-            <span class="text-slate-600">精选文章</span>
+            <span class="text-slate-600 dark:text-slate-400">精选文章</span>
           </label>
         </div>
 

@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" :class="scrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : 'bg-transparent'">
+  <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" :class="scrolled ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-md dark:shadow-slate-950/40' : 'bg-transparent'">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <router-link to="/" class="flex items-center space-x-2 group flex-shrink-0">
@@ -30,7 +30,7 @@
               <circle cx="22" cy="36" r="2" fill="white" opacity="0.5"/>
             </svg>
           </div>
-          <span class="text-xl font-bold text-slate-800">机智的鱼</span>
+          <span class="text-xl font-bold text-slate-800 dark:text-slate-100">机智的鱼</span>
         </router-link>
 
         <nav class="hidden lg:flex items-center space-x-6 xl:space-x-8">
@@ -38,7 +38,7 @@
             v-for="item in navItems" 
             :key="item.name" 
             :to="item.path"
-            class="nav-link text-slate-600 hover:text-indigo-600 transition-colors relative group text-sm xl:text-base whitespace-nowrap"
+            class="nav-link text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors relative group text-sm xl:text-base whitespace-nowrap"
             :class="{ 'nav-link-active': isActive(item) }"
           >
             {{ item.label }}
@@ -54,22 +54,58 @@
         </nav>
 
         <div class="flex items-center space-x-2 sm:space-x-4">
+          <!-- 白天 / 黑夜切换 -->
+          <button
+            @click="toggleTheme"
+            class="p-2 rounded-lg text-slate-600 hover:text-indigo-600 hover:bg-slate-100/70 dark:text-slate-300 dark:hover:text-amber-300 dark:hover:bg-slate-700/50 transition-colors"
+            :title="theme === 'dark' ? '切换到白天模式' : '切换到黑夜模式'"
+            :aria-label="theme === 'dark' ? '切换到白天模式' : '切换到黑夜模式'"
+          >
+            <svg
+              v-if="theme === 'dark'"
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+          </button>
+
           <div class="relative hidden sm:block">
             <input 
               type="text" 
               v-model="searchKeyword"
               @keyup.enter="handleSearch"
               placeholder="搜索文章..."
-              class="w-32 md:w-40 lg:w-48 px-4 py-2 bg-white/60 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-400 transition-colors"
+              class="w-32 md:w-40 lg:w-48 px-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-400 transition-colors"
             />
-            <button @click="handleSearch" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600">
+            <button @click="handleSearch" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-300">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
           </div>
 
-          <button @click="toggleMobileMenu" class="lg:hidden text-slate-700 p-2 hover:bg-slate-100 rounded-lg transition-colors">
+          <button @click="toggleMobileMenu" class="lg:hidden text-slate-700 dark:text-slate-200 p-2 hover:bg-slate-100 dark:hover:bg-slate-700/60 rounded-lg transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -80,7 +116,7 @@
     </div>
 
     <Transition name="mobile-menu">
-      <div v-if="mobileMenuOpen" class="lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg">
+      <div v-if="mobileMenuOpen" class="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 shadow-lg">
         <div class="container mx-auto px-4 py-4">
           <div class="relative sm:hidden mb-4">
             <input 
@@ -88,9 +124,9 @@
               v-model="searchKeyword"
               @keyup.enter="handleSearch"
               placeholder="搜索文章..."
-              class="w-full px-4 py-2 bg-white/60 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-400"
+              class="w-full px-4 py-2 bg-white/60 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-400"
             />
-            <button @click="handleSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600">
+            <button @click="handleSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-indigo-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -102,7 +138,7 @@
               :key="item.name" 
               :to="item.path"
               @click="mobileMenuOpen = false"
-              class="flex items-center justify-between py-3 px-3 rounded-lg text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              class="flex items-center justify-between py-3 px-3 rounded-lg text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-700/50 transition-colors"
               active-class="mobile-nav-active"
             >
               <span>{{ item.label }}</span>
@@ -127,6 +163,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useTheme } from '../composables/useTheme'
+
+const { theme, toggleTheme } = useTheme()
 
 const router = useRouter()
 const route = useRoute()
