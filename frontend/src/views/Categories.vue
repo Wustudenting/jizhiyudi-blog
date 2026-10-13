@@ -51,15 +51,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import SideBar from '../components/SideBar.vue'
-import { syncFromServer } from '../service/syncService'
+import { syncFromServer, purgeLegacySeedData } from '../service/syncService'
 
-const defaultCategories = [
-  { id: 1, categoryName: '前端', categoryDescription: '前端开发技术分享' },
-  { id: 2, categoryName: '后端', categoryDescription: '后端开发技术分享' },
-  { id: 3, categoryName: '生活', categoryDescription: '生活随笔与感悟' },
-  { id: 4, categoryName: '学习', categoryDescription: '学习笔记与知识总结' },
-  { id: 5, categoryName: '项目', categoryDescription: '项目实战经验' },
-]
+// 原本这里有一组硬编码的假分类，已删除 —— 它会无条件混进真实分类里，
+// 让博客显示 5 个用户从没建过的分类。分类现在来自语雀知识库，没有就显示空状态。
 
 const categoryDescriptions = {
   '感悟': '人生感悟与思考',
@@ -96,14 +91,7 @@ const generateDescription = (name) => {
   return `${name}相关内容分享`
 }
 
-const defaultArticles = [
-  { id: 1, categoryName: '前端' },
-  { id: 2, categoryName: '前端' },
-  { id: 3, categoryName: '后端' },
-  { id: 4, categoryName: '学习' },
-  { id: 5, categoryName: '生活' },
-  { id: 6, categoryName: '前端' },
-]
+// 同上，这组假文章也已删除，它原本只用来给假分类凑计数。
 
 const safeParse = (key, fallback) => {
   try {
@@ -117,41 +105,29 @@ const safeParse = (key, fallback) => {
   }
 }
 
+// 历史假数据由 syncService 的 purgeLegacySeedData() 统一清理，这里不再管版本号。
 const loadCategories = () => {
-  const saved = safeParse('blog_categories', null)
-  if (saved && saved.length > 0) {
-    const merged = [...saved]
-    
-    defaultCategories.forEach(dc => {
-      if (!merged.find(c => c.categoryName === dc.categoryName)) {
-        merged.push(dc)
-      }
-    })
-    
-    merged.forEach(cat => {
-      if (!cat.categoryDescription || cat.categoryDescription === '暂无描述') {
-        cat.categoryDescription = generateDescription(cat.categoryName || '')
-      }
-      if (cat.categoryName && !cat.id) {
-        cat.id = Date.now() + Math.random()
-      }
-    })
-    
-    localStorage.setItem('blog_categories', JSON.stringify(merged))
-    return merged
-  }
-  localStorage.setItem('blog_categories', JSON.stringify(defaultCategories))
-  return [...defaultCategories]
+  const saved = safeParse('blog_categories', [])
+  if (saved.length === 0) return []
+
+  const merged = saved.map(cat => ({
+    ...cat,
+    // 没写描述的补一句，纯粹是展示用，不是数据
+    categoryDescription:
+      !cat.categoryDescription || cat.categoryDescription === '暂无描述'
+        ? generateDescription(cat.categoryName || '')
+        : cat.categoryDescription,
+    id: cat.id || cat.categoryName,
+  }))
+  localStorage.setItem('blog_categories', JSON.stringify(merged))
+  return merged
 }
 
-const loadArticles = () => {
-  const localArticles = safeParse('blog_articles', [])
-  if (!localArticles || localArticles.length === 0) return defaultArticles
-  return localArticles.map(a => ({
+const loadArticles = () =>
+  safeParse('blog_articles', []).map(a => ({
     ...a,
     categoryName: a.categoryName || (a.category ? a.category.name : '') || '未分类',
   }))
-}
 
 const categories = ref([])
 
@@ -174,6 +150,7 @@ const categoriesWithCount = computed(() => {
 })
 
 onMounted(async () => {
+  purgeLegacySeedData() // 先清掉老版本塞进来的假分类，避免首次渲染闪一下假数据
   categories.value = loadCategories()
   
   try {

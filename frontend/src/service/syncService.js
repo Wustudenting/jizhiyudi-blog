@@ -23,6 +23,8 @@ function mapArticleFromBackend(a) {
     isFeatured: a.is_featured ?? a.isFeatured ?? 0,
     tagNames: (a.tags || []).map(t => t.name || t.tagName || '').filter(Boolean),
     status: a.status || 'published',
+    // 'yuque' = 来自语雀同步，博客上删不掉；'db' = 本地数据库
+    source: a.source || 'db',
   }
 }
 
@@ -64,7 +66,25 @@ async function fetchWithTimeout(fn, timeout = 3000) {
   }
 }
 
+/**
+ * 一次性清掉老版本写进 localStorage 的硬编码假数据。
+ *
+ * 老代码在缓存为空时会把 25 个假标签 / 5 个假分类 / 11 篇假文章塞进 localStorage，
+ * 接入语雀后这些全是污染（会显示用户从没建过的标签和分类）。这里清一次即可，
+ * 之后这些页面只信真实数据，没数据就显示空状态。
+ */
+const LEGACY_SEED_PURGE_KEY = 'blog_legacy_seed_purged_v1'
+
+export function purgeLegacySeedData() {
+  if (localStorage.getItem(LEGACY_SEED_PURGE_KEY)) return
+  localStorage.removeItem('blog_tags')
+  localStorage.removeItem('blog_tags_version')
+  localStorage.removeItem('blog_categories')
+  localStorage.setItem(LEGACY_SEED_PURGE_KEY, '1')
+}
+
 export async function syncFromServer() {
+  purgeLegacySeedData()
   try {
     const [rawArticles, rawCategories, rawTags, rawTalks, rawLinks] = await Promise.all([
       fetchWithTimeout(() => blogApi.getArticles()),
@@ -171,7 +191,6 @@ export async function syncFromServer() {
     if (rawTags && Array.isArray(rawTags) && rawTags.length > 0) {
       const mapped = rawTags.map(t => mapTagFromBackend(t))
       localStorage.setItem('blog_tags', JSON.stringify(mapped))
-      localStorage.setItem('blog_tags_version', 'v3')
     }
 
     if (rawTalks && Array.isArray(rawTalks)) {

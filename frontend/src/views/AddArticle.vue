@@ -163,14 +163,6 @@ import { blogApi } from '../service/api'
 
 const router = useRouter()
 
-const defaultCategories = [
-  { id: 1, categoryName: '前端', categoryDescription: '前端开发技术分享' },
-  { id: 2, categoryName: '后端', categoryDescription: '后端开发技术分享' },
-  { id: 3, categoryName: '生活', categoryDescription: '生活随笔与感悟' },
-  { id: 4, categoryName: '学习', categoryDescription: '学习笔记与知识总结' },
-  { id: 5, categoryName: '项目', categoryDescription: '项目实战经验' },
-]
-
 const categoryDescriptions = {
   '感悟': '人生感悟与思考',
   '生活': '日常生活点滴记录',
@@ -206,65 +198,36 @@ const generateDescription = (name) => {
   return `${name}相关内容分享`
 }
 
-const defaultTags = [
-  { id: 1, tagName: 'Vue3' },
-  { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'Node.js' },
-  { id: 4, tagName: 'Docker' },
-  { id: 5, tagName: 'React' },
-  { id: 6, tagName: 'TypeScript' },
-  { id: 7, tagName: 'CSS' },
-  { id: 8, tagName: 'HTML5' },
-  { id: 9, tagName: 'Vue2' },
-  { id: 10, tagName: 'Spring Boot' },
-  { id: 11, tagName: 'MySQL' },
-  { id: 12, tagName: 'Redis' },
-  { id: 13, tagName: 'Git' },
-  { id: 14, tagName: 'Linux' },
-  { id: 15, tagName: 'Nginx' },
-  { id: 16, tagName: 'Kubernetes' },
-  { id: 17, tagName: 'Python' },
-  { id: 18, tagName: 'Java' },
-  { id: 19, tagName: 'WebSocket' },
-  { id: 20, tagName: 'RESTful' },
-]
-
+// 不再往 localStorage 写硬编码的假分类/假标签。
+// 老代码每次进这个页面都会写一遍，是假数据最主要的污染源 ——
+// 博客上那些用户从没建过的标签和分类就是这么来的。
 const loadCategories = () => {
   const saved = localStorage.getItem('blog_categories')
-  if (saved) {
-    const savedCategories = JSON.parse(saved)
-    const merged = [...savedCategories]
-    
-    defaultCategories.forEach(dc => {
-      if (!merged.find(c => c.categoryName === dc.categoryName)) {
-        merged.push(dc)
-      }
-    })
-    
-    merged.forEach(cat => {
-      if (!cat.categoryDescription || cat.categoryDescription === '暂无描述') {
-        cat.categoryDescription = generateDescription(cat.categoryName)
-      }
-    })
-    
-    localStorage.setItem('blog_categories', JSON.stringify(merged))
-    return merged
+  if (!saved) return []
+  try {
+    const parsed = JSON.parse(saved)
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(cat => ({
+      ...cat,
+      categoryDescription:
+        !cat.categoryDescription || cat.categoryDescription === '暂无描述'
+          ? generateDescription(cat.categoryName)
+          : cat.categoryDescription,
+    }))
+  } catch {
+    return []
   }
-  localStorage.setItem('blog_categories', JSON.stringify(defaultCategories))
-  return [...defaultCategories]
 }
 
-const TAGS_VERSION = 'v3'
-
 const loadTags = () => {
-  const savedVersion = localStorage.getItem('blog_tags_version')
   const saved = localStorage.getItem('blog_tags')
-  if (saved && savedVersion === TAGS_VERSION) {
-    return JSON.parse(saved)
+  if (!saved) return []
+  try {
+    const parsed = JSON.parse(saved)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
   }
-  localStorage.setItem('blog_tags', JSON.stringify(defaultTags))
-  localStorage.setItem('blog_tags_version', TAGS_VERSION)
-  return [...defaultTags]
 }
 
 const loadArticles = () => {

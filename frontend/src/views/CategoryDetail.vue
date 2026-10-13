@@ -82,26 +82,6 @@ import { syncFromServer } from '../service/syncService'
 
 const route = useRoute()
 
-const getDateStr = (daysAgo) => {
-  const date = new Date()
-  date.setDate(date.getDate() - daysAgo)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-const defaultArticles = [
-  { id: 1, articleTitle: 'Vue3 组合式API详解', articleSummary: '深入探讨Vue3的组合式API，包括setup、ref、reactive等核心概念...', categoryName: '前端', createTime: getDateStr(0), viewCount: 1234, commentCount: 45, tags: [{ id: 1, tagName: 'Vue3' }, { id: 2, tagName: 'JavaScript' }], articleCover: '' },
-  { id: 2, articleTitle: 'Tailwind CSS 实战技巧', articleSummary: '分享 Tailwind CSS 在项目中的实用技巧...', categoryName: '前端', createTime: getDateStr(1), viewCount: 256, commentCount: 20, tags: [{ id: 6, tagName: 'Tailwind' }, { id: 2, tagName: 'JavaScript' }], articleCover: '' },
-  { id: 3, articleTitle: 'Node.js Express 入门', articleSummary: '从零开始学习 Node.js Express 框架...', categoryName: '后端', createTime: getDateStr(2), viewCount: 654, commentCount: 28, tags: [{ id: 4, tagName: 'Node.js' }, { id: 5, tagName: 'Express' }], articleCover: '' },
-  { id: 4, articleTitle: '我的前端学习之路', articleSummary: '记录我的前端学习历程与心得体会', categoryName: '学习', createTime: getDateStr(3), viewCount: 456, commentCount: 19, tags: [{ id: 11, tagName: '前端' }, { id: 12, tagName: '学习' }], articleCover: '' },
-  { id: 5, articleTitle: '生活中的小确幸', articleSummary: '记录生活中的美好瞬间', categoryName: '生活', createTime: getDateStr(4), viewCount: 68, commentCount: 2, tags: [{ id: 9, tagName: '生活' }, { id: 10, tagName: '随笔' }], articleCover: '' },
-  { id: 6, articleTitle: 'Vite 构建优化', articleSummary: 'Vite 项目的构建优化实践', categoryName: '前端', createTime: getDateStr(5), viewCount: 192, commentCount: 18, tags: [{ id: 7, tagName: 'Vite' }, { id: 1, tagName: 'Vue3' }], articleCover: '' },
-  { id: 7, articleTitle: 'React Hooks 实战指南', articleSummary: '深入理解 React Hooks 使用方法...', categoryName: '前端', createTime: getDateStr(6), viewCount: 780, commentCount: 25, tags: [{ id: 14, tagName: 'React' }, { id: 2, tagName: 'JavaScript' }], articleCover: '' },
-  { id: 8, articleTitle: 'Node.js 性能优化实践', articleSummary: '分享 Node.js 性能优化的实用技巧...', categoryName: '后端', createTime: getDateStr(7), viewCount: 654, commentCount: 28, tags: [{ id: 4, tagName: 'Node.js' }, { id: 17, tagName: 'Redis' }], articleCover: '' },
-  { id: 9, articleTitle: 'Docker 容器化部署指南', articleSummary: '从入门到精通 Docker 容器化部署...', categoryName: '学习', createTime: getDateStr(8), viewCount: 1567, commentCount: 56, tags: [{ id: 13, tagName: 'Docker' }, { id: 22, tagName: 'Nginx' }], articleCover: '' },
-  { id: 10, articleTitle: 'MySQL 索引优化', articleSummary: 'MySQL 索引优化最佳实践', categoryName: '后端', createTime: getDateStr(9), viewCount: 610, commentCount: 22, tags: [{ id: 16, tagName: 'MySQL' }], articleCover: '' },
-  { id: 11, articleTitle: 'Kubernetes 入门到精通', articleSummary: 'Kubernetes 容器编排系统学习', categoryName: '学习', createTime: getDateStr(10), viewCount: 430, commentCount: 15, tags: [{ id: 19, tagName: 'Kubernetes' }, { id: 13, tagName: 'Docker' }], articleCover: '' },
-]
-
 const safeParse = (key, fallback) => {
   try {
     const raw = localStorage.getItem(key)
@@ -183,8 +163,8 @@ const loadArticlesByCategory = () => {
     categoryName.value = '未知分类'
   }
   
-  const localArticles = loadLocalArticles()
-  const sourceArticles = localArticles.length > 0 ? localArticles : defaultArticles
+  // 不再用假文章兜底：没有就显示空状态，别让用户看到从没写过的文章
+  const sourceArticles = loadLocalArticles()
   const allArticles = sourceArticles.map(a => {
     const actualCommentCount = getCommentCount(a.id)
     return {

@@ -4,7 +4,7 @@ const { query, get, run } = require('../db')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const JWT_SECRET = process.env.JWT_SECRET || 'aurora-blog-secret-key-2024'
+const JWT_SECRET = process.env.JWT_SECRET || 'jizhiyudi-blog-secret-key-2024'
 
 router.post('/login', (req, res) => {
   const { username, password } = req.body

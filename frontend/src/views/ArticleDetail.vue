@@ -53,8 +53,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
-            <button 
-              @click="deleteArticle" 
+            <!-- 语雀同步来的文章删不掉（下次同步会回来），只对本地库文章显示 -->
+            <button
+              v-if="article.source !== 'yuque'"
+              @click="deleteArticle"
               class="p-2 text-slate-400 hover:text-red-400 transition-colors"
               title="删除文章"
             >
@@ -168,6 +170,7 @@ import { useRoute, useRouter } from 'vue-router'
 import SideBar from '../components/SideBar.vue'
 import AIChat from '../components/AIChat.vue'
 import { syncArticleDetail, syncComments } from '../service/syncService'
+import { blogApi } from '../service/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -184,30 +187,29 @@ const loadArticle = async (skipIncrement = false) => {
   
   if (!found) {
     try {
-      const resp = await fetch(`http://localhost:8080/articles/${id}`)
-      if (resp.ok) {
-        const data = await resp.json()
-        if (data && !data.message) {
-          found = {
-            id: data.id,
-            articleTitle: data.title || data.articleTitle,
-            articleContent: data.content || '',
-            articleSummary: data.summary || '',
-            articleCover: data.cover || '',
-            categoryName: data.category ? data.category.name : '未分类',
-            createTime: data.created_at,
-            viewCount: data.view_count || 0,
-            likeCount: data.like_count || 0,
-            tagNames: (data.tags || []).map(t => t.name),
-          }
-          if (!saved.find(a => a.id === id)) {
-            saved.push(found)
-            localStorage.setItem('blog_articles', JSON.stringify(saved))
-          }
+      // 走 service 层，别写死后端地址：语雀文章是静态 JSON，线上没有后端进程
+      const data = await blogApi.getArticleById(id)
+      if (data && !data.message) {
+        found = {
+          id: data.id,
+          articleTitle: data.title || data.articleTitle,
+          articleContent: data.content || '',
+          articleSummary: data.summary || '',
+          articleCover: data.cover || '',
+          categoryName: data.category ? data.category.name : '未分类',
+          createTime: data.created_at,
+          viewCount: data.view_count || 0,
+          likeCount: data.like_count || 0,
+          tagNames: (data.tags || []).map(t => t.name),
+          source: data.source,
+        }
+        if (!saved.find(a => a.id === id)) {
+          saved.push(found)
+          localStorage.setItem('blog_articles', JSON.stringify(saved))
         }
       }
     } catch (e) {
-      console.warn('Failed to fetch article from backend:', e.message)
+      console.warn('Failed to fetch article detail:', e.message)
     }
   }
 
@@ -236,6 +238,7 @@ const loadArticle = async (skipIncrement = false) => {
       viewCount: newViewCount,
       commentCount: found.commentCount || 0,
       liked: liked.includes(found.id),
+      source: found.source || 'db',
       tags: (found.tagNames || found.tags || []).map((name, idx) => {
         if (typeof name === 'string') return { id: idx + 100, tagName: name }
         return { id: name.id || idx + 100, tagName: name.tagName || name.name }
@@ -363,8 +366,11 @@ const deleteArticle = async () => {
   
   try {
     try {
-      await fetch(`http://localhost:8080/articles/${article.value.id}`, { method: 'DELETE' })
-    } catch (e) {}
+      await blogApi.deleteArticle(article.value.id)
+    } catch (e) {
+      // 后端没部署时删不掉是正常的，下面继续清本地缓存，保证界面一致
+      console.warn('后端删除失败，仅清理本地缓存：', e.message)
+    }
 
     const saved = localStorage.getItem('blog_articles')
     if (saved) {
@@ -416,26 +422,19 @@ const submitComment = async () => {
   }
 
   try {
-    const resp = await fetch('http://localhost:8080/comments/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        article_id: article.value?.id,
-        nickname: newComment.nickname,
-        content: newComment.commentContent,
-        avatar: '',
-        parent_id: 0,
-      })
+    const data = await blogApi.saveComment({
+      article_id: article.value?.id,
+      nickname: newComment.nickname,
+      content: newComment.commentContent,
+      avatar: '',
+      parent_id: 0,
     })
-    if (resp.ok) {
-      const data = await resp.json()
-      if (data && data.id) {
-        const idx = comments.value.findIndex(c => c.id === tempId)
-        if (idx > -1) {
-          comments.value[idx].id = data.id
-          comments.value[idx]._backendId = data.id
-          saveComments(article.value.id, comments.value)
-        }
+    if (data && data.id) {
+      const idx = comments.value.findIndex(c => c.id === tempId)
+      if (idx > -1) {
+        comments.value[idx].id = data.id
+        comments.value[idx]._backendId = data.id
+        saveComments(article.value.id, comments.value)
       }
     }
   } catch (e) {

@@ -44,51 +44,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import SideBar from '../components/SideBar.vue'
-import { syncFromServer } from '../service/syncService'
+import { syncFromServer, purgeLegacySeedData } from '../service/syncService'
 
-const defaultTags = [
-  { id: 1, tagName: 'Vue3' },
-  { id: 2, tagName: 'JavaScript' },
-  { id: 3, tagName: 'CSS' },
-  { id: 4, tagName: 'Node.js' },
-  { id: 5, tagName: 'Express' },
-  { id: 6, tagName: 'Tailwind' },
-  { id: 7, tagName: 'Vite' },
-  { id: 8, tagName: 'SQLite' },
-  { id: 9, tagName: '生活' },
-  { id: 10, tagName: '随笔' },
-  { id: 11, tagName: '前端' },
-  { id: 12, tagName: '学习' },
-  { id: 13, tagName: 'Docker' },
-  { id: 14, tagName: 'React' },
-  { id: 15, tagName: 'TypeScript' },
-  { id: 16, tagName: 'MySQL' },
-  { id: 17, tagName: 'Redis' },
-  { id: 18, tagName: 'Spring Boot' },
-  { id: 19, tagName: 'Kubernetes' },
-  { id: 20, tagName: 'Git' },
-  { id: 21, tagName: 'Linux' },
-  { id: 22, tagName: 'Nginx' },
-  { id: 23, tagName: 'Java' },
-  { id: 24, tagName: 'Python' },
-  { id: 25, tagName: 'HTML5' },
-]
-
-const defaultArticles = [
-  { id: 1, tagNames: ['Vue3', 'JavaScript'] },
-  { id: 2, tagNames: ['Tailwind', 'JavaScript'] },
-  { id: 3, tagNames: ['Node.js', 'Express'] },
-  { id: 4, tagNames: ['前端', '学习'] },
-  { id: 5, tagNames: ['生活', '随笔'] },
-  { id: 6, tagNames: ['Vite', 'Vue3'] },
-  { id: 7, tagNames: ['React', 'JavaScript'] },
-  { id: 8, tagNames: ['Node.js', 'Redis'] },
-  { id: 9, tagNames: ['Docker', 'Nginx'] },
-  { id: 10, tagNames: ['MySQL'] },
-  { id: 11, tagNames: ['Kubernetes', 'Docker'] },
-]
-
-const TAGS_VERSION = 'v3'
+// 注意：这里原本有两组硬编码的假数据（25 个标签 + 11 篇假文章）用作兜底，已删除。
+// 接入语雀后它们变成纯粹的污染源：语雀文档没有标签概念，硬塞进去会显示
+// 一堆用户从没建过的标签、且计数全是 0。没数据就老老实实显示「暂无标签」。
+// 历史脏数据由 syncService 的 purgeLegacySeedData() 统一清理，这里不再管版本号。
 
 const safeParse = (key, fallback) => {
   try {
@@ -101,21 +62,9 @@ const safeParse = (key, fallback) => {
   }
 }
 
-const loadTagsSafe = () => {
-  const savedVersion = localStorage.getItem('blog_tags_version')
-  const saved = safeParse('blog_tags', null)
-  if (saved && saved.length > 0 && savedVersion === TAGS_VERSION) {
-    return saved
-  }
-  localStorage.setItem('blog_tags', JSON.stringify(defaultTags))
-  localStorage.setItem('blog_tags_version', TAGS_VERSION)
-  return [...defaultTags]
-}
+const loadTagsSafe = () => safeParse('blog_tags', [])
 
-const loadArticlesSafe = () => {
-  const localArticles = safeParse('blog_articles', [])
-  return localArticles.length > 0 ? localArticles : defaultArticles
-}
+const loadArticlesSafe = () => safeParse('blog_articles', [])
 
 const tags = ref([])
 
@@ -143,6 +92,7 @@ const tagsWithCount = computed(() => {
 })
 
 onMounted(async () => {
+  purgeLegacySeedData() // 先清掉老版本塞进来的假标签，避免首次渲染闪一下假数据
   tags.value = loadTagsSafe()
   
   try {

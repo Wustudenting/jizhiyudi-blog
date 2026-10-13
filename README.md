@@ -29,7 +29,7 @@
 ## 📁 项目结构
 
 ```
-aurora-master/
+jizhiyudi-blog/
 ├── frontend/          # 前端项目
 │   ├── src/
 │   │   ├── components/    # 组件
