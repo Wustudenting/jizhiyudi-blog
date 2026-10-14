@@ -54,19 +54,17 @@
         <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">机智的鱼的博客，记录技术成长与生活感悟</p>
         <div class="flex justify-center space-x-6 text-center">
           <div>
-            <p class="text-lg font-bold text-blue-500">{{ stats.articleCount }}</p>
+            <p class="text-lg font-bold text-cyan-600 dark:text-blue-500">{{ stats.articleCount }}</p>
             <p class="text-xs text-slate-500 dark:text-slate-400">文章</p>
           </div>
           <div>
-            <p class="text-lg font-bold text-purple-500">{{ stats.tagCount }}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400">标签</p>
-          </div>
-          <div>
-            <p class="text-lg font-bold text-green-500">{{ stats.categoryCount }}</p>
+            <p class="text-lg font-bold text-cyan-700 dark:text-green-500">{{ stats.categoryCount }}</p>
             <p class="text-xs text-slate-500 dark:text-slate-400">分类</p>
           </div>
         </div>
-        <a href="https://github.com/Wustudenting" target="_blank" class="block w-full mt-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:opacity-90 transition-opacity text-center">
+        <!-- 用 .btn-primary：白天是站内统一的玻璃态青色，黑夜自动回落到原来的蓝紫渐变。
+             原来这里写死了 from-blue-500 to-purple-600，白天跟淡青底撞得厉害。 -->
+        <a href="https://github.com/Wustudenting" target="_blank" rel="noopener" class="btn-primary mt-4 block w-full text-center">
           + 关注我
         </a>
         <div class="flex justify-center space-x-4 mt-4">
@@ -125,19 +123,6 @@
       </ul>
     </section>
 
-    <section class="glass-card p-6">
-      <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">热门标签</h3>
-      <div class="flex flex-wrap gap-2">
-        <router-link 
-          v-for="tag in tags" 
-          :key="tag.id"
-          :to="`/tags/${tag.id}`"
-          class="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 text-sm rounded-full hover:bg-indigo-100 transition-colors"
-        >
-          {{ tag.name || tag.tagName }}
-        </router-link>
-      </div>
-    </section>
   </aside>
 </template>
 
@@ -160,14 +145,14 @@ const props = defineProps({
   }
 })
 
-const tags = ref([])
 const recentArticles = ref([])
 const totalArticleCount = ref(0)
 const categoryCount = ref(0)
 
+// 标签不做了：语雀没有标签概念，同步下来的 tags 恒为空数组，
+// 「热门标签」永远是个空框，个人卡片里的标签数也永远是 0。
 const stats = computed(() => ({
   articleCount: totalArticleCount.value || 0,
-  tagCount: tags.value.length || 0,
   categoryCount: categoryCount.value || 0,
 }))
 
@@ -179,9 +164,8 @@ const formatDate = (date) => {
 
 onMounted(async () => {
   try {
-    const [allArticles, topTags, categories] = await Promise.all([
+    const [allArticles, categories] = await Promise.all([
       blogApi.getArticles().catch(() => []),
-      blogApi.getTopTenTags().catch(() => []),
       blogApi.getCategories().catch(() => []),
     ])
 
@@ -195,10 +179,6 @@ onMounted(async () => {
         articleTitle: a.title || a.articleTitle || '',
         createTime: a.created_at || a.createTime,
       }))
-    }
-
-    if (topTags && Array.isArray(topTags)) {
-      tags.value = topTags
     }
 
     if (categories && Array.isArray(categories)) {

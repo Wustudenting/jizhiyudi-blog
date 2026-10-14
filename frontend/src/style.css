@@ -118,14 +118,50 @@ html:not(.dark) body {
   -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 
-.glass-card-hover:hover {
+/* ------------------------------------------------------------------
+   卡片 hover 动效。效果**照抄项目经历页那张卡**：
+     hover:shadow-lg hover:-translate-y-1 transition-all duration-300
+   也就是「上浮 4px + 阴影加重」，300ms，**不缩放**。
+
+   项目经历页自己仍保留那串 Tailwind 类，一个字没动 —— 这套只是把同样的
+   效果供给其余卡片：`.glass-card` 全家，外加内联 Tailwind 写的那几张
+   （加个 `.card-hover` 类即可）。
+
+   两个细节：
+   - transition 写在**基态**而不是 :hover。写在 :hover 里只有「进入」有过渡，
+     鼠标移出时会瞬间弹回去。
+   - transform 不参与布局，所以卡片浮起不会把周围的内容挤动。
+   ------------------------------------------------------------------ */
+.glass-card,
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-card:hover,
+.card-hover:hover {
   border-color: rgba(255, 255, 255, 0.75);
-  transition: all 0.3s ease;
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-0.25rem); /* = hover:-translate-y-1 */
   box-shadow:
-    0 22px 48px rgba(15, 42, 80, 0.18),
-    0 8px 20px rgba(15, 42, 80, 0.1),
-    inset 0 1px rgba(255, 255, 255, 0.85);
+    0 10px 15px -3px rgba(15, 42, 80, 0.14), /* = hover:shadow-lg 的形状，换成本站藏青调 */
+    0 4px 6px -4px rgba(15, 42, 80, 0.1),
+    inset 0 1px rgba(255, 255, 255, 0.99);
+}
+
+/* 黑夜的 hover 阴影/边框沿用原有那套深色值，不要照搬白天的 */
+.dark .glass-card:hover,
+.dark .card-hover:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* 系统开了「减少动态效果」就不做位移动画，只留阴影变化 */
+@media (prefers-reduced-motion: reduce) {
+  .glass-card:hover,
+  .card-hover:hover,
+  .glass-card-hover:hover {
+    transform: none;
+  }
 }
 
 .dark .glass-card {

@@ -1,7 +1,8 @@
 <template>
   <div class="pt-24">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-2">
+    <!-- 侧边栏已下线，简历正文独占整宽并居中 -->
+    <div>
+      <div>
         <div class="max-w-4xl mx-auto space-y-6">
           <section class="glass-card p-8">
             <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
@@ -234,15 +235,12 @@
           </section>
         </div>
       </div>
-
-      <SideBar />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import SideBar from '../components/SideBar.vue'
 
 const currentProfile = ref('fullstack')
 </script>

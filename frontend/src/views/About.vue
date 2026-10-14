@@ -71,8 +71,32 @@ import { ref, onMounted } from 'vue'
 import SideBar from '../components/SideBar.vue'
 import { blogApi } from '../service/api'
 
+/**
+ * 兜底文案（后端拿不到时用）。
+ * 描述的是这个站**实际**的技术形态，别再写「Node.js 全栈 / SQLite / 评论互动」——
+ * 线上跑的是纯静态站，内容来自语雀同步，后端接口从未部署，标签功能也已下线。
+ */
 const mockAbout = {
-  aboutContent: '<p>欢迎来到 <strong>机智的鱼</strong> 个人博客！这是一个基于 Vue3 + Node.js 全栈技术打造的个人博客系统，记录技术学习与生活感悟。</p><h2>技术栈</h2><ul><li><strong>前端：</strong>Vue3、JavaScript、Tailwind CSS、Vite</li><li><strong>后端：</strong>Node.js、Express、SQLite</li><li><strong>其他：</strong>Git、Docker、Nginx</li></ul><h2>项目特点</h2><ul><li>✨ Vue3 组合式 API + Vite 构建，开发体验流畅</li><li>🎨 Tailwind CSS 响应式设计，界面美观现代</li><li>📝 完整的文章管理、标签分类、评论互动功能</li><li>💾 本地持久化 + 后端同步，数据安全可靠</li></ul><h2>关于博客</h2><p>这个博客是我记录技术成长、分享生活感悟的地方。希望通过分享，能够帮助到更多的开发者，同时也督促自己不断学习和进步。</p>',
+  aboutContent: `
+<p>欢迎来到 <strong>机智的鱼</strong> 个人博客！这里是记录技术成长与生活感悟的自留地，从内容到页面都是自己一趟趟搭起来的。</p>
+<h2>技术栈</h2>
+<ul>
+  <li><strong>前端框架：</strong>Vue 3（组合式 API / <code>&lt;script setup&gt;</code>）、Vue Router、Vite</li>
+  <li><strong>样式：</strong>Tailwind CSS，白天 / 黑夜双主题各自独立配色</li>
+  <li><strong>内容来源：</strong>语雀知识库写作，配自研同步脚本导出静态 JSON</li>
+  <li><strong>可视化：</strong>ECharts（专业技能页）、手写 Canvas 与 three.js（首页知识星球）</li>
+  <li><strong>部署：</strong>纯静态托管，不需要后端服务常驻</li>
+</ul>
+<h2>项目特点</h2>
+<ul>
+  <li>📝 <strong>写作和发布分开：</strong>平时在语雀写，一条 <code>npm run sync:yuque</code> 就抓成静态 JSON，改完重新同步即可</li>
+  <li>⚡ <strong>纯静态：</strong>没有数据库、没有常驻后端，打开就能读，也不存在接口挂了页面就打不开的情况</li>
+  <li>🎨 <strong>双主题：</strong>白天、黑夜各一套配色，随系统偏好或手动切换</li>
+  <li>🌌 <strong>知识星球：</strong>首页把每篇文章放成一颗星，按分类着色、按篇幅定大小，点星直达正文</li>
+</ul>
+<h2>关于博客</h2>
+<p>这个博客是我记录技术成长、分享生活感悟的地方。写下来的过程本身就是一次复盘，如果这些笔记刚好也能帮到别人，那就更好了。</p>
+`.trim(),
   nickname: '机智的鱼',
   email: '1146013446@qq.com',
   address: '中国',

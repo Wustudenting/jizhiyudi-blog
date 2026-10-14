@@ -29,8 +29,8 @@
     </div>
 
     <div class="bg-gradient-to-br from-indigo-50 dark:from-indigo-500/10 via-blue-50 dark:via-blue-500/10 to-purple-50 dark:to-purple-500/10 rounded-2xl p-5 mb-6 shadow-sm border border-white/60 dark:border-slate-700/50">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-indigo-100/60">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm card-hover border border-indigo-100/60">
           <div class="flex items-center gap-2 mb-3">
             <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-white text-sm shadow-sm">📂</span>
             <h3 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">分类筛选</h3>
@@ -47,24 +47,7 @@
           </div>
         </div>
 
-        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-purple-100/60">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-sm shadow-sm">🏷️</span>
-            <h3 class="text-sm font-semibold text-purple-700 dark:text-purple-300">标签筛选</h3>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="tag in popularTags"
-              :key="tag"
-              @click="toggleTag(tag)"
-              :class="['px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105', selectedTags.includes(tag) ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-300 hover:bg-purple-100 hover:shadow-sm']"
-            >
-              {{ tag }}
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-cyan-100/60">
+        <div class="bg-white/70 dark:bg-slate-800/60 rounded-xl p-4 shadow-sm card-hover border border-cyan-100/60">
           <div class="flex items-center gap-2 mb-3">
             <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center text-white text-sm shadow-sm">📊</span>
             <h3 class="text-sm font-semibold text-cyan-700 dark:text-cyan-300">排序方式</h3>
@@ -90,27 +73,16 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-3 mt-5">
-        <router-link to="/categories" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-400 to-blue-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-          <span>📁</span> 全部分类
-        </router-link>
-        <router-link to="/tags" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-400 to-pink-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-          <span>🏷️</span> 全部标签
-        </router-link>
-      </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-2">
+    <!-- 侧边栏已下线，正文独占整宽 -->
+    <div>
+      <div>
         <div v-if="hasActiveFilters" class="mb-4 flex flex-wrap gap-2 items-center">
           <span class="text-sm text-slate-500 dark:text-slate-400">已选筛选:</span>
           <span v-for="cat in selectedCategories" :key="'c-'+cat" class="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs rounded-full flex items-center gap-1">
             {{ cat }}
             <button @click="toggleCategory(cat)" class="hover:text-indigo-900">×</button>
-          </span>
-          <span v-for="tag in selectedTags" :key="'t-'+tag" class="px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded-full flex items-center gap-1">
-            {{ tag }}
-            <button @click="toggleTag(tag)" class="hover:text-purple-900">×</button>
           </span>
         </div>
 
@@ -189,8 +161,6 @@
           <p class="text-slate-400 dark:text-slate-500">暂无文章</p>
         </div>
       </div>
-
-      <SideBar />
     </div>
   </div>
 </template>
@@ -198,7 +168,6 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import SideBar from '../components/SideBar.vue'
 import { blogApi } from '../service/api'
 
 const route = useRoute()
@@ -220,7 +189,6 @@ watch(searchKeyword, (val) => {
 })
 
 const selectedCategories = ref([])
-const selectedTags = ref([])
 const sortBy = ref('date-desc')
 
 const allCategories = computed(() => {
@@ -228,21 +196,8 @@ const allCategories = computed(() => {
   return Array.from(cats)
 })
 
-const popularTags = computed(() => {
-  const tagCounts = {}
-  allArticles.value.forEach(a => {
-    a.tags?.forEach(t => {
-      tagCounts[t.tagName] = (tagCounts[t.tagName] || 0) + 1
-    })
-  })
-  return Object.entries(tagCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([tag]) => tag)
-})
-
 const hasActiveFilters = computed(() => {
-  return selectedCategories.value.length > 0 || selectedTags.value.length > 0 || sortBy.value !== 'date-desc'
+  return selectedCategories.value.length > 0 || sortBy.value !== 'date-desc'
 })
 
 const filteredArticles = computed(() => {
@@ -262,15 +217,6 @@ const filteredArticles = computed(() => {
   if (selectedCategories.value.length > 0) {
     const cats = selectedCategories.value
     result = result.filter(a => cats.includes(a.categoryName))
-  }
-
-  if (selectedTags.value.length > 0) {
-    const tags = selectedTags.value
-    result = result.filter(a =>
-      tags.every(tag =>
-        a.tags?.some(t => t.tagName === tag)
-      )
-    )
   }
 
   switch (sortBy.value) {
@@ -314,19 +260,8 @@ const toggleCategory = (cat) => {
   currentPage.value = 1
 }
 
-const toggleTag = (tag) => {
-  const idx = selectedTags.value.indexOf(tag)
-  if (idx > -1) {
-    selectedTags.value.splice(idx, 1)
-  } else {
-    selectedTags.value.push(tag)
-  }
-  currentPage.value = 1
-}
-
 const clearFilters = () => {
   selectedCategories.value = []
-  selectedTags.value = []
   searchKeyword.value = ''
   debouncedKeyword.value = ''
   sortBy.value = 'date-desc'
@@ -384,7 +319,7 @@ const nextPage = () => {
   }
 }
 
-watch([debouncedKeyword, selectedCategories, selectedTags, sortBy], () => {
+watch([debouncedKeyword, selectedCategories, sortBy], () => {
   currentPage.value = 1
 })
 

@@ -15,16 +15,6 @@
           <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(article.createTime) }}</span>
         </div>
         <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6">{{ article.articleTitle }}</h1>
-        <div class="flex flex-wrap gap-2 mb-6">
-          <router-link 
-            v-for="tag in article.tags" 
-            :key="tag.id"
-            :to="`/tags/${tag.id}`"
-            class="px-3 py-1 bg-purple-500/20 text-purple-500 text-sm rounded-full hover:bg-purple-500/30 transition-colors"
-          >
-            {{ tag.tagName }}
-          </router-link>
-        </div>
         <div class="markdown-body" v-html="article.articleContent"></div>
         <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
           <div class="flex items-center space-x-4 text-slate-500 dark:text-slate-400">

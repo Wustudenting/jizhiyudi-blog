@@ -96,7 +96,7 @@
                   <HeroGalaxy :articles="galaxyArticles" />
                 </div>
                 <p class="hero-caption mt-3 text-center text-[11px]">
-                  知识星球：点击星球上的星星直达对应文章
+                  星球上的每颗星是一篇文章 · 悬停预览 · 点击直达
                 </p>
               </div>
             </div>
@@ -218,7 +218,7 @@
               href="https://github.com/Wustudenting"
               target="_blank"
               rel="noopener"
-              class="mt-4 block w-full rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-700 py-2 text-center font-medium text-white transition-opacity hover:opacity-90 dark:from-blue-500 dark:to-purple-600"
+              class="btn-primary mt-4 block w-full text-center"
             >
               + 关注我
             </a>
@@ -263,10 +263,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
 import { blogApi } from '../service/api'
-import HeroGalaxy from '../components/HeroGalaxy.vue'
 import HeroQuote from '../components/HeroQuote.vue'
+
+// 知识星球整块是 three.js，打进主包会让首屏多背 ~500KB。
+// 拆成异步组件：地球慢一拍出现，其余内容立刻能看。
+const HeroGalaxy = defineAsyncComponent(() => import('../components/HeroGalaxy.vue'))
 
 /**
  * 技术标签 chips。语雀那边没有标签概念（同步下来的 tags 恒为空数组），
@@ -296,11 +299,16 @@ const metrics = computed(() => [
   { label: '累计字数', value: formatWordCount(stats.value.wordCount) },
 ])
 
-/** 给知识星球的形状：星星按字数定大小、按分类上色 */
+/**
+ * 给知识星球的形状：星星按字数定大小、按分类上色。
+ * summary 也要带上 —— 语雀里有不少文档名是「1.day1」这种纯编号，
+ * 光有标题的话星图上就是一堆 day1，标签得靠 summary 兜底（见 HeroGalaxy）。
+ */
 const galaxyArticles = computed(() =>
   articlesData.value.map((a) => ({
     id: a.id,
     title: a.articleTitle,
+    summary: a.articleSummary,
     categoryName: a.categoryName,
     tags: [],
     wordCount: a.wordCount || 0,
@@ -319,8 +327,8 @@ const siteFeatures = computed(() => [
   },
   {
     eyebrow: '站点形态',
-    title: '纯静态 · 零后端',
-    desc: 'Vue 3 + Vite 打包成静态文件直接托管，没有数据库要维护、没有服务要守着，也不存在接口挂了页面就打不开的情况。',
+    title: '静态托管 · 后端待上线',
+    desc: '前端打包成静态文件直接托管，目前线上跑的就是这一层；配套的 Express 后端（文章、评论、友链等接口）代码已经写好，只是还没部署。',
   },
   {
     eyebrow: '阅读体验',

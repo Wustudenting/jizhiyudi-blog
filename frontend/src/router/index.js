@@ -4,8 +4,6 @@ import Articles from '../views/Articles.vue'
 import ArticleDetail from '../views/ArticleDetail.vue'
 import Categories from '../views/Categories.vue'
 import CategoryDetail from '../views/CategoryDetail.vue'
-import Tags from '../views/Tags.vue'
-import TagDetail from '../views/TagDetail.vue'
 import Talks from '../views/Talks.vue'
 import TalkDetail from '../views/TalkDetail.vue'
 import About from '../views/About.vue'
@@ -47,16 +45,6 @@ const routes = [
     path: '/categories/:id',
     name: 'CategoryDetail',
     component: CategoryDetail,
-  },
-  {
-    path: '/tags',
-    name: 'Tags',
-    component: Tags,
-  },
-  {
-    path: '/tags/:id',
-    name: 'TagDetail',
-    component: TagDetail,
   },
   {
     path: '/talks',

@@ -18,7 +18,7 @@
         <div
           v-for="stat in stats"
           :key="stat.label"
-          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl px-5 py-4 border border-white/80 dark:border-slate-700/50 shadow-sm"
+          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl px-5 py-4 border border-white/80 dark:border-slate-700/50 shadow-sm card-hover"
         >
           <p class="text-3xl font-bold text-slate-800 dark:text-slate-100 leading-none">{{ stat.value }}</p>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">{{ stat.label }}</p>
@@ -29,7 +29,7 @@
       <!-- 图表区：两张，形态不同（横向条形 / 柱 + 面积线） -->
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
         <section
-          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm"
+          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm card-hover"
         >
           <div class="flex items-baseline justify-between mb-1">
             <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">技术沉淀分布</h2>
@@ -52,7 +52,7 @@
         </section>
 
         <section
-          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm"
+          class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm card-hover"
         >
           <div class="flex items-baseline justify-between mb-1">
             <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">笔记积累趋势</h2>
@@ -69,47 +69,53 @@
         </section>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div class="lg:col-span-2 space-y-6">
-          <!-- 技能矩阵。这里刻意用进度条(meter)而不是图表：
-               熟练度是「一个比值对上限(100%)」，规范里对应的形态就是 meter，
-               而且四个分类各来一张条形图本来就会长得一模一样。 -->
-          <section
-            v-for="category in skillCategories"
-            :key="category.name"
-            class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div class="flex items-center mb-5">
-              <div
-                :class="[
-                  'w-10 h-10 rounded-xl flex items-center justify-center text-xl mr-3 shadow-sm',
-                  category.iconBg,
-                ]"
-              >
-                <span>{{ category.icon }}</span>
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ category.name }}</h2>
-                <p class="text-xs text-slate-400 dark:text-slate-500">{{ category.desc }}</p>
-              </div>
-            </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- 学习方向构成 -->
+        <section
+          class="lg:col-span-2 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/80 dark:border-slate-700/50 shadow-sm card-hover"
+        >
+          <div class="flex items-baseline justify-between mb-1">
+            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">学习方向占比</h2>
+            <span class="text-xs text-slate-400 dark:text-slate-500">语雀知识库</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            把知识库按方向归堆后的笔记篇数 —— 在语雀新开一个方向（比如大模型开发），这里会自动长出来
+          </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-              <div v-for="skill in category.skills" :key="skill.name" class="group">
-                <div class="flex items-center justify-between mb-1.5">
-                  <span class="text-slate-700 dark:text-slate-300 text-sm font-medium">{{ skill.name }}</span>
-                  <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ skill.value }}%</span>
-                </div>
-                <div class="h-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
-                  <div
-                    class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700 group-hover:brightness-110"
-                    :style="{ width: skill.value + '%' }"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
+          <DonutChart
+            v-if="directionStats.length"
+            :items="directionStats"
+            center-label="篇笔记"
+            unit=" 篇"
+            :height="300"
+          />
+          <p v-else class="text-sm text-slate-400 dark:text-slate-500 py-8 text-center">
+            正在读取语雀数据…
+          </p>
+
+          <!--
+            表格视图。两个作用：
+            1. 环形图只负责「一眼看构成」，要读准数字看这里
+            2. 浅色模式下青 / 黄 / 品红三个色槽的对比度低于 3:1，
+               规范要求必须配可见标注或表格视图作为兜底
+          -->
+          <ul
+            v-if="directionStats.length"
+            class="mt-4 border-t border-slate-100 divide-y divide-slate-100 dark:border-slate-700/50 dark:divide-slate-700/50"
+          >
+            <li v-for="d in directionStats" :key="d.name" class="flex items-center gap-3 py-2.5">
+              <span
+                class="h-2.5 w-2.5 shrink-0 rounded-full"
+                :style="{ background: donutColors[d.slot] }"
+              ></span>
+              <span class="flex-1 text-sm text-slate-600 dark:text-slate-300">{{ d.name }}</span>
+              <span class="font-mono text-sm text-slate-500 dark:text-slate-400">{{ d.value }} 篇</span>
+              <span class="w-16 text-right font-mono text-sm text-slate-400 dark:text-slate-500">
+                {{ percentOf(d.value) }}%
+              </span>
+            </li>
+          </ul>
+        </section>
 
         <!-- 侧栏 -->
         <div class="lg:col-span-1 space-y-5">
@@ -146,7 +152,7 @@
           </div>
 
           <!-- 最新笔记：真实数据，跳转到文章详情 -->
-          <div class="bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-purple-100/60 dark:border-slate-700/50 shadow-sm">
+          <div class="bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-purple-100/60 dark:border-slate-700/50 shadow-sm card-hover">
             <div class="flex items-center gap-2 mb-4">
               <span class="text-base">💡</span>
               <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">最新笔记</h4>
@@ -172,53 +178,6 @@
             <p v-else class="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">正在读取…</p>
           </div>
 
-          <!-- 工具箱 -->
-          <section class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-white/80 dark:border-slate-700/50 shadow-sm">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="text-base">🛠️</span>
-              <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">工具与其他</h4>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="tool in tools"
-                :key="tool"
-                class="px-3.5 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700/50 dark:to-slate-700/30 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-medium hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-500/20 dark:hover:to-purple-500/20 hover:text-indigo-600 dark:hover:text-indigo-300 hover:shadow-sm transition-all cursor-default border border-slate-200/60 dark:border-slate-600/40"
-              >
-                {{ tool }}
-              </span>
-            </div>
-          </section>
-
-          <!-- 语言能力 -->
-          <section class="bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl p-5 border border-white/80 dark:border-slate-700/50 shadow-sm">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="text-base">🌟</span>
-              <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100">语言能力</h4>
-            </div>
-            <!-- 这一栏在侧边栏里很窄，保持单列，双列会被挤扁 -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-700/40 dark:to-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-700/40">
-                <div class="flex items-center gap-3">
-                  <span class="text-2xl">🇨🇳</span>
-                  <div>
-                    <p class="font-medium text-slate-800 dark:text-slate-100 text-sm">中文</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">母语</p>
-                  </div>
-                </div>
-                <span class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 rounded-full text-xs font-medium">精通</span>
-              </div>
-              <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-700/40 dark:to-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-700/40">
-                <div class="flex items-center gap-3">
-                  <span class="text-2xl">🇬🇧</span>
-                  <div>
-                    <p class="font-medium text-slate-800 dark:text-slate-100 text-sm">英语</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">CET-4</p>
-                  </div>
-                </div>
-                <span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-300 rounded-full text-xs font-medium">良好</span>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
     </div>
@@ -229,108 +188,111 @@
 import { ref, computed, onMounted } from 'vue'
 import BarChart from '../components/BarChart.vue'
 import TrendChart from '../components/TrendChart.vue'
+// 色板从环形图组件里拿同一份，别在这儿另抄一遍 —— 抄了就迟早会不一致
+import DonutChart, { DONUT_PALETTE } from '../components/DonutChart.vue'
+import { useTheme } from '../composables/useTheme'
 import { yuqueApi } from '../service/yuqueApi'
 
 /**
- * 技能清单与熟练度是自评，不来自语雀；
- * 语雀只提供「文章沉淀量」这类可核实的数据（见下方 articleStats / trendPoints）。
+ * 学习方向的归类规则。环形图的数据源，全部来自语雀真实篇数。
  *
- * 本轮按语雀实际覆盖做了调整：
- * - 新增 React（语雀 React 库 7 篇）、小程序/UniApp（2 篇）、Shell（linux和shell 库）
- * - Python（12 篇）与 Node.js（11 篇）是笔记量最大的两块，熟练度相应上调
- * - Python / FastAPI 从「AI 与扩展」移到「后端与数据库」—— 它们本来的定位就是后端
+ * 用关键词匹配而不是写死「知识库名 → 方向」的映射表：以后在语雀新开一个
+ * 方向（比如「大模型开发」），只要名字里带关键词就会自动出现在环里，
+ * 不用回来改代码 —— 这正是当初把自评进度条换成环形图的原因。
+ *
+ * 顺序有意义：**先匹配更具体的方向**，别让宽泛的词把人家抢走。
+ * 比如「AI开发全能开发技术之数据库」既沾 AI 又是数据库，
+ * 放在大模型规则里不带裸的 'ai'，就是为了让它老实落进「后端与数据库」。
+ *
+ * slot 是色板里的固定槽位 —— 颜色跟着方向走，不跟着篇数排序走。
+ * 否则某个方向笔记变多、排名一变，所有扇区就会集体换色。
  */
-const skillCategories = [
+const DIRECTION_RULES = [
+  {
+    name: '大模型开发',
+    slot: 0,
+    keywords: ['大模型', 'llm', 'prompt', 'agent', 'rag', 'langchain', 'langgraph', 'transformer', '微调'],
+  },
   {
     name: '前端开发',
-    icon: '🎨',
-    iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-500/25 dark:to-cyan-500/25',
-    desc: '现代前端技术栈与小程序',
-    skills: [
-      { name: 'HTML5', value: 95 },
-      { name: 'CSS3', value: 92 },
-      { name: 'JavaScript', value: 90 },
-      { name: 'Vue 3', value: 88 },
-      { name: 'Tailwind CSS', value: 88 },
-      { name: 'Vite', value: 85 },
-      { name: 'Element Plus', value: 85 },
-      { name: 'Pinia', value: 84 },
-      { name: 'TypeScript', value: 82 },
-      { name: 'ECharts', value: 80 },
-      { name: '小程序 / UniApp', value: 78 },
-      { name: 'React', value: 70 },
-    ],
+    slot: 1,
+    keywords: ['react', 'vue', 'typescript', 'javascript', 'css', 'html', '小程序', 'uniapp', '前端', 'ts'],
   },
   {
     name: '后端与数据库',
-    icon: '⚙️',
-    iconBg: 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-500/25 dark:to-pink-500/25',
-    desc: '服务端开发、API 设计与数据存储',
-    skills: [
-      { name: 'Python', value: 88 },
-      { name: 'SQLite', value: 86 },
-      { name: 'Node.js', value: 85 },
-      { name: 'Express', value: 85 },
-      { name: 'MySQL', value: 85 },
-      { name: 'RESTful API', value: 84 },
-      { name: 'Spring Boot', value: 82 },
-      { name: 'FastAPI', value: 80 },
-      { name: 'Java', value: 80 },
-      { name: 'Redis', value: 78 },
-    ],
+    slot: 2,
+    keywords: ['python', 'node', 'fastapi', 'mysql', '数据库', 'java', 'redis', 'spring', 'sql', '后端'],
   },
   {
     name: '工程化与运维',
-    icon: '🔧',
-    iconBg: 'bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-500/25 dark:to-red-500/25',
-    desc: '开发工具、版本控制与部署环境',
-    skills: [
-      { name: 'VS Code', value: 92 },
-      { name: 'Git', value: 88 },
-      { name: 'Chrome DevTools', value: 85 },
-      { name: 'Postman', value: 84 },
-      { name: 'Linux', value: 80 },
-      { name: 'Nginx', value: 78 },
-      { name: 'Shell', value: 76 },
-      { name: 'Docker', value: 76 },
-    ],
-  },
-  {
-    name: 'AI 与数据',
-    icon: '🤖',
-    iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-500/25 dark:to-teal-500/25',
-    desc: '计算机视觉与数据处理',
-    skills: [
-      { name: 'YOLOv10', value: 75 },
-      { name: 'OpenCV', value: 74 },
-      { name: 'PyTorch', value: 72 },
-      { name: 'Pandas', value: 70 },
-    ],
+    slot: 3,
+    keywords: ['linux', 'shell', 'git', 'docker', 'nginx', '运维', '工程化', '部署'],
   },
 ]
 
-const tools = [
-  'RESTful API', 'WebSocket', 'Chrome DevTools', 'Vant', 'UniApp', 'TypeScript',
-  'Composition API', 'Vuex', 'Nuxt', 'GraphQL', 'JWT', 'Swagger',
-  'Vercel', 'Railway', 'PM2', 'MongoDB', 'Nacos', 'Seata',
-]
+const DIRECTION_FALLBACK = { name: '其他', slot: 4 }
+
+/** 知识库名 → 方向名；一条都没命中就归「其他」 */
+const matchDirection = (bookName) => {
+  const s = String(bookName || '').toLowerCase()
+  const hit = DIRECTION_RULES.find((r) => r.keywords.some((k) => s.includes(k)))
+  return hit ? hit.name : DIRECTION_FALLBACK.name
+}
 
 // ---- 以下都是语雀真实数据 ----
 const articleStats = ref([])
+const totalWords = ref(0)
 const trendPoints = ref([])
 const recentNotes = ref([])
 const categoryCount = ref(0)
 const articleCount = ref(0)
 
-const skillCount = computed(() =>
-  skillCategories.reduce((n, c) => n + c.skills.length, 0),
+/**
+ * 环形图数据：知识库 → 方向 → 篇数合计。
+ *
+ * 输出保持**规则表的固定顺序**，不按篇数从多到少重排。两个原因：
+ *  1. 颜色按 slot 走，跟着方向不跟着排名 —— 排序一变，扇区颜色会集体错位
+ *  2. 扇区相邻关系也要稳定。色板验证的是「相邻槽位」那一组配对；
+ *     一旦按篇数重排，橙色和黄色可能贴到一起，那对恰恰是没过全配对门槛的
+ *     组合（见 DonutChart 的色板说明）
+ */
+const directionStats = computed(() => {
+  const totals = new Map()
+  for (const item of articleStats.value) {
+    const name = matchDirection(item.name)
+    totals.set(name, (totals.get(name) || 0) + item.value)
+  }
+
+  return [...DIRECTION_RULES, DIRECTION_FALLBACK]
+    .map((r) => ({ name: r.name, slot: r.slot, value: totals.get(r.name) || 0 }))
+    .filter((d) => d.value > 0)
+})
+
+const { theme } = useTheme()
+
+/** 表格视图的小圆点跟环形图用同一份颜色 */
+const donutColors = computed(() =>
+  theme.value === 'dark' ? DONUT_PALETTE.dark : DONUT_PALETTE.light,
 )
+
+const directionTotal = computed(() =>
+  directionStats.value.reduce((n, d) => n + d.value, 0),
+)
+
+const percentOf = (v) =>
+  directionTotal.value ? ((v / directionTotal.value) * 100).toFixed(2) : '0.00'
 
 const stats = computed(() => [
   { value: categoryCount.value || '—', label: '技术领域', hint: '语雀知识库' },
   { value: articleCount.value || '—', label: '文章沉淀', hint: '已同步到博客' },
-  { value: skillCount.value, label: '技能项', hint: '按熟练度自评' },
-  { value: tools.length, label: '工具链', hint: '常用工具与框架' },
+  { value: directionStats.value.length || '—', label: '学习方向', hint: '按知识库归类' },
+  // 「工具与其他」那一栏已经下线，再挂一个「工具链 N」就是在数一个看不见的列表，
+  // 换成和首页一致的累计字数
+  {
+    value: totalWords.value ? `${(totalWords.value / 10000).toFixed(2)} 万` : '—',
+    label: '累计字数',
+    hint: '语雀笔记合计',
+  },
 ])
 
 const formatDate = (s) => {
@@ -350,6 +312,7 @@ onMounted(async () => {
 
     articleCount.value = articles.length
     categoryCount.value = categories.length
+    totalWords.value = articles.reduce((n, a) => n + (Number(a.wordCount) || 0), 0)
 
     articleStats.value = [...categories]
       .filter((c) => c.count > 0)

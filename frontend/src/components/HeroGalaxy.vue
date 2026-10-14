@@ -8,53 +8,137 @@
   >
     <canvas ref="canvasEl" class="galaxy-canvas"></canvas>
 
-    <!-- 文字标签：字数最多的 5 颗常驻 + 当前 hover 的那颗，位置由 canvas 循环每帧同步 -->
+    <!--
+      文字标签：每篇文章一个，绝对定位的圆角徽章。
+      位置和透明度每帧由「星星相对镜头的正面程度」驱动 —— 见 syncLabels()。
+    -->
     <div
       v-for="item in labelItems"
       :key="item.id"
       :ref="item.setEl"
       class="galaxy-label"
       :title="item.fullTitle"
-      :style="{ color: item.color, textShadow: `0 0 8px ${item.color}80, 0 1px 3px rgba(2,6,23,.9)` }"
     >
       {{ item.title }}
     </div>
 
-    <!-- 空态：不起动画循环，只留一行居中提示 -->
-    <div v-if="!articles.length" class="galaxy-empty">暂无文章</div>
+    <div v-if="!articles.length" class="galaxy-overlay">暂无文章</div>
+    <div v-else-if="webglFailed" class="galaxy-overlay galaxy-overlay--warn">
+      浏览器未启用硬件加速，3D 地球无法渲染
+    </div>
 
     <div v-if="hovered" ref="tipEl" class="galaxy-tooltip" :style="tooltipStyle">
       <div class="galaxy-tooltip__title">
         <i class="galaxy-tooltip__dot" :style="{ background: hovered.color }"></i>
-        <span>{{ hovered.title }}</span>
+        <span>{{ hovered.label }}</span>
       </div>
       <div v-if="tooltipMeta" class="galaxy-tooltip__meta">{{ tooltipMeta }}</div>
+      <!-- 标签取的是 summary，这里补上语雀里的原始文档名，方便对回是哪一篇 -->
+      <div v-if="hovered.docTitle" class="galaxy-tooltip__doc">语雀文档名：{{ hovered.docTitle }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
 /**
- * HeroGalaxy —— 文章星图。
+ * HeroGalaxy —— 首页那颗会自转的关注地球。
  *
- * 每篇文章 = 一颗星：位置由向日葵螺旋（黄金角）决定，半径看字数，颜色看分类。
- * 这块面板白天/黑夜模式下都是深色星空，是刻意的「星空窗口」效果，所以不跟随主题切换。
+ * 用 three.js 做一个真实贴图的三维地球（贴着球面飞的文章星点），
+ * 结构照搬参考站：昼夜贴图 + 法线贴图 + 高光贴图 + 云层 + 大气辉光 shader。
  *
- * 配色说明：9 色青蓝系色板只作视觉区分 —— 这里没有图例，分类身份由 tooltip 和
- * 文字标签给出，不靠「颜色 ↔ 分类」的对照阅读，所以色板不做分类编码意义上的校验。
- * 分类名用 FNV-1a 哈希稳定取色：同一分类永远同色，且与文章在数组里的位置无关。
+ * 和参考站的两处不同：
+ *   1. 云层用**加法混合 + 灰度图**，不是带 alpha 的 PNG —— 带 alpha 的 WebP
+ *      压不动（实测 quality 从 45 调到 60 体积纹丝不动，走了无损），
+ *      灰度 + AdditiveBlending 一张 JPEG 就够，85KB 顶掉 210KB。
+ *   2. 单独处理 WebGL 起不来的情况：没开硬件加速的访客要看到一句人话，
+ *      而不是一块黑屏（参考站就是黑屏的，用户自己踩过）。
+ *
+ * 这篇文章星点的「正面程度」驱动标签淡入淡出，那套阈值是实测调出来的：
+ * 均匀球面上 z 分量均匀分布 → front = (z+1)/2 也均匀 → 可见比例 = 1 - 阈值。
  */
 import { ref, shallowRef, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  Group,
+  Mesh,
+  Sprite,
+  SpriteMaterial,
+  SphereGeometry,
+  MeshPhongMaterial,
+  ShaderMaterial,
+  CanvasTexture,
+  Color,
+  Vector2,
+  Vector3,
+  AdditiveBlending,
+  BackSide,
+  DirectionalLight,
+  AmbientLight,
+  TextureLoader,
+  SRGBColorSpace,
+} from 'three'
 
 const props = defineProps({
-  /** [{ id, title, categoryName, tags: string[], wordCount }] */
+  /** [{ id, title, summary, categoryName, tags: string[], wordCount }] */
   articles: { type: Array, default: () => [] },
 })
 
+/**
+ * 标签上显示什么文字。
+ *
+ * 语雀里的文档名有 36/42 是纯编号（「1.day1」「2.day2」），直接当标签等于没信息；
+ * 这种就改用 summary（文档的首个标题）顶上，并把开头的「第X章.」「1.」剥掉，
+ * 让「第一章.MySQL的常用函数」变成「MySQL的常用函数」。
+ *
+ * 标题本身有信息量的（「252.express路由系统-静态资源部署-koa和中间件」
+ * 「小程序八股」）**保持原标题** —— 那些的 summary 往往只是其中一个知识点
+ * （「express路由系统的使用」），换过去反而丢信息。
+ */
+const BARE_TITLE = /^\d+\s*\.\s*(day\s*\d*)?\s*$/i
+
+/** summary 太长的多半是正文首段连写，不是小标题 */
+const MAX_SUMMARY_LABEL = 20
+/** 带句读的也不是标题 */
+const SENTENCE_PUNCT = /[。，！？；]/
+
+/** 剥掉开头的「第X章.」「1.」 */
+const stripSectionPrefix = (s) =>
+  String(s || '')
+    .replace(/^第\s*[一二三四五六七八九十百零\d]+\s*[章节篇]\s*[.、：:·-]?\s*/, '')
+    .replace(/^\d+\s*[.、：:]\s*/, '')
+
+/**
+ * summary 通常是「标题1标题2标题3」连写的（「安装第三方库1.标准库介绍2.引入第三方库」），
+ * 只取第一段就够当标签了。
+ */
+const firstSegment = (s) =>
+  String(s || '')
+    .split(/第\s*[一二三四五六七八九十百零\d]+\s*[章节篇]/)[0]
+    .split(/\d+\s*[.、：:]/)[0]
+    .trim()
+
+const labelTextOf = (title, summary) => {
+  const t = String(title || '').trim()
+  if (!BARE_TITLE.test(t)) return t
+
+  const s = firstSegment(stripSectionPrefix(summary))
+  // 太长或带句读的，说明 summary 存的是正文首段而不是小标题 ——
+  // 与其把半句话截出来当标签（「这个是我们依赖的核…」），不如老实退回文档名。
+  // 实测这样能挡掉「React+Ts基础环境创建我们要创建一个…」这类连写。
+  if (!s || s.length > MAX_SUMMARY_LABEL || SENTENCE_PUNCT.test(s)) return t
+  return s
+}
+
 const router = useRouter()
 
-/** 9 色青蓝系色板：在深空底色上都够亮、够可读 */
+const rootEl = ref(null)
+const canvasEl = ref(null)
+const tipEl = ref(null)
+
+/** 9 色青蓝系色板，在深空底上都够亮 */
 const PALETTE = [
   '#22d3ee',
   '#38bdf8',
@@ -67,49 +151,59 @@ const PALETTE = [
   '#93c5fd',
 ]
 
-/** 黄金角 ≈ 137.5°，斐波那契球面分布的核心常数 */
-const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
-const TAU = Math.PI * 2
-const MAX_LABELS = 5 // 常驻文字标签的数量
-const GLOW_SCALE = 3.5 // 光晕半径 = 星半径 * 3.5
-const HIT_PADDING = 8 // 命中判定额外放宽的像素，小星也点得中
+// ---- 场景尺度 ----
+const GLOBE_R = 7 // 地球半径
+const STAR_R = GLOBE_R * 1.017 // 星点贴在地表外侧一点点，避免被球面 z-fighting 吃掉
+const ATMO_R = GLOBE_R * 1.136 // 大气层
+const CAM_Z = 27 // 相机距离：这个值 + fov 一起决定地球在面板里占多大。约留三成余量
+const FOV = 45
+const SPIN = 0.13 // 自转角速度（弧度/秒），约 48 秒一圈
 
-// ---- 球面投影 ----
-const SPHERE_R = 0.42 // 球半径 = min(宽, 高) * 0.42，给容器留边
-const CAM_Z = 3 // 相机在 z 轴上的位置，单位是球半径。越小透视越夸张
-const AXIAL_TILT = 0.35 // 地轴倾角（约 20°）：不加的话球体轮廓是个正圆，很假
-const LABEL_FRONT_MIN = 0.35 // 深度低于此值的星，标签藏起来（字浮在球外会穿帮）
+/**
+ * 系统开了「减少动态效果」时的速度倍数。
+ *
+ * 这里**不是停转，而是降到三成** —— 参考站就是这么处理的（它的循环里写的是
+ * `t = reduce ? .3 : 1`，然后 `rotation.y += .0022 * t`）。
+ * 之前我按「完全冻结」实现，结果开了这个系统设置的访客看到的是地球一动不动，
+ * 和参考站对不上。低频、缓慢的连续自转不属于该设置要防的那类动效
+ * （它主要防视差、大幅位移、高频闪烁），所以跟着参考站降速是合理的。
+ */
+const SPIN_REDUCED = 0.3
 
-const rootEl = ref(null)
-const canvasEl = ref(null)
-const tipEl = ref(null)
+// 标签可见性：低于 MIN 不给标签，到 FULL 完全不透明，中间线性淡入淡出。
+//
+// front 取的是世界坐标归一化后的 z，落在 [-1, 1] 且**均匀分布**，
+// 所以「同时可见比例 = (1 - MIN) / 2」。想要两成左右就是 MIN = 0.60。
+// （从手写 canvas 版搬过来时这里是 0.80 —— 那版 front 是 (z+1)/2 落在 [0,1]，
+//   刻度和这边差一倍，直接照搬会只剩一成的标签。）
+const LABEL_FRONT_MIN = 0.6
+const LABEL_FRONT_FULL = 0.84
+const LABEL_FADE = 0.08 // 每帧朝目标透明度逼近的比例
+const LABEL_PAD = 4
+const LABEL_H = 20
 
-/** 当前 hover 的星（普通对象，用 shallowRef 避免深层代理） */
 const hovered = shallowRef(null)
-/** 需要渲染成 DOM 的标签项，只在布局 / hover 变化时重建 */
 const labelItems = shallowRef([])
-/** 容器 CSS 尺寸，tooltip 翻转要靠它 */
 const box = ref({ w: 0, h: 0 })
-/** tooltip 的实测尺寸，用于贴边翻转 */
 const tipSize = ref({ w: 0, h: 0 })
-/** tooltip 跟随鼠标的位置（容器内坐标） */
 const tipPos = ref({ x: 0, y: 0 })
+const webglFailed = ref(false)
 
-// 下面这些都是每帧读写的东西，故意不放响应式：60fps 走 proxy 只会白白变慢
-let ctx = null
-let dpr = 1
-let stars = []
-let backdrop = [] // 球面上的背景星尘（装饰，不可点）
-let view = { w: 0, h: 0, cx: 0, cy: 0 }
-let rotation = 0
+// 每帧读写的东西一律不放响应式
+let renderer = null
+let camera = null
+let scene = null
+let earthGroup = null
 let rafId = 0
-let startTs = 0
+let lastTs = 0
 let reducedMotion = false
 let resizeObserver = null
-/** id -> 标签项，保证 setEl 的函数引用稳定（同一颗星换标题时才重建） */
+let stars = []
+let starMeshes = []
 const labelCache = new Map()
+const disposables = [] // 卸载时要 dispose 的几何/材质/贴图
 
-/** FNV-1a：把分类名稳定映射到色板下标，同一分类永远同色，与数组顺序无关 */
+/** FNV-1a：分类名 → 色板下标，同一分类永远同色，与数组顺序无关 */
 const hashToIndex = (str, mod) => {
   let h = 2166136261
   const s = String(str || '')
@@ -120,117 +214,218 @@ const hashToIndex = (str, mod) => {
   return (h >>> 0) % mod
 }
 
-/** 色板是 hex（给 CSS 用的），canvas 的径向渐变要 rgba，这里做一次转换 */
-const hexToRgba = (hex, alpha) => {
-  const n = parseInt(hex.slice(1), 16)
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
+/** 径向渐变的小光点贴图（白的，上色交给 sprite 的 color） */
+const makeGlowTexture = (size = 128) => {
+  const c = document.createElement('canvas')
+  c.width = c.height = size
+  const g = c.getContext('2d')
+  const r = size / 2
+  const grad = g.createRadialGradient(r, r, 0, r, r, r)
+  grad.addColorStop(0, 'rgba(255,255,255,1)')
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.75)')
+  grad.addColorStop(0.55, 'rgba(255,255,255,0.18)')
+  grad.addColorStop(1, 'rgba(255,255,255,0)')
+  g.fillStyle = grad
+  g.fillRect(0, 0, size, size)
+  const tex = new CanvasTexture(c)
+  tex.colorSpace = SRGBColorSpace
+  disposables.push(tex)
+  return tex
+}
+
+const makeStarMaterial = (glowTex, color) => {
+  const mat = new SpriteMaterial({
+    map: glowTex,
+    color: new Color(color),
+    transparent: true,
+    blending: AdditiveBlending,
+    depthWrite: false,
+  })
+  disposables.push(mat)
+  return mat
 }
 
 /**
- * 用**斐波那契球面**把每颗星铺在球壳上。
- *
- * 和向日葵螺旋是同一个套路（黄金角 + 面积均匀），只是从平面搬到了球面：
- *   y   = 1 - 2(i + 0.5) / n   → 按纬度把球切成 n 条等高的带
- *   r   = √(1 - y²)            → 该纬度圈的半径
- *   θ   = i × 黄金角            → 经度
- * 任意点数都铺得均匀、不结块也不留空洞，同样不需要碰撞检测。
- *
- * 存的是**单位球面坐标**（ux/uy/uz，模长恒为 1），不是屏幕坐标 ——
- * 自转、透视、前后遮挡每帧现算，所以窗口缩放时不用重建星图，只要换个 R。
+ * 注意是 TextureLoader 而不是 ImageLoader —— 后者回调给的是裸的
+ * HTMLImageElement，塞进 material.map 里 three 会去读 map.matrix 然后炸在
+ * Matrix3.copy 上，报错长得完全不像「加载器用错了」。踩过一次。
+ */
+const textureLoader = new TextureLoader()
+
+const loadTexture = (url) =>
+  new Promise((resolve, reject) => {
+    textureLoader.load(
+      url,
+      (tex) => {
+        tex.colorSpace = SRGBColorSpace
+        disposables.push(tex)
+        resolve(tex)
+      },
+      undefined,
+      reject,
+    )
+  })
+
+/** 大气辉光：越靠球的边缘越亮，正面最弱 —— 参考站用的就是这个公式 */
+const makeAtmosphere = () => {
+  const geo = new SphereGeometry(ATMO_R, 64, 64)
+  const mat = new ShaderMaterial({
+    vertexShader: `
+      varying vec3 vNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vNormal;
+      void main() {
+        float intensity = pow(0.58 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+        gl_FragColor = vec4(0.3, 0.72, 1.0, 1.0) * intensity;
+      }
+    `,
+    blending: AdditiveBlending,
+    side: BackSide,
+    transparent: true,
+    depthWrite: false,
+  })
+  disposables.push(geo, mat)
+  return new Mesh(geo, mat)
+}
+
+const buildEarth = async () => {
+  earthGroup = new Group()
+  // 地轴倾角：不加的话地球看着像被立正了，很假
+  earthGroup.rotation.z = 0.41
+  scene.add(earthGroup)
+
+  // 贴图是本地静态资源（public/textures/），已从 2048 压到 1024。
+  // 加载失败不该让整块面板炸掉 —— 退化成没有贴图的暗球，星点照常。
+  let day = null
+  let normal = null
+  let specular = null
+  let clouds = null
+  try {
+    ;[day, normal, specular, clouds] = await Promise.all([
+      loadTexture('/textures/earth-day.jpg'),
+      loadTexture('/textures/earth-normal.jpg'),
+      loadTexture('/textures/earth-specular.jpg'),
+      loadTexture('/textures/earth-clouds.jpg'),
+    ])
+  } catch (err) {
+    console.warn('[HeroGalaxy] 地球贴图加载失败，退化成素球：', err.message)
+  }
+
+  const globeGeo = new SphereGeometry(GLOBE_R, 96, 96)
+  const globeMat = new MeshPhongMaterial({
+    map: day,
+    normalMap: normal,
+    normalScale: new Vector2(0.85, 0.85),
+    specularMap: specular,
+    specular: new Color(0x2e4457),
+    shininess: 6,
+    color: day ? 0xffffff : 0x1b2f4a,
+  })
+  disposables.push(globeGeo, globeMat)
+  earthGroup.add(new Mesh(globeGeo, globeMat))
+
+  if (clouds) {
+    const cloudGeo = new SphereGeometry(GLOBE_R * 1.009, 64, 64)
+    // 加法混合的云层不能给太亮：它是「往地表上加白」，给到 0.5 以上
+    // 整颗球会糊成灰蒙蒙一团，大陆和海的颜色都被洗掉
+    const cloudMat = new MeshPhongMaterial({
+      map: clouds,
+      blending: AdditiveBlending,
+      transparent: true,
+      opacity: 0.3,
+      depthWrite: false,
+    })
+    disposables.push(cloudGeo, cloudMat)
+    earthGroup.add(new Mesh(cloudGeo, cloudMat))
+  }
+
+  earthGroup.add(makeAtmosphere())
+}
+
+/**
+ * 文章星点：斐波那契球面铺在球壳上。
+ * 和平面螺旋同源（黄金角 + 面积均匀），只是搬到了球面，任意点数都不结块。
  */
 const buildStars = () => {
-  const n = props.articles.length
-  const cosT = Math.cos(AXIAL_TILT)
-  const sinT = Math.sin(AXIAL_TILT)
+  starMeshes.forEach((m) => earthGroup.remove(m))
+  starMeshes = []
+  stars = []
 
-  stars = props.articles.map((a, i) => {
+  const glow = makeGlowTexture()
+  const n = props.articles.length
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5))
+  const matCache = new Map()
+
+  props.articles.forEach((a, i) => {
     const y = 1 - (2 * (i + 0.5)) / n
     const ringR = Math.sqrt(Math.max(0, 1 - y * y))
-    const theta = i * GOLDEN_ANGLE
-    const sx0 = ringR * Math.cos(theta)
-    const sz0 = ringR * Math.sin(theta)
-
-    // 地轴倾角：绕 x 轴转一次，写死在基准坐标里
-    const uy = y * cosT - sz0 * sinT
-    const uz = y * sinT + sz0 * cosT
+    const theta = i * goldenAngle
 
     const wordCount = Number(a.wordCount) || 0
     const tags = Array.isArray(a.tags) ? a.tags : []
     const category = a.categoryName || '未分类'
-    return {
+    const rawTitle = a.title || '未命名'
+    const label = labelTextOf(rawTitle, a.summary)
+    const color = PALETTE[hashToIndex(category, PALETTE.length)]
+    // 基础尺寸看篇幅，再叠一点微扰，免得大星挤在一起时看着像复制粘贴
+    const baseScale = 0.5 + Math.min(wordCount / 1400, 1) * 0.9 + (i % 5) * 0.06
+
+    if (!matCache.has(color)) matCache.set(color, makeStarMaterial(glow, color))
+    const sprite = new Sprite(matCache.get(color))
+    sprite.position.set(STAR_R * ringR * Math.cos(theta), STAR_R * y, STAR_R * ringR * Math.sin(theta))
+    sprite.scale.setScalar(baseScale)
+    earthGroup.add(sprite)
+    starMeshes.push(sprite)
+
+    stars.push({
       id: a.id,
-      title: a.title || '未命名',
-      // tooltip / 标签上的副信息：前 3 个标签，没有标签就退回分类名
+      title: rawTitle,
+      label,
+      // 标签取的是 summary 时，把原始文档名也留着，tooltip 里给出来方便对回语雀
+      docTitle: label === rawTitle ? '' : rawTitle,
       meta: tags.length ? tags.slice(0, 3).join(' · ') : category,
-      wordCount,
-      color: PALETTE[hashToIndex(category, PALETTE.length)],
-      radius: 1.6 + Math.min(wordCount / 1400, 1) * 2.2, // 1.6 ~ 3.8px
-      ux: sx0,
-      uy,
-      uz,
-      phase: Math.random() * TAU, // 闪烁相位 / 频率：初始化时随机固定，之后不再变
-      speed: 0.6 + Math.random() * 0.9,
-      sx: 0, // 每帧算出的屏幕坐标（CSS 像素），绘制、命中、标签共用
+      color,
+      sprite,
+      baseScale,
+      phase: Math.random() * Math.PI * 2,
+      // 每帧算出来的：屏幕坐标 + 正面程度，标签和命中检测共用
+      sx: 0,
       sy: 0,
-      scale: 1, // 该帧的透视缩放系数，命中半径跟着它走
-      front: 1, // 前后程度：1 = 正对镜头，0 = 转到球心最深处
-    }
+      front: 1,
+      screenR: 6,
+    })
   })
+
   labelCache.clear()
   hovered.value = null
   buildLabels()
 }
 
-/**
- * 球面上的背景星尘。
- *
- * 42 颗文章星铺在一个球面上，正面同时能看到的也就二十来颗 —— 单靠它们，
- * 球看起来是个空壳。真实地球靠贴图提供这层质感，我们没有贴图，就用一圈
- * 又小又暗的点把球面「填实」，让球体读得出来。它们不可点击、不参与命中、
- * 也不进 tooltip，纯装饰。
- *
- * 位置同样用斐波那契球面（点数不同 → 和文章星自然错开），
- * 大小和亮度用 index 的确定性伪随机微扰，保证每次刷新长得一模一样。
- */
-const BACKDROP_COUNT = 150
-
-/** sin 散列：给第 i 个点一个稳定的 0~1 伪随机数，不依赖 Math.random，刷新不变 */
-const jitter = (i, salt) => {
-  const v = Math.sin(i * 12.9898 + salt) * 43758.5453
-  return v - Math.floor(v)
-}
-
-const makeBackdrop = () => {
-  const cosT = Math.cos(AXIAL_TILT)
-  const sinT = Math.sin(AXIAL_TILT)
-  backdrop = Array.from({ length: BACKDROP_COUNT }, (_, i) => {
-    const y = 1 - (2 * (i + 0.5)) / BACKDROP_COUNT
-    const ringR = Math.sqrt(Math.max(0, 1 - y * y))
-    const theta = i * GOLDEN_ANGLE
-    const sx0 = ringR * Math.cos(theta)
-    const sz0 = ringR * Math.sin(theta)
-    return {
-      ux: sx0,
-      uy: y * cosT - sz0 * sinT,
-      uz: y * sinT + sz0 * cosT,
-      size: 0.5 + jitter(i, 1.7) * 0.7,
-      alpha: 0.35 + jitter(i, 9.3) * 0.65,
-    }
-  })
-}
-
-/** 文章标题普遍偏长（「251.注册路径-中间件案例-文件上传-请求参数解析」），
-    不截断的话标签会横穿整个星空盘、互相压在一起。完整标题留在 title 属性里。 */
+/** 标签文字偏长就截断；完整内容留在 title 属性里 */
 const LABEL_MAX_CHARS = 10
 const truncate = (s) => (s.length > LABEL_MAX_CHARS ? `${s.slice(0, LABEL_MAX_CHARS)}…` : s)
 
-/** 取（并缓存）某颗星的标签项，setEl 引用稳定，避免反复触发 ref 解绑 */
 const getLabelItem = (star) => {
   const cached = labelCache.get(star.id)
-  const title = truncate(star.title)
+  const title = truncate(star.label)
   if (cached && cached.title === title && cached.color === star.color) return cached
-  const item = { id: star.id, title, fullTitle: star.title, color: star.color, star, el: null, w: 0 }
-  // 闭包捕获 item 本身（而不是用 this），Vue 调用时才能写回同一个对象
+  const item = {
+    id: star.id,
+    title,
+    fullTitle: star.label,
+    color: star.color,
+    star,
+    el: null,
+    w: 0,
+    opacity: 0,
+    x: undefined, // 转到背面后要留在原地淡出，不能跳回原点
+    y: undefined,
+  }
   item.setEl = (el) => {
     item.el = el
   }
@@ -238,273 +433,121 @@ const getLabelItem = (star) => {
   return item
 }
 
-/** 常驻标签 = 字数最多的 5 颗；被 hover 的那颗也补一个（已在列表里就不重复） */
+/** 每篇文章一个标签；「该显示谁」每帧由深度现算，不是固定一批 */
 const buildLabels = () => {
-  const picked = new Map()
-  const top = [...stars].sort((a, b) => b.wordCount - a.wordCount).slice(0, MAX_LABELS)
-  for (const s of top) picked.set(s.id, s)
-  if (hovered.value) picked.set(hovered.value.id, hovered.value)
-  labelItems.value = [...picked.values()].map(getLabelItem)
+  labelItems.value = stars.map(getLabelItem)
 }
 
-const LABEL_H = 15
-const LABEL_PAD = 4
+// ---- 临时向量：每帧复用，避免 60fps 下疯狂分配对象触发 GC ----
+const _world = new Vector3()
+const _proj = new Vector3()
 
-/** 把标签摆到星的右下角，贴边时翻到另一侧；再夹进容器、避让已摆好的标签 */
+/**
+ * 每帧把星点投到屏幕上，并算出「正面程度」。
+ *
+ * 正面程度 = 星点方向 · 相机方向（都归一化后的点积）：
+ * 1 = 正对镜头，0 = 转到球心最深处，<0 表示在背面。
+ * 这和参考站 ge() 里算的是同一个量，只是那边叫 c。
+ */
+const projectStars = () => {
+  const { w, h } = box.value
+
+  for (const s of stars) {
+    _world.copy(s.sprite.position).applyMatrix4(earthGroup.matrixWorld)
+
+    // 相机在 +z 轴上看向原点，所以「相机方向」就是 (0,0,1)；
+    // 星点世界坐标归一化后的 z 分量，就等于和相机方向做点积，省一步运算。
+    // 结果落在 [-1, 1]：+1 = 正对镜头，-1 = 转到球心最深处。
+    // 这里手写除范数而不是 clone().normalize()：后者每帧每颗星都要新分配一个
+    // Vector3，42 颗星 × 60fps 就是每秒两千多次分配，白白喂给 GC。
+    s.front = _world.z / (_world.length() || 1)
+
+    _proj.copy(_world).project(camera)
+    s.sx = (_proj.x * 0.5 + 0.5) * w
+    s.sy = (-_proj.y * 0.5 + 0.5) * h
+
+    // 星点在世界里的实际像素半径：用来做命中热区
+    const worldPerPixel = (2 * Math.tan((FOV * Math.PI) / 360) * CAM_Z) / h
+    s.screenR = Math.max(5, (s.baseScale * s.sprite.scale.x * 1.6) / worldPerPixel)
+  }
+}
+
+/**
+ * 摆标签 + 算透明度。
+ *
+ * 两种「消失」共用同一条平滑通道（item.opacity 每帧朝目标逼近）：
+ *   1. 转到背面 —— 目标透明度随深度连续衰减，所以是化掉，不是闪没
+ *   2. 和别人撞了 —— 让位，但同样走淡出
+ * 直接写 style.opacity 会随自转频繁跳变，看着毛躁。
+ */
 const syncLabels = () => {
-  const placed = [] // 已占用的矩形，用来躲重叠
+  const placed = []
+  const targets = new Map()
+
+  const visible = labelItems.value
+    .filter((it) => it.el && it.star.front >= LABEL_FRONT_MIN)
+    .sort((a, b) => b.star.front - a.star.front)
+
+  for (const item of visible) {
+    const { sx, sy, front } = item.star
+    if (!item.w) item.w = item.el.offsetWidth
+
+    let x = sx + 8
+    let y = sy - LABEL_H / 2
+    if (x + item.w > box.value.w - LABEL_PAD) x = sx - 8 - item.w
+    x = Math.min(Math.max(LABEL_PAD, x), Math.max(LABEL_PAD, box.value.w - item.w - LABEL_PAD))
+    y = Math.min(Math.max(LABEL_PAD, y), Math.max(LABEL_PAD, box.value.h - LABEL_H - LABEL_PAD))
+
+    const hit = placed.some(
+      (p) => !(x + item.w < p.x || p.x + p.w < x || y + LABEL_H < p.y || p.y + LABEL_H < y),
+    )
+    if (!hit) placed.push({ x, y, w: item.w })
+
+    item.x = x
+    item.y = y
+    targets.set(item, hit ? 0 : (front - LABEL_FRONT_MIN) / (LABEL_FRONT_FULL - LABEL_FRONT_MIN))
+  }
 
   for (const item of labelItems.value) {
     const el = item.el
     if (!el) continue
-
-    // 转到球背面的标签直接藏掉 —— 文字浮在球外面会穿帮，
-    // 而且它本来也「看不见」那颗星。摆位也就跳过，不占 placed 名额。
-    if (item.star.front < LABEL_FRONT_MIN) {
-      el.style.opacity = '0'
-      continue
+    const target = Math.min(1, Math.max(0, targets.get(item) ?? 0))
+    // 减弱动态效果时动画循环跑得很慢，一帧定生死，得直接到位
+    item.opacity = reducedMotion ? target : item.opacity + (target - item.opacity) * LABEL_FADE
+    if (item.x !== undefined) {
+      el.style.transform = `translate3d(${item.x.toFixed(1)}px, ${item.y.toFixed(1)}px, 0)`
     }
-
-    const { sx, sy } = item.star
-    if (!item.w) item.w = el.offsetWidth // 文字不变，宽度测一次就够
-
-    let x = sx + 7
-    let y = sy + 7
-    if (x + item.w > view.w - LABEL_PAD) x = sx - 7 - item.w
-    if (y + LABEL_H > view.h - LABEL_PAD) y = sy - 7 - LABEL_H
-
-    // 翻面之后仍可能越界（星的 x 很小时 x 会变成负数），必须再夹一次 ——
-    // 容器是 overflow:hidden，跑出去的文字会被直接切掉半截。
-    x = Math.min(Math.max(LABEL_PAD, x), Math.max(LABEL_PAD, view.w - item.w - LABEL_PAD))
-    y = Math.min(Math.max(LABEL_PAD, y), Math.max(LABEL_PAD, view.h - LABEL_H - LABEL_PAD))
-
-    // 撞上已摆好的标签就往下让一行
-    const overlaps = (py) =>
-      placed.some((p) => !(x + item.w < p.x || p.x + p.w < x || py + LABEL_H < p.y || p.y + LABEL_H < py))
-
-    let tries = 0
-    while (tries < 3 && overlaps(y)) {
-      y += LABEL_H + 2
-      tries++
-    }
-
-    // 让不开、或者让出下边界了 —— 直接藏起来。
-    // 注意必须**再判一次 overlaps**：只判断越界的话，位置还在界内但依然压着的
-    // 标签会被原样摆上去，糊成一团。（漏过这一条，reduced-motion 下实测有 1 对重叠。）
-    if (overlaps(y) || y + LABEL_H > view.h - LABEL_PAD) {
-      el.style.opacity = '0'
-      continue
-    }
-
-    el.style.opacity = ''
-    placed.push({ x, y, w: item.w })
-    el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`
+    el.style.opacity = item.opacity < 0.02 ? '0' : String(item.opacity)
   }
 }
 
-/**
- * 标签定位的兜底时机。
- *
- * 平时 syncLabels() 是挂在 draw() 末尾、靠 rAF 每帧跑的。但开启「减少动态效果」时
- * 根本没有 rAF 循环（只有状态变化时的一次性 draw），而 onMounted 里那次
- * nextTick(syncLabels) 又只覆盖第一轮 —— ResizeObserver 首次回调会再走一遍
- * applyLayout()，重建 labelItems，此时 DOM 还没重渲染、item.el 全是 null，
- * 之后再没有任何时机补位，标签就会全部堆在 (0,0)。
- *
- * 所以这里直接盯 labelItems：它一换，就等 DOM 补完 ref 再摆一次。
- * flush: 'post' 保证回调跑在 DOM 更新之后。
- */
-watch(labelItems, () => nextTick(syncLabels), { flush: 'post' })
+const tick = (ts) => {
+  rafId = requestAnimationFrame(tick)
+  if (!renderer || !camera) return
 
-/**
- * 球体本身。星星只是一堆点，光看点阵看不出「球」——立体感全靠下面三层：
- * 一层偏向光源的球面填充、一圈贴着球面的大气辉光、一道很淡的轮廓线。
- * 这三笔都是纯 2D canvas，不需要 WebGL。
- */
-const paintGlobe = (cx, cy, R) => {
-  // 球面：光从左上打过来，所以高光偏心
-  const body = ctx.createRadialGradient(cx - R * 0.34, cy - R * 0.34, 0, cx, cy, R)
-  body.addColorStop(0, 'rgba(34, 211, 238, 0.10)')
-  body.addColorStop(0.55, 'rgba(14, 116, 144, 0.07)')
-  body.addColorStop(1, 'rgba(3, 8, 20, 0.20)')
-  ctx.fillStyle = body
-  ctx.beginPath()
-  ctx.arc(cx, cy, R, 0, TAU)
-  ctx.fill()
+  const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0
+  lastTs = ts
+  // 「减少动态效果」只降速，不停 —— 自转、浮动、闪烁一起按同一个倍数放慢
+  const speed = reducedMotion ? SPIN_REDUCED : 1
+  const t = (ts / 1000) * speed
 
-  // 大气辉光：内侧透明、贴着球面最亮、外侧再散掉
-  const rim = ctx.createRadialGradient(cx, cy, R * 0.82, cx, cy, R * 1.16)
-  rim.addColorStop(0, 'rgba(56, 189, 248, 0)')
-  rim.addColorStop(0.46, 'rgba(56, 189, 248, 0.13)')
-  rim.addColorStop(1, 'rgba(56, 189, 248, 0)')
-  ctx.fillStyle = rim
-  ctx.beginPath()
-  ctx.arc(cx, cy, R * 1.16, 0, TAU)
-  ctx.fill()
+  earthGroup.rotation.y += SPIN * speed * dt
+  // 缓慢上下浮动，免得像贴纸一样死板
+  earthGroup.position.y = Math.sin((t * SPIN) / 0.22) * 0.35
 
-  ctx.strokeStyle = 'rgba(125, 211, 252, 0.16)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.arc(cx, cy, R, 0, TAU)
-  ctx.stroke()
-}
-
-/** 画一帧：先算屏幕坐标，再逐颗画光晕 + 实心核心 */
-const draw = () => {
-  if (!ctx) return
-  const { w, h, cx, cy } = view
-  ctx.clearRect(0, 0, w, h)
-  if (!stars.length) return
-
-  const cosR = Math.cos(rotation)
-  const sinR = Math.sin(rotation)
-  const t = (performance.now() - startTs) / 1000
-  const R = Math.min(w, h) * SPHERE_R
-
-  paintGlobe(cx, cy, R)
-
-  // 背景星尘：和文章星共用同一套自转 + 透视，先铺在底下当球体纹理
-  ctx.fillStyle = '#bae6fd'
-  for (const b of backdrop) {
-    const brx = b.ux * cosR - b.uz * sinR
-    const brz = b.ux * sinR + b.uz * cosR
-    const k = CAM_Z / (CAM_Z - brz)
-    const front = (brz + 1) / 2
-    ctx.globalAlpha = b.alpha * (0.12 + 0.88 * front) * 0.75
-    ctx.beginPath()
-    ctx.arc(cx + brx * R * k, cy - b.uy * R * k, b.size * k, 0, TAU)
-    ctx.fill()
-  }
-  ctx.globalAlpha = 1
-
-  // 把球面上每颗星投到屏幕上
+  // 星点闪烁：每颗相位不同，幅度小，别抢注意力
   for (const s of stars) {
-    // 绕 y 轴自转（cos/sin 每帧只算一次，所有星共用）
-    const rx = s.ux * cosR - s.uz * sinR
-    const rz = s.ux * sinR + s.uz * cosR
-    const ry = s.uy
-
-    // 透视投影：相机在 +z 轴、朝 -z 看。rz 越大离镜头越近，屏幕坐标铺得越开 ——
-    // 近大远小是让人一眼认出「这是个球」的最主要线索。
-    const k = CAM_Z / (CAM_Z - rz)
-    s.sx = cx + rx * R * k
-    s.sy = cy - ry * R * k
-    s.scale = k
-    s.front = (rz + 1) / 2 // 1 = 正对镜头，0 = 转到球心最深处
+    const twinkle = 0.82 + 0.3 * Math.abs(Math.sin(t * 1.6 + s.phase))
+    const target = hovered.value === s ? s.baseScale * 2 : s.baseScale * twinkle
+    const now = s.sprite.scale.x
+    s.sprite.scale.setScalar(now + (target - now) * 0.14)
   }
 
-  // 从后往前画，正面的星自然盖住背面的，遮挡关系才对。
-  // 命中的那颗单独挪到最后，保证高亮不被别的星压住。
-  const hot = hovered.value
-  const order = stars.slice().sort((a, b) => a.front - b.front)
-  if (hot) {
-    const idx = order.indexOf(hot)
-    if (idx >= 0) {
-      order.splice(idx, 1)
-      order.push(hot)
-    }
-  }
-
-  for (const s of order) {
-    const isHot = s === hot
-    // 背面的星又小又淡：s.scale 给近大远小，depthFade 再把远处的压暗。
-    // 下限留 0.32 而不是 0 —— 压到全黑的话球背面就只剩一片空，反而看不出是球。
-    const depthFade = 0.32 + 0.68 * s.front
-    const r = (isHot ? s.radius * 1.4 : s.radius) * s.scale
-    const alpha =
-      (reducedMotion ? 0.85 : 0.55 + 0.45 * Math.sin(t * s.speed + s.phase)) * depthFade
-    const glowR = r * (isHot ? GLOW_SCALE * 1.25 : GLOW_SCALE)
-
-    ctx.globalAlpha = 1
-    const glow = ctx.createRadialGradient(s.sx, s.sy, 0, s.sx, s.sy, glowR)
-    glow.addColorStop(0, hexToRgba(s.color, Math.min(1, alpha * (isHot ? 0.9 : 0.5))))
-    glow.addColorStop(0.45, hexToRgba(s.color, Math.min(1, alpha * (isHot ? 0.3 : 0.16))))
-    glow.addColorStop(1, hexToRgba(s.color, 0))
-    ctx.fillStyle = glow
-    ctx.beginPath()
-    ctx.arc(s.sx, s.sy, glowR, 0, TAU)
-    ctx.fill()
-
-    ctx.globalAlpha = alpha
-    ctx.fillStyle = s.color
-    ctx.beginPath()
-    ctx.arc(s.sx, s.sy, r, 0, TAU)
-    ctx.fill()
-
-    if (isHot) {
-      ctx.globalAlpha = 1
-      ctx.strokeStyle = hexToRgba(s.color, 0.9)
-      ctx.lineWidth = 1.2
-      ctx.beginPath()
-      ctx.arc(s.sx, s.sy, r + 3.5, 0, TAU)
-      ctx.stroke()
-    }
-    ctx.globalAlpha = 1
-  }
-
+  renderer.render(scene, camera)
+  projectStars()
   syncLabels()
 }
 
-const stopLoop = () => {
-  if (rafId) cancelAnimationFrame(rafId)
-  rafId = 0
-}
-
-const loop = () => {
-  rotation += 0.00055 // 每帧约 0.03°，转一圈要 40 秒左右 —— 慢到不抢注意力
-  draw()
-  rafId = requestAnimationFrame(loop)
-}
-
-const startLoop = () => {
-  if (rafId || reducedMotion || !stars.length) return
-  startTs = performance.now()
-  rafId = requestAnimationFrame(loop)
-}
-
-/**
- * 量尺寸 + 重建布局。
- *
- * 位图按 dpr 放大（否则高分屏上 1px 的星会糊），再用 setTransform 把绘制坐标系
- * 拉回 CSS 像素 —— 这样后面所有坐标、半径、命中判定都直接用 CSS px 写，
- * 不用到处 ×dpr，鼠标事件坐标（clientX - rect.left）也能直接比。
- */
-const applyLayout = () => {
-  const el = rootEl.value
-  const canvas = canvasEl.value
-  if (!el || !canvas) return
-
-  const rect = el.getBoundingClientRect()
-  const w = Math.max(1, Math.round(rect.width))
-  const h = Math.max(1, Math.round(rect.height))
-  dpr = window.devicePixelRatio || 1
-
-  canvas.width = Math.round(w * dpr)
-  canvas.height = Math.round(h * dpr)
-  canvas.style.width = `${w}px`
-  canvas.style.height = `${h}px`
-
-  ctx = canvas.getContext('2d')
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-
-  view = { w, h, cx: w / 2, cy: h / 2 }
-  box.value = { w, h }
-  if (!backdrop.length) makeBackdrop() // 纯几何，和尺寸无关，建一次就够
-  buildStars()
-  draw()
-
-  // 空数据时不空转 rAF；有数据且没开「减少动态效果」才起循环
-  if (!stars.length || reducedMotion) stopLoop()
-  else startLoop()
-}
-
-/**
- * 命中检测：直接拿每颗星的**屏幕坐标**比距离。
- *
- * 上一版是「把鼠标点反向旋转回基准坐标系」，那在平面布局下很省事。换成球面之后行不通了：
- * 透视投影（近大远小）+ 地轴倾角 + 前后遮挡，反变换要还原的东西比正向算还多。
- * 既然 draw() 每帧已经把 sx / sy / front 算好了，直接扫一遍最省事也最不容易错。
- */
 const pickStar = (clientX, clientY) => {
   const el = rootEl.value
   if (!el || !stars.length) return null
@@ -515,9 +558,8 @@ const pickStar = (clientX, clientY) => {
   let best = null
   let bestFront = -Infinity
   for (const s of stars) {
-    // 命中半径跟着透视缩放走，远处的星热区也跟着小
-    if (Math.hypot(s.sx - x, s.sy - y) > s.radius * s.scale + HIT_PADDING) continue
-    // 重叠时选靠前的那颗，否则点在正面星星上可能选中它背后那颗
+    if (Math.hypot(s.sx - x, s.sy - y) > s.screenR + 8) continue
+    // 重叠时选靠前的，否则点在正面星星上可能选中它背后那颗
     if (s.front > bestFront) {
       best = s
       bestFront = s.front
@@ -528,30 +570,19 @@ const pickStar = (clientX, clientY) => {
 
 const onMouseMove = (e) => {
   const el = rootEl.value
-  if (!el || !stars.length) return
+  if (!el) return
   const hit = pickStar(e.clientX, e.clientY)
   el.style.cursor = hit ? 'pointer' : 'default'
-
   if (hit) {
     const rect = el.getBoundingClientRect()
     tipPos.value = { x: e.clientX - rect.left, y: e.clientY - rect.top }
   }
-
-  if (hovered.value !== hit) {
-    hovered.value = hit
-    buildLabels()
-    if (reducedMotion) draw() // 静态模式没有 rAF，状态变化得自己补画
-    nextTick(syncLabels)
-  }
+  hovered.value = hit
 }
 
 const onMouseLeave = () => {
   if (rootEl.value) rootEl.value.style.cursor = 'default'
-  if (!hovered.value) return
   hovered.value = null
-  buildLabels()
-  if (reducedMotion) draw()
-  nextTick(syncLabels)
 }
 
 const onClick = (e) => {
@@ -561,7 +592,6 @@ const onClick = (e) => {
 
 const tooltipMeta = computed(() => (hovered.value ? hovered.value.meta : ''))
 
-/** tooltip 跟随鼠标；贴近右 / 下边缘时翻到鼠标另一侧，避免溢出容器 */
 const tooltipStyle = computed(() => {
   if (!hovered.value) return {}
   const pad = 12
@@ -575,43 +605,98 @@ const tooltipStyle = computed(() => {
   return { transform: `translate(${Math.max(pad, x)}px, ${Math.max(pad, y)}px)` }
 })
 
-// tooltip 内容变了要重新量一次尺寸，翻转才准
 watch(hovered, async () => {
   await nextTick()
   if (tipEl.value) tipSize.value = { w: tipEl.value.offsetWidth, h: tipEl.value.offsetHeight }
 })
 
-// 文章列表变化（异步加载完成 / 筛选）→ 重新布局星点
+// labelItems 一换，DOM 要重渲染、ref 才绑得上；
+// 减弱动态效果时动画循环很慢，这是唯一稳定的补位时机
+watch(labelItems, () => nextTick(syncLabels), { flush: 'post' })
+
 watch(
   () => props.articles,
-  () => applyLayout(),
+  () => {
+    if (!earthGroup) return
+    buildStars()
+  },
   { deep: true },
 )
 
-onMounted(() => {
-  // 只读一次：不监听系统设置的变化，省掉一个常驻监听器
+const resize = () => {
+  const el = rootEl.value
+  if (!el || !renderer || !camera) return
+  const rect = el.getBoundingClientRect()
+  const w = Math.max(1, Math.round(rect.width))
+  const h = Math.max(1, Math.round(rect.height))
+  box.value = { w, h }
+  camera.aspect = w / h
+  camera.updateProjectionMatrix()
+  renderer.setSize(w, h, false)
+}
+
+onMounted(async () => {
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  applyLayout()
 
-  // 观察根元素而不是 canvas：canvas 是绝对定位的，改它的尺寸不会反过来触发 RO
-  resizeObserver = new ResizeObserver(applyLayout)
+  // WebGL 起不来就直接告诉用户，别留一块黑屏（没开硬件加速的机器很常见）
+  try {
+    renderer = new WebGLRenderer({
+      canvas: canvasEl.value,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance',
+    })
+  } catch (err) {
+    console.warn('[HeroGalaxy] WebGL 不可用：', err.message)
+    webglFailed.value = true
+    return
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+
+  scene = new Scene()
+
+  camera = new PerspectiveCamera(FOV, 1, 0.1, 400)
+  camera.position.set(0, 0, CAM_Z)
+
+  // 光从左上偏前来：海洋的高光、大陆的明暗都靠它。
+  // 环境光压得很低（0.3）—— 调高了整颗球会被照平，昼夜分界和体积感全没了。
+  const key = new DirectionalLight(0xffffff, 2.6)
+  key.position.set(-1, 0.65, 1.15)
+  scene.add(key)
+  scene.add(new AmbientLight(0xffffff, 0.3))
+
+  await buildEarth()
+  buildStars()
+  resize()
+
+  // 循环总是要起：减少动态效果只是把它放慢（见 SPIN_REDUCED），不是停
+  rafId = requestAnimationFrame(tick)
+
+  resizeObserver = new ResizeObserver(resize)
   resizeObserver.observe(rootEl.value)
-
-  nextTick(syncLabels) // 标签元素这时才挂进 DOM，补一次定位
 })
 
 onUnmounted(() => {
-  stopLoop()
+  if (rafId) cancelAnimationFrame(rafId)
+  rafId = 0
   resizeObserver?.disconnect()
   resizeObserver = null
   labelCache.clear()
   stars = []
-  // mousemove / mouseleave / click 走的是模板绑定，Vue 卸载时会自己摘掉，不留监听器
+  starMeshes = []
+  // three 的对象不吃 GC，显式释放显存（几何、材质、贴图、renderer）
+  for (const d of disposables) d.dispose?.()
+  disposables.length = 0
+  renderer?.dispose()
+  renderer = null
+  scene = null
+  camera = null
+  earthGroup = null
 })
 </script>
 
 <style scoped>
-/* 深色星空底色：白天/黑夜模式共用，刻意做成一块「星空窗口」 */
+/* 深空底色：白天/黑夜模式共用，刻意做成一块「星空窗口」 */
 .hero-galaxy {
   position: relative;
   width: 100%;
@@ -627,29 +712,52 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
+/* 标签做成圆角徽章（参考站就是这个样式），比纯文字在星空上清楚得多 */
 .galaxy-label {
   position: absolute;
   left: 0;
   top: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  background: rgba(8, 20, 40, 0.72);
+  color: #e0f2fe;
   font-size: 11px;
-  line-height: 15px;
+  line-height: 14px;
   white-space: nowrap;
-  letter-spacing: 0.01em;
   pointer-events: none;
-  will-change: transform;
+  /* 这里**不要**挂 will-change —— 每篇文章都有一个标签元素，
+     逐个挂等于要求浏览器提升几十个合成层，多数浏览器直接忽略、白吃内存 */
+  transition: opacity 0.12s linear;
 }
 
-.galaxy-empty {
+/* 开了「减少动态效果」就别再补淡入淡出 —— 那正是用户想关掉的东西 */
+@media (prefers-reduced-motion: reduce) {
+  .galaxy-label {
+    transition: none;
+  }
+}
+
+.galaxy-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 16px;
+  text-align: center;
   font-size: 12px;
   letter-spacing: 0.12em;
-  color: rgba(148, 163, 184, 0.65);
+  color: rgba(148, 163, 184, 0.72);
+}
+
+.galaxy-overlay--warn {
+  color: rgba(251, 191, 36, 0.85);
+  letter-spacing: 0.04em;
 }
 
 .galaxy-tooltip {
@@ -685,9 +793,19 @@ onUnmounted(() => {
 }
 
 .galaxy-tooltip__meta {
-  margin-top: 3px;
+  margin-top: 4px;
   font-size: 11px;
   line-height: 15px;
   color: #94a3b8;
+  word-break: break-all;
+}
+
+/* 原始文档名：比副信息再淡一档，它只是用来对回语雀的 */
+.galaxy-tooltip__doc {
+  margin-top: 2px;
+  font-size: 10px;
+  line-height: 14px;
+  color: #64748b;
+  word-break: break-all;
 }
 </style>
