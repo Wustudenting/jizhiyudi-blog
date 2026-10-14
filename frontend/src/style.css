@@ -20,21 +20,34 @@ body {
   overflow-x: hidden;
 }
 
+/* 白天首屏兜底：真正铺背景的是 App.vue 那个全屏 canvas，但它要等 JS 跑起来
+   才画第一帧。在那之前先让 body 顶上同样的「平铺 + 双径向光晕」，避免白闪。
+   canvas 一旦绘制就会盖住这里，两者不会叠加。
+   黑夜不设 —— 保持原来的透明。 */
+html:not(.dark) body {
+  background:
+    radial-gradient(circle at top, #0891b224, transparent 28%),
+    radial-gradient(circle at 80% 18%, #0ea5e91a, transparent 22%),
+    linear-gradient(180deg, #f3f8fb 0%, #f3f8fb 100%);
+  background-attachment: fixed;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
 
+/* 白天：淡青（配合 velpro 配色）。黑夜的覆盖见下方 `.dark ::-webkit-scrollbar-*` */
 ::-webkit-scrollbar-track {
-  background: #e0e7ff;
+  background: #e0f2fe;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #a5b4fc;
+  background: #7dd3fc;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #818cf8;
+  background: #38bdf8;
 }
 
 /* ---------------------------------------------------------------
@@ -82,19 +95,37 @@ body {
   pointer-events: none;
 }
 
+/* 白天：玻璃形态对齐 velpro（数值取自其编译产物，非估算）。
+   圆角仍是 12px —— 首页那几个大圆角卡片用 Home.vue 的 scoped 类局部覆盖，
+   这样其它页面（14+ 处在用 .glass-card）的观感不会被牵连。 */
 .glass-card {
-  background: rgba(255, 255, 255, 0.65);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.36));
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+  box-shadow:
+    0 14px 32px rgba(15, 42, 80, 0.12),
+    0 4px 12px rgba(15, 42, 80, 0.07),
+    inset 0 1px rgba(255, 255, 255, 0.99);
+}
+
+/* backdrop-filter 是 `.glass-card` 上唯一没有 `.dark` 覆盖的属性
+   （`.dark .glass-card` 只改了 background / border-color / box-shadow），
+   所以模糊度必须单独限定在白天，否则黑夜也会跟着变。 */
+:root:not(.dark) .glass-card {
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 
 .glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(255, 255, 255, 0.75);
   transition: all 0.3s ease;
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.12);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow:
+    0 22px 48px rgba(15, 42, 80, 0.18),
+    0 8px 20px rgba(15, 42, 80, 0.1),
+    inset 0 1px rgba(255, 255, 255, 0.85);
 }
 
 .dark .glass-card {
@@ -109,8 +140,9 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* 白天：青色渐变。`.dark .gradient-text` 会覆盖 background-image，黑夜不受影响 */
 .gradient-text {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #0e7490, #0891b2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -122,6 +154,42 @@ body {
 
 .btn-secondary {
   @apply px-6 py-2.5 bg-indigo-100/60 rounded-lg font-medium text-indigo-700 hover:bg-indigo-200/60 transition-all duration-300;
+}
+
+/* ------------------------------------------------------------------
+   白天：主/次按钮换成 velpro 的青色玻璃质感。
+
+   必须用 `:root:not(.dark)` 限定 —— 上面两条基类规则**没有**对应的
+   `.dark` 覆盖（`.btn-secondary` 有一条、`.btn-primary` 没有），
+   直接改基类会让黑夜模式跟着一起变色。
+   background 简写顺带把 background-color 重置成 transparent，
+   否则基类里 bg-indigo-100/60 的底色会从半透明渐变里透出来。
+   ------------------------------------------------------------------ */
+:root:not(.dark) .btn-primary {
+  background: linear-gradient(135deg, rgba(14, 165, 190, 0.8), rgba(8, 116, 145, 0.68));
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 12px 28px rgba(8, 116, 145, 0.28),
+    inset 0 1px rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+:root:not(.dark) .btn-primary:hover {
+  background: linear-gradient(135deg, rgba(14, 165, 190, 0.92), rgba(8, 116, 145, 0.82));
+}
+
+:root:not(.dark) .btn-secondary {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.36));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #0e7490;
+  box-shadow:
+    0 12px 28px rgba(15, 42, 80, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.99);
+}
+
+:root:not(.dark) .btn-secondary:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.58));
 }
 
 .card-shadow {
@@ -250,8 +318,10 @@ body {
   background-clip: text;
 }
 
+/* 白天用青色。黑夜由上文 `.dark .nav-link-active, .dark .nav-link:hover`
+   （特异性更高、同样带 !important）接管，不受影响。 */
 .nav-link-active {
-  color: #4f46e5 !important;
+  color: #0891b2 !important;
 }
 
 .nav-link-active .nav-underline {
@@ -263,7 +333,7 @@ body {
 }
 
 .nav-link:hover {
-  color: #4f46e5 !important;
+  color: #0891b2 !important;
 }
 
 .nav-link:hover .nav-underline {

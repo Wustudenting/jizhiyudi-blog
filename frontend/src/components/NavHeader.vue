@@ -38,11 +38,11 @@
             v-for="item in navItems" 
             :key="item.name" 
             :to="item.path"
-            class="nav-link text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors relative group text-sm xl:text-base whitespace-nowrap"
+            class="nav-link text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-indigo-300 transition-colors relative group text-sm xl:text-base whitespace-nowrap"
             :class="{ 'nav-link-active': isActive(item) }"
           >
             {{ item.label }}
-            <span class="nav-underline absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300"
+            <span class="nav-underline absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-cyan-500 to-cyan-700 dark:from-blue-500 dark:to-purple-600 transition-all duration-300"
                   :class="{ 'w-full': isActive(item), 'w-0': !isActive(item) }"></span>
           </router-link>
           <router-link 
@@ -57,7 +57,7 @@
           <!-- 白天 / 黑夜切换 -->
           <button
             @click="toggleTheme"
-            class="p-2 rounded-lg text-slate-600 hover:text-indigo-600 hover:bg-slate-100/70 dark:text-slate-300 dark:hover:text-amber-300 dark:hover:bg-slate-700/50 transition-colors"
+            class="p-2 rounded-lg text-slate-600 hover:text-cyan-600 hover:bg-slate-100/70 dark:text-slate-300 dark:hover:text-amber-300 dark:hover:bg-slate-700/50 transition-colors"
             :title="theme === 'dark' ? '切换到白天模式' : '切换到黑夜模式'"
             :aria-label="theme === 'dark' ? '切换到白天模式' : '切换到黑夜模式'"
           >
@@ -96,9 +96,9 @@
               v-model="searchKeyword"
               @keyup.enter="handleSearch"
               placeholder="搜索文章..."
-              class="w-32 md:w-40 lg:w-48 px-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-400 transition-colors"
+              class="w-32 md:w-40 lg:w-48 px-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-400 dark:focus:border-indigo-400 transition-colors"
             />
-            <button @click="handleSearch" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-300">
+            <button @click="handleSearch" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-cyan-600 dark:hover:text-indigo-300">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -124,9 +124,9 @@
               v-model="searchKeyword"
               @keyup.enter="handleSearch"
               placeholder="搜索文章..."
-              class="w-full px-4 py-2 bg-white/60 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+              class="w-full px-4 py-2 bg-white/60 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-400 dark:focus:border-indigo-400"
             />
-            <button @click="handleSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-indigo-600">
+            <button @click="handleSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-cyan-600 dark:hover:text-indigo-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -138,7 +138,7 @@
               :key="item.name" 
               :to="item.path"
               @click="mobileMenuOpen = false"
-              class="flex items-center justify-between py-3 px-3 rounded-lg text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-700/50 transition-colors"
+              class="flex items-center justify-between py-3 px-3 rounded-lg text-slate-600 dark:text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:text-indigo-600 dark:hover:bg-slate-700/50 transition-colors"
               active-class="mobile-nav-active"
             >
               <span>{{ item.label }}</span>
@@ -216,8 +216,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 白天用青色。下面两条 `.dark ...` 是把黑夜钉回改造前的值 ——
+   组件样式打包后排在全局 style.css 之后，不钉的话
+   `.dark .nav-link-active`（同为 !important、特异性打平）会被这里的规则盖掉。
+   注意这里**不能**写 `:global(.dark) X`：Vue 的 scoped 编译器会把它压成
+   光秃秃的 `.dark{...}`，后半截选择器直接丢掉（踩过）。
+   直接写 `.dark X` 就会编译成 `.dark X[data-v-xxx]`，正是想要的。 */
 .nav-link-active {
-  color: #4f46e5 !important;
+  color: #0891b2 !important;
 }
 
 .nav-link-active .nav-underline {
@@ -225,6 +231,15 @@ onUnmounted(() => {
 }
 
 .mobile-nav-active {
+  color: #0891b2 !important;
+  background-color: rgba(8, 145, 178, 0.08) !important;
+}
+
+.dark .nav-link-active {
+  color: #4f46e5 !important;
+}
+
+.dark .mobile-nav-active {
   color: #4f46e5 !important;
   background-color: rgba(99, 102, 241, 0.08) !important;
 }

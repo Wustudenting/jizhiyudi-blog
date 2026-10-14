@@ -1,7 +1,13 @@
 <template>
   <div class="min-h-screen relative">
     <canvas ref="canvas" class="fixed inset-0 z-0"></canvas>
-    <NavHeader class="relative z-50" />
+    <!--
+      这里**不要**加 `relative`。NavHeader 的根元素本身是 `fixed top-0 …`，
+      而 Tailwind 的 `.relative` 在产物 CSS 里排在 `.fixed` 之后，会把它顶掉 ——
+      导航会跟着页面一起滚走（原来的 `relative z-50` 就是这么写的，一直有这个 bug）。
+      `z-50` 单独加就够了：position:fixed 本身就能承载 z-index。
+    -->
+    <NavHeader class="z-50" />
     <main class="container mx-auto px-4 py-8 relative z-10">
       <router-view :key="$route.fullPath" />
     </main>
@@ -26,13 +32,25 @@ let ctx = null
 /**
  * 两套配色。canvas 是逐帧重绘的，所以主题一变下一帧就跟着变，
  * 不需要额外的重绘逻辑 —— 只在每帧读一次 theme.value 即可。
+ *
+ * ⚠️ dark 这一套是「原始配色」，改动白天时不要碰它。
  */
 const PALETTE = {
   light: {
-    bg: ['#dbeafe', '#e0e7ff', '#ede9fe'], // 白天：浅蓝 → 浅靛 → 浅紫
-    dot: 'rgba(99, 102, 241, 0.6)',
-    link: '139, 92, 246', // 粒子之间的连线
-    linkMouse: '99, 102, 241', // 鼠标连线
+    // 白天：对齐 velpro 的「淡青白平铺 + 两处青色径向光晕」。
+    // 它不是一个三档线性渐变，所以这里用 mode 标出绘制形态，
+    // 真正的铺底逻辑见 paintBackground()。
+    mode: 'glow',
+    bg: '#f3f8fb',
+    glow: [
+      // 对应 velpro 的 radial-gradient(circle at top, #0891b224, transparent 28%)
+      { x: 0.5, y: 0, radius: 0.46, color: 'rgba(8, 145, 178, 0.14)' },
+      // 对应 radial-gradient(circle at 80% 18%, #0ea5e91a, transparent 22%)
+      { x: 0.8, y: 0.18, radius: 0.36, color: 'rgba(14, 165, 233, 0.1)' },
+    ],
+    dot: 'rgba(8, 145, 178, 0.55)',
+    link: '8, 145, 178', // 粒子之间的连线
+    linkMouse: '14, 165, 233', // 鼠标连线
   },
   dark: {
     bg: ['#0b1220', '#111a2e', '#1a1430'], // 黑夜：深海军蓝 → 深靛
@@ -107,15 +125,44 @@ const drawLines = () => {
   }
 }
 
-const animate = () => {
-  const { bg, linkMouse } = palette()
+/**
+ * 铺底。两种形态：
+ *  - 'glow'（白天）：平铺底色 + 若干径向光晕，复刻 velpro 的 body 背景
+ *  - 默认（黑夜）：原来的三档线性渐变，逻辑与改造前完全一致
+ */
+const paintBackground = () => {
+  const p = palette()
+  const { width: w, height: h } = canvas.value
 
-  const gradient = ctx.createLinearGradient(0, 0, canvas.value.width, canvas.value.height)
-  gradient.addColorStop(0, bg[0])
-  gradient.addColorStop(0.5, bg[1])
-  gradient.addColorStop(1, bg[2])
+  if (p.mode === 'glow') {
+    ctx.fillStyle = p.bg
+    ctx.fillRect(0, 0, w, h)
+
+    for (const g of p.glow) {
+      const radius = Math.hypot(w, h) * g.radius
+      const x = w * g.x
+      const y = h * g.y
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, radius)
+      grad.addColorStop(0, g.color)
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, w, h)
+    }
+    return
+  }
+
+  const gradient = ctx.createLinearGradient(0, 0, w, h)
+  gradient.addColorStop(0, p.bg[0])
+  gradient.addColorStop(0.5, p.bg[1])
+  gradient.addColorStop(1, p.bg[2])
   ctx.fillStyle = gradient
-  ctx.fillRect(0, 0, canvas.value.width, canvas.value.height)
+  ctx.fillRect(0, 0, w, h)
+}
+
+const animate = () => {
+  const { linkMouse } = palette()
+
+  paintBackground()
 
   particles.forEach(p => {
     p.update()
